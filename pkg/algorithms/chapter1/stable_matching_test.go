@@ -2,6 +2,7 @@ package chapter1
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"github.com/mikejlong60/golangz/pkg/array"
 	"github.com/mikejlong60/golangz/pkg/linked_list"
 	"github.com/mikejlong60/golangz/pkg/propcheck"
