@@ -2,12 +2,12 @@ package chapter1
 
 import (
 	"fmt"
-	"github.com/mikejlong60/golangz/pkg/linked_list"
+	"github.com/greymatter-io/golangz/linked_list"
 )
 
 type Man struct {
 	Id          string
-	Preferences *linked_list.ConsList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
+	Preferences *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
 }
 
 type Woman struct {
@@ -16,7 +16,7 @@ type Woman struct {
 	EngagedTo   *Man
 }
 
-func Match(freeMen *linked_list.ConsList[*Man]) []*Woman {
+func Match(freeMen *linked_list.LinkedList[*Man]) []*Woman {
 	fmt.Printf("Size of list:%v\n", linked_list.Len(freeMen))
 	if linked_list.Len(freeMen) == 0 {
 		return []*Woman{}

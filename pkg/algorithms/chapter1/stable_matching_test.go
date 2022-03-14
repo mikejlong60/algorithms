@@ -2,10 +2,10 @@ package chapter1
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
+	"github.com/greymatter-io/golangz/linked_list"
+	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/hashicorp/go-multierror"
-	"github.com/mikejlong60/golangz/pkg/array"
-	"github.com/mikejlong60/golangz/pkg/linked_list"
-	"github.com/mikejlong60/golangz/pkg/propcheck"
 	"math/rand"
 	"testing"
 	"time"
@@ -26,10 +26,10 @@ func TestStableMatching(t *testing.T) {
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
 	g0 := propcheck.ChooseInt(0, 3000)
-	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.ConsList[*Man], propcheck.SimpleRNG) {
+	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.LinkedList[*Man], propcheck.SimpleRNG) {
 		allTheMen = []*Man{}
 		allTheWomen = []*Woman{}
-		mw := func(mIds []string, wIds []string) *linked_list.ConsList[*Man] {
+		mw := func(mIds []string, wIds []string) *linked_list.LinkedList[*Man] {
 			if len(allTheWomen) != len(allTheMen) {
 				t.Error("length of men and women arrays were not equal")
 			}
@@ -41,14 +41,14 @@ func TestStableMatching(t *testing.T) {
 			}
 
 			//Make two arrays, one of shuffled men, one for each woman, and one of  shuffled women, one for each man.
-			var freeMen *linked_list.ConsList[*Man]
+			var freeMen *linked_list.LinkedList[*Man]
 			for _, s := range allTheMen {
 				freeMen = linked_list.Push(s, freeMen)
 			}
 
 			for i, _ := range allTheWomen {
 				womenForMan := shuffle(allTheWomen)
-				var allWomen *linked_list.ConsList[*Woman]
+				var allWomen *linked_list.LinkedList[*Woman]
 				for _, s := range womenForMan {
 					allWomen = linked_list.Push(s, allWomen)
 				}
@@ -70,7 +70,7 @@ func TestStableMatching(t *testing.T) {
 
 	prop := propcheck.ForAll(g,
 		"Make a bunch of men and women and match them up  \n",
-		func(freeMen *linked_list.ConsList[*Man]) []*Woman {
+		func(freeMen *linked_list.LinkedList[*Man]) []*Woman {
 			len := linked_list.Len(freeMen)
 			start := time.Now()
 			r := Match(freeMen)
@@ -100,9 +100,9 @@ func TestStableMatching(t *testing.T) {
 					return false
 				}
 			}
-			if !array.SetEquality(allMenIds, allHusbandIds, mEq) {
+			if !arrays.SetEquality(allMenIds, allHusbandIds, mEq) {
 				errors = multierror.Append(errors, fmt.Errorf("All men were not married"))
-				fmt.Printf("These men never got married:%v\n", array.SetMinus(allMenIds, allHusbandIds, mEq))
+				fmt.Printf("These men never got married:%v\n", arrays.SetMinus(allMenIds, allHusbandIds, mEq))
 			}
 			if errors != nil {
 				return false, errors
@@ -112,6 +112,6 @@ func TestStableMatching(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{10, rng})
-	propcheck.ExpectSuccess[*linked_list.ConsList[*Man]](t, result)
+	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
 	fmt.Println(rng)
 }
