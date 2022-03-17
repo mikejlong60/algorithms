@@ -30,7 +30,7 @@ func MatchResidentToHospitals(hospitalsWithResidentOpenings *linked_list.LinkedL
 		xs := linked_list.ToArray(hospitalsWithResidentOpenings)
 		var z int
 		for _, y := range xs {
-			z = z + y.ResidentCapacity //+ 1
+			z = z + y.ResidentCapacity
 		}
 		if z > linked_list.Len(xs[0].ResidentPreferences) {
 			panic("Cannot have more hospital resident openings than you have residents")
@@ -58,8 +58,10 @@ func MatchResidentToHospitals(hospitalsWithResidentOpenings *linked_list.LinkedL
 			if mEq(res.Hospital, thisHospital) || mEq(res.Hospital, m) {
 				if mEq(m, thisHospital) {
 					result = true
+					fmt.Printf("resident:%v prefers this hospital:%v over current one:%v\n", res.Id, thisHospital.Id, m.Id)
 					break
 				} else if mEq(m, res.Hospital) {
+					fmt.Printf("resident:%v prefers current hospital:%v over this one:%v\n", res.Id, m.Id, res.Hospital.Id)
 					result = false
 					break
 				}
@@ -72,16 +74,15 @@ func MatchResidentToHospitals(hospitalsWithResidentOpenings *linked_list.LinkedL
 		hospital := linked_list.Head(hospitalsWithResidentOpenings)
 		var hospitalResidentPreferences = hospital.ResidentPreferences
 		var emptyStackError error
-		for hospitalResidentPreferences != nil && hospital.ResidentCapacity < len(hospital.Residents) { //Loop over the hospital's resident preferences until the hospital has reached it' capacity
+		for hospitalResidentPreferences != nil && len(hospital.Residents) <= hospital.ResidentCapacity { //Loop over the hospital's resident preferences until the hospital has reached it' capacity
 			resident := linked_list.Head(hospitalResidentPreferences)
-			if resident.Hospital == nil {
+			if resident.Hospital == nil && len(hospital.Residents) <= hospital.ResidentCapacity {
 				resident.Hospital = hospital
 				hospitalResidentPreferences, emptyStackError = linked_list.Tail(hospitalResidentPreferences)
 				if emptyStackError != nil {
-					fmt.Println(emptyStackError)
+					fmt.Printf("1:%v\n", emptyStackError)
 				}
 				hospital.Residents[resident.Id] = resident
-				//				break
 			} else {
 				//Does this resident prefer this hospital to the one to whom he is currently assigned? If so he
 				//breaks his agreement to that hospital and you make hospital have an additional resident opening.
@@ -92,20 +93,22 @@ func MatchResidentToHospitals(hospitalsWithResidentOpenings *linked_list.LinkedL
 					///Set up current resident with this hospital
 					resident.Hospital = hospital
 					hospitalsWithResidentOpenings = linked_list.AddLast(oldHospital, hospitalsWithResidentOpenings) //TODO Might have to check to see if this hospital is already in the hospitalsWithResidentOpenings list
-					//fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", resident.Id, hospital.Id, oldMan.Id)
+					fmt.Printf("Resident %v prefers hospital(%v) and just broke agreement with hospital %v\n", resident.Id, hospital.Id, oldHospital.Id)
 				} else {
-					//fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", resident.Id, resident.EngagedTo.Id, hospital.Id)
+					fmt.Printf("Resident %v prefers her current hospital %v over this one (%v)\n", resident.Id, resident.Hospital.Id, hospital.Id)
 				}
 			}
-			hospital.ResidentPreferences, emptyStackError = linked_list.Tail(hospital.ResidentPreferences)
+			//hospital.ResidentPreferences, emptyStackError = linked_list.Tail(hospital.ResidentPreferences)
+			hospitalResidentPreferences, emptyStackError = linked_list.Tail(hospital.ResidentPreferences)
+			hospital.ResidentPreferences = hospitalResidentPreferences
 			if emptyStackError != nil {
-				fmt.Println(emptyStackError)
+				break //fmt.Printf("2:%v\n", emptyStackError)
 			}
 
 		} //end resident for
 		hospitalsWithResidentOpenings, emptyStackError = linked_list.Tail(hospitalsWithResidentOpenings)
 		if emptyStackError != nil {
-			fmt.Println(emptyStackError)
+			fmt.Printf("3:%v\n", emptyStackError)
 		}
 	} // end hospital with resident openings for
 	return allResidents

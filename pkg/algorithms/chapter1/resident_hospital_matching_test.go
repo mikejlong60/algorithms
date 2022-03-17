@@ -36,21 +36,21 @@ func TestResidentHospitalMatching(t *testing.T) {
 	hosp1 := &Hospital{
 		Id:                  "1",
 		ResidentCapacity:    2,
-		Residents:           nil,
+		Residents:           make(map[string]*Resident),
 		ResidentPreferences: nil,
 	}
 	hosp2 := &Hospital{
 		Id:                  "2",
 		ResidentCapacity:    2,
-		Residents:           nil,
+		Residents:           make(map[string]*Resident),
 		ResidentPreferences: nil,
 	}
 
-	res1.Preferences = []*Hospital{hosp1, hosp2}
-	res2.Preferences = []*Hospital{hosp1, hosp2}
-	res3.Preferences = []*Hospital{hosp2, hosp1}
+	res1.Preferences = []*Hospital{hosp2, hosp1}
+	res2.Preferences = []*Hospital{hosp2, hosp1}
+	res3.Preferences = []*Hospital{hosp1, hosp2}
 	res4.Preferences = []*Hospital{hosp1, hosp2}
-	res5.Preferences = []*Hospital{hosp2, hosp1}
+	res5.Preferences = []*Hospital{hosp1, hosp2}
 
 	var hospitalsWithResidentOpenings *linked_list.LinkedList[*Hospital]
 	var hosp1ResPrefs *linked_list.LinkedList[*Resident]
@@ -65,6 +65,11 @@ func TestResidentHospitalMatching(t *testing.T) {
 	hospitalsWithResidentOpenings = linked_list.Push(hosp1, hospitalsWithResidentOpenings)
 	hospitalsWithResidentOpenings = linked_list.Push(hosp2, hospitalsWithResidentOpenings)
 	match := MatchResidentToHospitals(hospitalsWithResidentOpenings)
+	for _, y := range match {
+		fmt.Println(y.Hospital.Id)
+
+	}
+	fmt.Println()
 	fmt.Println(match)
 	t.Errorf("fail")
 }
