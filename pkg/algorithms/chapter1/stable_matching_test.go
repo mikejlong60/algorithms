@@ -2,140 +2,233 @@ package chapter1
 
 import (
 	"fmt"
-	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/linked_list"
-	"github.com/greymatter-io/golangz/propcheck"
-	"github.com/hashicorp/go-multierror"
-	"math/rand"
 	"testing"
-	"time"
 )
 
-func shuffle[A any](toBeShuffled []*A) []*A {
-	rr := make([]*A, len(toBeShuffled))
-	copy(rr, toBeShuffled)
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(rr), func(i, j int) {
-		rr[i], rr[j] = rr[j], rr[i]
-	})
-	return rr
+func TestStableMatchingWomanConflictsNoIndifference(t *testing.T) {
+	w0 := &Woman{
+		Id:          "0",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+	w1 := &Woman{
+		Id:          "1",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+
+	m0 := &Man{
+		Id:          "0",
+		Preferences: nil,
+	}
+	m1 := &Man{
+		Id:          "1",
+		Preferences: nil,
+	}
+
+	w0.Preferences[m1.Id] = 0
+	w0.Preferences[m0.Id] = 1
+	w1.Preferences[m1.Id] = 0
+	w1.Preferences[m0.Id] = 1
+
+	var allMen *linked_list.LinkedList[*Man]
+	var manPreferences *linked_list.LinkedList[*Woman]
+	manPreferences = linked_list.Push(w1, manPreferences)
+	manPreferences = linked_list.Push(w0, manPreferences)
+
+	m0.Preferences = manPreferences
+	m1.Preferences = manPreferences
+	allMen = linked_list.Push(m1, allMen)
+	allMen = linked_list.Push(m0, allMen)
+	actual := Match(allMen, womanPrefersMe)
+	if w0.EngagedTo.Id != m1.Id {
+		t.Errorf("Expected woman 1 to be engaged to man 1")
+	}
+	if w1.EngagedTo.Id != m0.Id {
+		t.Errorf("Expected woman 2 to be engaged to man 2")
+	}
+	fmt.Println(actual)
 }
 
-func TestStableMatching(t *testing.T) {
-	var wPrefersMe = func(wp *Woman, me *Man) bool { //Does wp prefer m to whom she is currently engaged
-		mEq := func(m1 *Man, m2 *Man) bool {
-			if m1.Id == m2.Id {
-				return true
-			} else {
-				return false
-			}
-		}
+var womanPrefersMe = func(wp *Woman, courtier *Man) bool { //Does woman prefer this man to the one to which she is currently assigned?
+	//This function assumes that the wp woman is already engaged.
+	courtierRanking, courtierIsInPreferredList := wp.Preferences[courtier.Id]
+	currentFianceeRanking, currentFianceeIsInPreferredList := wp.Preferences[wp.EngagedTo.Id]
 
-		var result bool
-		for _, m := range wp.Preferences {
-			if mEq(wp.EngagedTo, me) || mEq(wp.EngagedTo, m) {
-				if mEq(m, me) {
-					result = true
-					break
-				} else if mEq(m, wp.EngagedTo) {
-					result = false
-					break
-				}
-			}
-		}
-		return result
+	if !courtierIsInPreferredList && !currentFianceeIsInPreferredList { //Woman is indifferent to both men. So she will stick with her current fiancee.
+		fmt.Printf("Woman:%v is indifferent to both men. So she will stick with her current fiancee%v\n", wp.Id, wp.EngagedTo.Id)
+		return false
+	} else if courtierIsInPreferredList && !currentFianceeIsInPreferredList { //Woman is indifferent to her current husband but not the courtier. So she chooses the courtier.
+		fmt.Printf("Woman:%v is indifferent to her current husband:%v but not the courtier:%v. So she chooses the courtier.\n", wp.Id, wp.EngagedTo.Id, courtier.Id)
+		return true
+	} else if !courtierIsInPreferredList && currentFianceeIsInPreferredList { //Woman is indifferent to the courtier but she prefers her current fiancee is in her list of preferences.
+		//So she sticks with her current fiancee
+		fmt.Printf("Woman:%v is indifferent to the courtier:%v but her current fiancee:%v in in her preference list. So she sticks with her current fiancee\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
+		return false
+	} else if courtierRanking < currentFianceeRanking {
+		fmt.Printf("woman:%v prefers courtier:%v over current financee:%v\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
+		return true
+	} else {
+		fmt.Printf("woman:%v prefers current fiancee:%v over courtier:%v\n", wp.Id, wp.EngagedTo.Id, courtier.Id)
+		return false
+	}
+}
+
+func TestStableMatchingWomanConflicts2(t *testing.T) {
+	w0 := &Woman{
+		Id:          "0",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+	w1 := &Woman{
+		Id:          "1",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
 	}
 
-	var allTheMen []*Man
-	var allTheWomen []*Woman
-	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	g0 := propcheck.ChooseInt(0, 3000)
-	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.LinkedList[*Man], propcheck.SimpleRNG) {
-		allTheMen = []*Man{}
-		allTheWomen = []*Woman{}
-		mw := func(mIds []string, wIds []string) *linked_list.LinkedList[*Man] {
-			if len(allTheWomen) != len(allTheMen) {
-				t.Error("length of men and women arrays were not equal")
-			}
-			for _, s := range mIds {
-				allTheMen = append(allTheMen, &Man{Id: s})
-			}
-			for _, s := range wIds {
-				allTheWomen = append(allTheWomen, &Woman{Id: s})
-			}
-
-			//Make two arrays, one of shuffled men, one for each woman, and one of  shuffled women, one for each man.
-			var freeMen *linked_list.LinkedList[*Man]
-			for _, s := range allTheMen {
-				freeMen = linked_list.Push(s, freeMen)
-			}
-
-			for i, _ := range allTheWomen {
-				womenForMan := shuffle(allTheWomen)
-				var allWomen *linked_list.LinkedList[*Woman]
-				for _, s := range womenForMan {
-					allWomen = linked_list.Push(s, allWomen)
-				}
-				allTheMen[i].Preferences = allWomen
-			}
-
-			for _, s := range allTheWomen {
-				s.Preferences = shuffle(allTheMen)
-			}
-
-			return freeMen
-		}
-		ra := propcheck.ListOfN(a, propcheck.String(100))
-		rb := propcheck.ListOfN(a, propcheck.String(100))
-		return propcheck.Map2(ra, rb, mw)
+	m0 := &Man{
+		Id:          "0",
+		Preferences: nil,
+	}
+	m1 := &Man{
+		Id:          "1",
+		Preferences: nil,
 	}
 
-	g := propcheck.FlatMap(g0, fa)
+	var allMen *linked_list.LinkedList[*Man]
+	var manPreferences *linked_list.LinkedList[*Woman]
+	manPreferences = linked_list.Push(w1, manPreferences)
+	manPreferences = linked_list.Push(w0, manPreferences)
 
-	prop := propcheck.ForAll(g,
-		"Make a bunch of men and women and match them up  \n",
-		func(freeMen *linked_list.LinkedList[*Man]) []*Woman {
-			len := linked_list.Len(freeMen)
-			start := time.Now()
-			r := Match(freeMen, wPrefersMe)
-			fmt.Printf("Match took %v for %v couples\n", time.Since(start), len)
-			return r
-		},
-		func(allWomen []*Woman) (bool, error) {
-			var errors error
+	m0.Preferences = manPreferences
+	m1.Preferences = manPreferences //TODO Fix this to be different
+	allMen = linked_list.Push(m1, allMen)
+	allMen = linked_list.Push(m0, allMen)
 
-			var allHusbandIds []string
-			for _, j := range allWomen {
-				if j.EngagedTo == nil {
-					errors = multierror.Append(errors, fmt.Errorf("Woman:%v was not married ", j.Id))
-				}
-				allHusbandIds = append(allHusbandIds, j.EngagedTo.Id)
-			}
+	w0.Preferences[m1.Id] = 1
+	w0.Preferences[m0.Id] = 0
+	w1.Preferences[m1.Id] = 0
+	w1.Preferences[m0.Id] = 1
+	actual := Match(allMen, womanPrefersMe)
+	if w0.EngagedTo.Id != m0.Id {
+		t.Errorf("Expected woman 0 to be engaged to man 0")
+	}
+	if w1.EngagedTo.Id != m1.Id {
+		t.Errorf("Expected woman 1 to be engaged to man 1")
+	}
 
-			var allMenIds []string
-			for _, man := range allTheMen {
-				allMenIds = append(allMenIds, man.Id)
-			}
+	fmt.Println(actual)
+}
 
-			mEq := func(m1 string, m2 string) bool {
-				if m1 == m2 {
-					return true
-				} else {
-					return false
-				}
-			}
-			if !arrays.SetEquality(allMenIds, allHusbandIds, mEq) {
-				errors = multierror.Append(errors, fmt.Errorf("All men were not married"))
-				fmt.Printf("These men never got married:%v\n", arrays.SetMinus(allMenIds, allHusbandIds, mEq))
-			}
-			if errors != nil {
-				return false, errors
-			} else {
-				return true, nil
-			}
-		},
-	)
-	result := prop.Run(propcheck.RunParms{10, rng})
-	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
-	fmt.Println(rng)
+func TestStableMatchingNoWomanPreferenceConflicts(t *testing.T) {
+	w0 := &Woman{
+		Id:          "0",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+	w1 := &Woman{
+		Id:          "1",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+
+	m0 := &Man{
+		Id:          "0",
+		Preferences: nil,
+	}
+	m1 := &Man{
+		Id:          "1",
+		Preferences: nil,
+	}
+
+	var allMen *linked_list.LinkedList[*Man]
+	var man0Preferences *linked_list.LinkedList[*Woman]
+	man0Preferences = linked_list.Push(w1, man0Preferences)
+	man0Preferences = linked_list.Push(w0, man0Preferences)
+	var man1Preferences *linked_list.LinkedList[*Woman]
+	man1Preferences = linked_list.Push(w0, man1Preferences)
+	man1Preferences = linked_list.Push(w1, man1Preferences)
+
+	m0.Preferences = man0Preferences
+	m1.Preferences = man1Preferences //TODO Fix this to be different
+	allMen = linked_list.Push(m1, allMen)
+	allMen = linked_list.Push(m0, allMen)
+
+	w0.Preferences[m1.Id] = 0
+	w0.Preferences[m0.Id] = 1
+	w1.Preferences[m1.Id] = 1
+	w1.Preferences[m0.Id] = 0
+	actual := Match(allMen, womanPrefersMe)
+	if w0.EngagedTo.Id != m0.Id {
+		t.Errorf("Expected woman 0 to be engaged to man 0")
+	}
+	if w1.EngagedTo.Id != m1.Id {
+		t.Errorf("Expected woman 1 to be engaged to man 1")
+	}
+
+	fmt.Println(actual)
+}
+
+func TestIndifferentStableMatching(t *testing.T) {
+	w0 := &Woman{
+		Id:          "0",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+	w1 := &Woman{
+		Id:          "1",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+
+	w2 := &Woman{
+		Id:          "2",
+		Preferences: make(map[string]int),
+		EngagedTo:   nil,
+	}
+
+	m0 := &Man{
+		Id:          "0",
+		Preferences: nil,
+	}
+	m1 := &Man{
+		Id:          "1",
+		Preferences: nil,
+	}
+	m2 := &Man{
+		Id:          "2",
+		Preferences: nil,
+	}
+
+	var allMen *linked_list.LinkedList[*Man]
+	var manPreferences *linked_list.LinkedList[*Woman]
+	manPreferences = linked_list.Push(w2, manPreferences)
+	manPreferences = linked_list.Push(w1, manPreferences)
+	manPreferences = linked_list.Push(w0, manPreferences)
+
+	m0.Preferences = manPreferences
+	m1.Preferences = manPreferences
+	m2.Preferences = manPreferences //TODO Fix this to be different
+	allMen = linked_list.Push(m2, allMen)
+	allMen = linked_list.Push(m1, allMen)
+	allMen = linked_list.Push(m0, allMen)
+
+	w0.Preferences[m1.Id] = 1
+	w0.Preferences[m0.Id] = 0
+	w1.Preferences[m1.Id] = 0
+	w1.Preferences[m0.Id] = 1
+	//w2 is indifferent to all men
+	actual := Match(allMen, womanPrefersMe)
+	if w0.EngagedTo.Id != m0.Id {
+		t.Errorf("Expected woman 0 to be engaged to man 0")
+	}
+	if w1.EngagedTo.Id != m1.Id {
+		t.Errorf("Expected woman 1 to be engaged to man 1")
+	}
+	if w2.EngagedTo.Id != m2.Id {
+		t.Errorf("Expected woman 2 to be engaged to man 2")
+	}
+
+	fmt.Println(actual)
 }

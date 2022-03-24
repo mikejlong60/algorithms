@@ -5,6 +5,7 @@ import (
 	"github.com/greymatter-io/golangz/linked_list"
 )
 
+//This algorithm accomodates both weak and strong instabilities.
 type Man struct {
 	Id          string
 	Preferences *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
@@ -12,9 +13,10 @@ type Man struct {
 }
 
 type Woman struct {
-	Id          string
-	Preferences []*Man
-	EngagedTo   *Man
+	Id           string
+	pPreferences []*Man
+	Preferences  map[string]int
+	EngagedTo    *Man
 }
 
 func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me *Man) bool) []*Woman {
@@ -22,7 +24,7 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 	if linked_list.Len(freeMen) == 0 {
 		return []*Woman{}
 	}
-	allWomen := linked_list.ToArray(linked_list.Head(freeMen).Preferences)
+	allWomen := linked_list.ToArray(linked_list.Head(freeMen).Preferences) //Every man must have every woman in his list of preferences
 
 	for freeMen != nil {
 		m := linked_list.Head(freeMen)
@@ -41,10 +43,12 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 					oldMan.EngagedTo = nil
 					///Set up current man with this woman
 					wp.EngagedTo = m
+					m.EngagedTo = wp
 					freeMen = linked_list.AddLast(oldMan, freeMen)
-					//fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", wp.Id, m.Id, oldMan.Id)
+					fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", wp.Id, m.Id, oldMan.Id)
+					break
 				} else {
-					//fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
+					fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
 				}
 			}
 			m.Preferences, _ = linked_list.Tail(m.Preferences)
