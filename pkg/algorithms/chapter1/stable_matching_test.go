@@ -22,6 +22,30 @@ func shuffle[A any](toBeShuffled []*A) []*A {
 }
 
 func TestStableMatching(t *testing.T) {
+	var wPrefersMe = func(wp *Woman, me *Man) bool { //Does wp prefer m to whom she is currently engaged
+		mEq := func(m1 *Man, m2 *Man) bool {
+			if m1.Id == m2.Id {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		var result bool
+		for _, m := range wp.Preferences {
+			if mEq(wp.EngagedTo, me) || mEq(wp.EngagedTo, m) {
+				if mEq(m, me) {
+					result = true
+					break
+				} else if mEq(m, wp.EngagedTo) {
+					result = false
+					break
+				}
+			}
+		}
+		return result
+	}
+
 	var allTheMen []*Man
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
@@ -73,7 +97,7 @@ func TestStableMatching(t *testing.T) {
 		func(freeMen *linked_list.LinkedList[*Man]) []*Woman {
 			len := linked_list.Len(freeMen)
 			start := time.Now()
-			r := Match(freeMen)
+			r := Match(freeMen, wPrefersMe)
 			fmt.Printf("Match took %v for %v couples\n", time.Since(start), len)
 			return r
 		},
