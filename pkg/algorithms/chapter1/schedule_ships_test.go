@@ -2,6 +2,7 @@ package chapter1
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"testing"
 )
 
@@ -20,13 +21,29 @@ func TestScheduleShips(t *testing.T) {
 	//	t.Errorf("Expected woman 2 to be engaged to man 2")
 	//}
 	var s1 = Ship{Id: 1,
-		ProposedSchedule: []interface{}{Port{Id: 1}, AtSea{}},
+		ProposedSchedule: []int{1, 0},
 	}
 	var s2 = Ship{Id: 2,
-		ProposedSchedule: []interface{}{Port{Id: 2}, AtSea{}},
+		ProposedSchedule: []int{2, 0},
 	}
-	r := []Ship{s1, s2}
+	masterSchedule := []*Ship{&s1, &s2}
 
-	schedule(r)
-	fmt.Println(schedule(r))
+	actual := schedule(masterSchedule)
+
+	fmt.Printf("actual[0]:%v\n", actual[0].ActualSchedule)
+	fmt.Printf("actual[1]:%v\n", actual[1].ActualSchedule)
+	p := func(l, r int) bool {
+		if l == r {
+			return true
+		} else {
+			return false
+		}
+	}
+	if !arrays.SetEquality(actual[0].ActualSchedule, []int{1, 0}, p) {
+		t.Errorf("Actual:%v, Expected:%v", actual[0].ActualSchedule, []int{1, 0})
+	}
+	if !arrays.SetEquality(actual[1].ActualSchedule, []int{2, 0}, p) {
+		t.Errorf("Actual:%v, Expected:%v", actual[1].ActualSchedule, []int{2, 0})
+	}
+
 }
