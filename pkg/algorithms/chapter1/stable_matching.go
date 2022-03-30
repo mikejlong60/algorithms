@@ -13,10 +13,9 @@ type Man struct {
 }
 
 type Woman struct {
-	Id           string
-	pPreferences []*Man
-	Preferences  map[string]int // The key is the man's Id and the value is that man's ranking with 0 being the highest.  No duplicate rankings are allowed.
-	EngagedTo    *Man
+	Id          string
+	Preferences map[string]int // The key is the man's Id and the value is that man's ranking with 0 being the highest.  No duplicate rankings are allowed.
+	EngagedTo   *Man
 }
 
 func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me *Man) bool) []*Woman {

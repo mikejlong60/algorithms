@@ -20,27 +20,30 @@ func schedule(ships []*Ship) []*Ship {
 	}
 
 	//Check the next ship's schedule to see if there are any conflicts
-	fEarliestConflict := func(currentShipSchedule, otherShipSchedule []int, previousEarliestConflictDay int) int {
+	fEarliestConflict := func(currentShipSchedule, otherShipSchedule []int) int {
 		for i, shipState := range currentShipSchedule {
-			if shipState > 0 && shipState == otherShipSchedule[i] {
-				if previousEarliestConflictDay > i {
-					earliestConflict := i
-					return earliestConflict
-				}
+			atSea := shipState == 0
+			shipPortConflict := shipState == otherShipSchedule[i]
+			if !atSea && shipPortConflict {
+				return i
 			}
 		}
-		return previousEarliestConflictDay
+		return len(currentShipSchedule)
 	}
 
 	//An invariant is that all ships have same calendar length reflected in the size of their proposed schedule
 	for i, ship := range ships { //Range loop over array of all ships
 		currentShipSchedule := ship.ProposedSchedule
-		var earliestConflict = 0              //len(currentShipSchedule)
+		var earliestConflict = len(currentShipSchedule)
+		var finalEarliestConflict = earliestConflict
 		for j := i + 1; j < len(ships); j++ { //For current ship iterate over all ships later in array and truncate ship's Proposed Schedule at earliest conflict
 			otherShipSchedule := ships[j].ProposedSchedule
-			earliestConflict = fEarliestConflict(currentShipSchedule, otherShipSchedule, earliestConflict)
+			earliestConflict = fEarliestConflict(currentShipSchedule, otherShipSchedule)
+			if earliestConflict < finalEarliestConflict {
+				finalEarliestConflict = earliestConflict
+			}
 		}
-		ship.ActualSchedule = ship.ProposedSchedule[0:earliestConflict] //TODO You have bug in this. For two ships with conflict this truncates the next ship too.
+		ship.ActualSchedule = ship.ProposedSchedule[0:finalEarliestConflict]
 	}
 	return ships
 }
