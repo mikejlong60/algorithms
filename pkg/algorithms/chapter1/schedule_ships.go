@@ -1,11 +1,16 @@
 package chapter1
 
+import "fmt"
+
 type ShipState = int //0 is at sea. Non-zero is port number
-//This algorithm accomodates both weak and strong instabilities.
 type Ship struct {
 	Id               int
 	ProposedSchedule []ShipState
 	ActualSchedule   []ShipState
+}
+
+func (w Ship) String() string {
+	return fmt.Sprintf("Id:%v, ProposedSchedule:%v, ActualSchedule:%v", w.Id, w.ProposedSchedule, w.ActualSchedule)
 }
 
 //Algorithm
