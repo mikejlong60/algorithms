@@ -102,7 +102,7 @@ func TestStableMatchingWomanConflicts2(t *testing.T) {
 	manPreferences = linked_list.Push(w0, manPreferences)
 
 	m0.Preferences = manPreferences
-	m1.Preferences = manPreferences //TODO Fix this to be different
+	m1.Preferences = manPreferences
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
 
@@ -151,7 +151,7 @@ func TestStableMatchingNoWomanPreferenceConflicts(t *testing.T) {
 	man1Preferences = linked_list.Push(w1, man1Preferences)
 
 	m0.Preferences = man0Preferences
-	m1.Preferences = man1Preferences //TODO Fix this to be different
+	m1.Preferences = man1Preferences
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
 
