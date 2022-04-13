@@ -1,5 +1,7 @@
 # Project containing exercises from book Algorithm Design by Kleinberg and Tardos
+
+This project requires Golang 1.18
 ### Initializing Project
-- `go1.18rc1 mod init`
-- `go1.18rc1 mod tidy`
-- `go1.18rc1 test -v -count=1 ./...`
+- `go mod init`
+- `go mod tidy`
+- `go test -v -count=1 ./...`

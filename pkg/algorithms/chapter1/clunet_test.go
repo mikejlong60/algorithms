@@ -36,8 +36,8 @@ func TestClunetSwitch(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseInt(1, 3000)
-	g1 := sets.ChooseSet(0, 50, g0, lt, eq)
+	g0 := propcheck.ChooseInt(1, 30000)
+	g1 := sets.ChooseSet(0, 6000, g0, lt, eq)
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g1,
 		"Validate Clunet switch algorithm  \n",
@@ -46,7 +46,7 @@ func TestClunetSwitch(t *testing.T) {
 			for _, y := range xs {
 				ow := OutputWire{
 					Id:             y,
-					InputJunctions: make([]*InputWire, len(xs), len(xs)), //[5]int
+					InputJunctions: make([]*InputWire, len(xs), len(xs)),
 				}
 				outputWires = append(outputWires, &ow)
 			}
@@ -65,23 +65,11 @@ func TestClunetSwitch(t *testing.T) {
 			ll := linked_list.ToList(inputWires)
 
 			start := time.Now()
-			r := MakeSwitches(ll)
+			MakeSwitches(ll)
 			fmt.Printf("Scheduling an array of %v inputWires took %v\n", len(inputWires), time.Since(start))
-			//for i, ow := range r { //Range loop over array of all inputWires
-			//	currentOutputRoute := ow..OutputRoute
-			//	for j := i + 1; j < len(inputWires); j++ { //For current ow iterate over all inputWires later in array and truncate ow's Proposed Schedule at earliest conflict
-			//		otherOutputRoute := inputWires[j]//.OutputRoute
-			//		for k, _ := range otherOutputRoute {
-			//			if k < len(currentOutputRoute)-1 { //Current ow not at sea and is not truncated before otherShip
-			//				if currentOutputRoute[k] == otherOutputRoute[k] { //Not at same port on same day
-			//					errors = multierror.Append(errors, fmt.Errorf("Ship:%v scheduled port:%v conflicted with ow%v on day:%v", ow.Id, currentOutputRoute[k], inputWires[j].Id, k))
-			//
-			//				}
-			//			}
-			//		}
-			//	}
-			//}
-			fmt.Println(r)
+			//TODO validate that last junction of every output wire is unique. To do that take the last element of every outout wire and use set to compare its set length to the length of the last element array.
+			//TODO And then verify that you have the proper number of output wires == to the size of the XS set.
+			//TODO And then make the ChooseInt smaller after you show Jeff.
 			if errors != nil {
 				return false, errors
 			} else {
@@ -89,6 +77,6 @@ func TestClunetSwitch(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{200, rng})
+	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }
