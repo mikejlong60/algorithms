@@ -5,6 +5,7 @@ import (
 	"github.com/greymatter-io/golangz/linked_list"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
+	"github.com/hashicorp/go-multierror"
 	"math/rand"
 	"testing"
 	"time"
@@ -36,9 +37,10 @@ func TestClunetSwitch(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseInt(1, 30000)
-	g1 := sets.ChooseSet(0, 6000, g0, lt, eq)
-	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
+	g0 := propcheck.ChooseInt(1, 300)
+	g1 := sets.ChooseSet(0, 60, g0, lt, eq)
+	rng := propcheck.SimpleRNG{Seed: 42934000} //propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
+	//	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g1,
 		"Validate Clunet switch algorithm  \n",
 		func(xs []int) []*InputWire {
@@ -54,22 +56,44 @@ func TestClunetSwitch(t *testing.T) {
 			for _, x := range xs {
 				s := InputWire{
 					Id:                    x,
-					OutputWirePreferences: shuffleRoutes(outputWires),
+					OutputWirePreferences: outputWires, //shuffleRoutes(outputWires),//TODO Shuffling makes the bug show up less often. But its still there.
 				}
 				r = append(r, &s)
 			}
 			return r
 		},
 		func(inputWires []*InputWire) (bool, error) {
+
+			eq := func(l, r *InputWire) bool {
+				if l.Id == r.Id {
+					return true
+				} else {
+					return false
+				}
+			}
+
+			lt := func(l, r *InputWire) bool {
+				if l.Id < r.Id {
+					return true
+				} else {
+					return false
+				}
+			}
 			var errors error
 			ll := linked_list.ToList(inputWires)
 
 			start := time.Now()
-			MakeSwitches(ll)
+			r := MakeSwitches(ll)
 			fmt.Printf("Scheduling an array of %v inputWires took %v\n", len(inputWires), time.Since(start))
-			//TODO validate that last junction of every output wire is unique. To do that take the last element of every outout wire and use set to compare its set length to the length of the last element array.
-			//TODO And then verify that you have the proper number of output wires == to the size of the XS set.
-			//TODO And then make the ChooseInt smaller after you show Jeff.
+			var liw []*InputWire
+			l := len(r)
+			for _, ow := range r {
+				liw = append(liw, ow.InputJunctions[l-1])
+			}
+			liwAsSet := sets.ToSet(liw, lt, eq)
+			if len(liwAsSet) != len(r) {
+				errors = multierror.Append(errors, fmt.Errorf("Expected the length:%v of the set of last input junctions for all output wires to equal the size of the set resulting from the switching operation:%v", len(liwAsSet), len(r)))
+			}
 			if errors != nil {
 				return false, errors
 			} else {
@@ -77,6 +101,7 @@ func TestClunetSwitch(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{100, rng})
+	fmt.Println(rng)
+	result := prop.Run(propcheck.RunParms{1, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }

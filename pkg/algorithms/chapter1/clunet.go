@@ -41,26 +41,46 @@ func MakeSwitches(incompleteInputWires *linked_list.LinkedList[*InputWire]) []*O
 	for incompleteInputWires != nil {
 		//fmt.Println(linked_list.Len(incompleteInputWires))
 		iw := linked_list.Head(incompleteInputWires)
+		//fmt.Println(iw.OutputWirePreferences)
+		fmt.Println("==================")
+
 		for i, ow := range iw.OutputWirePreferences {
 			if ow.InputJunctions[i] == nil {
 				ow.InputJunctions[i] = iw
+				fmt.Printf("found empty spot for first InputWire:%v\n", iw)
+				//fmt.Printf("all output wires for first InputWire:%v\n", allOutputWires)
+
 			} else { //try earlier point in ow.InputJunctions array. If there are none try later point from current index(i)
-				var foundEarlierOwSpot = false
-				for j := i; j >= 0; j-- { //Work backwards until you find an empty junction point on output wire and put input wire there
+				//Stick input wire at first empty spot on output wire
+				var foundEmptySpotOnOw = false
+				for j := 0; j < len(ow.InputJunctions); j++ {
 					if ow.InputJunctions[j] == nil {
 						ow.InputJunctions[j] = iw
-						foundEarlierOwSpot = true
+						foundEmptySpotOnOw = true
+						fmt.Printf("found empty spot for InputWire:%v\n", iw)
+						//fmt.Printf("all output wires for after empty spot InputWire:%v\n", allOutputWires)
 						break
 					}
 				}
-				if !foundEarlierOwSpot {
-					for j := i; j < len(ow.InputJunctions); j++ { //Work forward until you find an empty junction point on output wire and put input wire there
-						if ow.InputJunctions[j] == nil {
-							ow.InputJunctions[j] = iw
-							break
-						}
-					}
+				if !foundEmptySpotOnOw {
+					fmt.Println("could not find empty spot")
 				}
+				//var foundEarlierOwSpot = false
+				//for j := i; j >= 0; j-- { //Work backwards until you find an empty junction point on output wire and put input wire there
+				//	if ow.InputJunctions[j] == nil {
+				//		ow.InputJunctions[j] = iw
+				//		foundEarlierOwSpot = true
+				//		break
+				//	}
+				//}
+				//if !foundEarlierOwSpot {
+				//	for j := i; j < len(ow.InputJunctions); j++ { //Work forward until you find an empty junction point on output wire and put input wire there
+				//		if ow.InputJunctions[j] == nil {
+				//			ow.InputJunctions[j] = iw
+				//			break
+				//		}
+				//	}
+				//}
 			}
 		} //end placing iw preferences on Outputwire
 		incompleteInputWires, _ = linked_list.Tail(incompleteInputWires)
