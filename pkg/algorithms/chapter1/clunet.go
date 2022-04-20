@@ -2,12 +2,12 @@ package chapter1
 
 import (
 	"fmt"
-	"github.com/greymatter-io/golangz/linked_list"
+	"github.com/greymatter-io/golangz/arrays"
+	"github.com/greymatter-io/golangz/propcheck"
 )
 
 type InputWire struct {
-	Id                    int
-	OutputWirePreferences []*OutputWire //An array of OutputWire preferences. Every input wire must be in this list.
+	Id int
 }
 
 type OutputWire struct {
@@ -16,11 +16,7 @@ type OutputWire struct {
 }
 
 func (w InputWire) String() string {
-	var owIds = make([]int, len(w.OutputWirePreferences), len(w.OutputWirePreferences))
-	for i, ow := range w.OutputWirePreferences {
-		owIds[i] = ow.Id
-	}
-	return fmt.Sprintf("InputWire{Id:%v, OutputWirePreferences:%v}", w.Id, owIds)
+	return fmt.Sprintf("InputWire{Id:%v}", w.Id)
 }
 
 func (w OutputWire) String() string {
@@ -31,59 +27,33 @@ func (w OutputWire) String() string {
 	return fmt.Sprintf("OutputWire{Id:%v, InputJunctions:%v}", w.Id, iwIds)
 }
 
-func MakeSwitches(incompleteInputWires *linked_list.LinkedList[*InputWire]) []*OutputWire {
-	fmt.Printf("Size of list:%v\n", linked_list.Len(incompleteInputWires))
-	if linked_list.Len(incompleteInputWires) == 0 {
+func MakeSwitches(wires propcheck.Pair[[]*InputWire, []*OutputWire]) []*OutputWire {
+	iwEq := func(l, r *InputWire) bool {
+		if l == nil {
+			return false
+		} else if l.Id == r.Id {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	if len(wires.A) != len(wires.B) {
+		panic("input wires array must be same size as outoutwires array")
+	}
+	if len(wires.A) == 0 {
 		return []*OutputWire{}
 	}
-	var allOutputWires = linked_list.Head(incompleteInputWires).OutputWirePreferences
 
-	for incompleteInputWires != nil {
-		//fmt.Println(linked_list.Len(incompleteInputWires))
-		iw := linked_list.Head(incompleteInputWires)
-		//fmt.Println(iw.OutputWirePreferences)
-		fmt.Println("==================")
+	//Add next input wire as first junction on every next output wire
+	for i, iw := range wires.A {
+		ow := wires.B[i]
+		ow.InputJunctions[0] = iw
+	}
 
-		for i, ow := range iw.OutputWirePreferences {
-			if ow.InputJunctions[i] == nil {
-				ow.InputJunctions[i] = iw
-				fmt.Printf("found empty spot for first InputWire:%v\n", iw)
-				//fmt.Printf("all output wires for first InputWire:%v\n", allOutputWires)
-
-			} else { //try earlier point in ow.InputJunctions array. If there are none try later point from current index(i)
-				//Stick input wire at first empty spot on output wire
-				var foundEmptySpotOnOw = false
-				for j := 0; j < len(ow.InputJunctions); j++ {
-					if ow.InputJunctions[j] == nil {
-						ow.InputJunctions[j] = iw
-						foundEmptySpotOnOw = true
-						fmt.Printf("found empty spot for InputWire:%v\n", iw)
-						//fmt.Printf("all output wires for after empty spot InputWire:%v\n", allOutputWires)
-						break
-					}
-				}
-				if !foundEmptySpotOnOw {
-					fmt.Println("could not find empty spot")
-				}
-				//var foundEarlierOwSpot = false
-				//for j := i; j >= 0; j-- { //Work backwards until you find an empty junction point on output wire and put input wire there
-				//	if ow.InputJunctions[j] == nil {
-				//		ow.InputJunctions[j] = iw
-				//		foundEarlierOwSpot = true
-				//		break
-				//	}
-				//}
-				//if !foundEarlierOwSpot {
-				//	for j := i; j < len(ow.InputJunctions); j++ { //Work forward until you find an empty junction point on output wire and put input wire there
-				//		if ow.InputJunctions[j] == nil {
-				//			ow.InputJunctions[j] = iw
-				//			break
-				//		}
-				//	}
-				//}
-			}
-		} //end placing iw preferences on Outputwire
-		incompleteInputWires, _ = linked_list.Tail(incompleteInputWires)
-	} // end InputWire for
-	return allOutputWires
+	for _, ow := range wires.B {
+		otherJunctions := arrays.SetMinus(wires.A, ow.InputJunctions, iwEq)
+		ow.InputJunctions = arrays.Append(otherJunctions, ow.InputJunctions)
+	}
+	return wires.B
 }

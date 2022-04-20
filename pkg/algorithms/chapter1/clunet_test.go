@@ -2,24 +2,12 @@ package chapter1
 
 import (
 	"fmt"
-	"github.com/greymatter-io/golangz/linked_list"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
 	"github.com/hashicorp/go-multierror"
-	"math/rand"
 	"testing"
 	"time"
 )
-
-func shuffleRoutes(toBeShuffled []*OutputWire) []*OutputWire {
-	rr := make([]*OutputWire, len(toBeShuffled))
-	copy(rr, toBeShuffled)
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(rr), func(i, j int) {
-		rr[i], rr[j] = rr[j], rr[i]
-	})
-	return rr
-}
 
 func TestClunetSwitch(t *testing.T) {
 	lt := func(l, r int) bool {
@@ -38,31 +26,30 @@ func TestClunetSwitch(t *testing.T) {
 	}
 
 	g0 := propcheck.ChooseInt(1, 300)
-	g1 := sets.ChooseSet(0, 60, g0, lt, eq)
-	rng := propcheck.SimpleRNG{Seed: 42934000} //propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	//	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
+	g1 := sets.ChooseSet(0, 100, g0, lt, eq)
+	now := time.Now().Nanosecond()
+	rng := propcheck.SimpleRNG{now}
 	prop := propcheck.ForAll(g1,
 		"Validate Clunet switch algorithm  \n",
-		func(xs []int) []*InputWire {
+		func(xs []int) propcheck.Pair[[]*InputWire, []*OutputWire] {
 			var outputWires []*OutputWire
 			for _, y := range xs {
 				ow := OutputWire{
 					Id:             y,
-					InputJunctions: make([]*InputWire, len(xs), len(xs)),
+					InputJunctions: make([]*InputWire, 1, 1),
 				}
 				outputWires = append(outputWires, &ow)
 			}
-			var r []*InputWire
+			var inputWires []*InputWire
 			for _, x := range xs {
 				s := InputWire{
-					Id:                    x,
-					OutputWirePreferences: outputWires, //shuffleRoutes(outputWires),//TODO Shuffling makes the bug show up less often. But its still there.
+					Id: x,
 				}
-				r = append(r, &s)
+				inputWires = append(inputWires, &s)
 			}
-			return r
+			return propcheck.Pair[[]*InputWire, []*OutputWire]{inputWires, outputWires}
 		},
-		func(inputWires []*InputWire) (bool, error) {
+		func(wires propcheck.Pair[[]*InputWire, []*OutputWire]) (bool, error) {
 
 			eq := func(l, r *InputWire) bool {
 				if l.Id == r.Id {
@@ -80,15 +67,17 @@ func TestClunetSwitch(t *testing.T) {
 				}
 			}
 			var errors error
-			ll := linked_list.ToList(inputWires)
-
 			start := time.Now()
-			r := MakeSwitches(ll)
-			fmt.Printf("Scheduling an array of %v inputWires took %v\n", len(inputWires), time.Since(start))
+			r := MakeSwitches(wires)
+			fmt.Printf("Scheduling an array of %v wires took %v\n", len(wires.A), time.Since(start))
 			var liw []*InputWire
-			l := len(r)
+
+			//The switching operation ensures that
+			//  1. Every output wire contains every input wire
+			//  2. Every output wire switches on a different input wire
+			//  3. No input wires passes in front of any other input wire on an output wire on the way to its switch. This is accomplished by switching on the first junction of every output wire.
 			for _, ow := range r {
-				liw = append(liw, ow.InputJunctions[l-1])
+				liw = append(liw, ow.InputJunctions[0])
 			}
 			liwAsSet := sets.ToSet(liw, lt, eq)
 			if len(liwAsSet) != len(r) {
@@ -101,7 +90,6 @@ func TestClunetSwitch(t *testing.T) {
 			}
 		},
 	)
-	fmt.Println(rng)
-	result := prop.Run(propcheck.RunParms{1, rng})
+	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }
