@@ -18,6 +18,30 @@ type Woman struct {
 	EngagedTo   *Man
 }
 
+var womanPrefersMe = func(wp *Woman, courtier *Man) bool { //Does woman prefer this man to the one to which she is currently assigned?
+	//This function assumes that the wp woman is already engaged.
+	courtierRanking, courtierIsInPreferredList := wp.Preferences[courtier.Id]
+	currentFianceeRanking, currentFianceeIsInPreferredList := wp.Preferences[wp.EngagedTo.Id]
+
+	if !courtierIsInPreferredList && !currentFianceeIsInPreferredList { //Woman is indifferent to both men. So she will stick with her current fiancee.
+		//fmt.Printf("Woman:%v is indifferent to both men. So she will stick with her current fiancee%v\n", wp.Id, wp.EngagedTo.Id)
+		return false
+	} else if courtierIsInPreferredList && !currentFianceeIsInPreferredList { //Woman is indifferent to her current husband but not the courtier. So she chooses the courtier.
+		//fmt.Printf("Woman:%v is indifferent to her current husband:%v but not the courtier:%v. So she chooses the courtier.\n", wp.Id, wp.EngagedTo.Id, courtier.Id)
+		return true
+	} else if !courtierIsInPreferredList && currentFianceeIsInPreferredList { //Woman is indifferent to the courtier but she prefers her current fiancee is in her list of preferences.
+		//So she sticks with her current fiancee
+		//fmt.Printf("Woman:%v is indifferent to the courtier:%v but her current fiancee:%v in in her preference list. So she sticks with her current fiancee\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
+		return false
+	} else if courtierRanking < currentFianceeRanking {
+		//fmt.Printf("woman:%v prefers courtier:%v over current financee:%v\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
+		return true
+	} else {
+		//fmt.Printf("woman:%v prefers current fiancee:%v over courtier:%v\n", wp.Id, wp.EngagedTo.Id, courtier.Id)
+		return false
+	}
+}
+
 func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me *Man) bool) []*Woman {
 	fmt.Printf("Size of list:%v\n", linked_list.Len(freeMen))
 	if linked_list.Len(freeMen) == 0 {
@@ -44,10 +68,10 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 					wp.EngagedTo = m
 					m.EngagedTo = wp
 					freeMen = linked_list.AddLast(oldMan, freeMen)
-					fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", wp.Id, m.Id, oldMan.Id)
+					//fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", wp.Id, m.Id, oldMan.Id)
 					break
 				} else {
-					fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
+					//fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
 				}
 			}
 			m.Preferences, _ = linked_list.Tail(m.Preferences)
