@@ -3,6 +3,7 @@ package chapter1
 import (
 	"fmt"
 	"github.com/greymatter-io/golangz/linked_list"
+	"github.com/greymatter-io/golangz/propcheck"
 )
 
 //This algorithm accomodates both weak and strong instabilities.
@@ -14,7 +15,7 @@ type Man struct {
 
 type Woman struct {
 	Id          string
-	Preferences map[string]int // The key is the man's Id and the value is that man's ranking with 0 being the highest.  No duplicate rankings are allowed.
+	Preferences map[string]propcheck.Pair[int, *Man] // The key is the man's Id and the value is that man's ranking with 0 being the highest and a pointer to the complete Man.  No duplicate rankings are allowed.
 	EngagedTo   *Man
 }
 
@@ -33,7 +34,7 @@ var womanPrefersMe = func(wp *Woman, courtier *Man) bool { //Does woman prefer t
 		//So she sticks with her current fiancee
 		//fmt.Printf("Woman:%v is indifferent to the courtier:%v but her current fiancee:%v in in her preference list. So she sticks with her current fiancee\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
 		return false
-	} else if courtierRanking < currentFianceeRanking {
+	} else if courtierRanking.A < currentFianceeRanking.A {
 		//fmt.Printf("woman:%v prefers courtier:%v over current financee:%v\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
 		return true
 	} else {

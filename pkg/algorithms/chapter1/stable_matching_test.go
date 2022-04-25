@@ -1,20 +1,20 @@
 package chapter1
 
 import (
-	"fmt"
 	"github.com/greymatter-io/golangz/linked_list"
+	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
 )
 
 func TestStableMatchingWomanConflictsNoIndifference(t *testing.T) {
 	w0 := &Woman{
 		Id:          "0",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 	w1 := &Woman{
 		Id:          "1",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 
@@ -27,10 +27,10 @@ func TestStableMatchingWomanConflictsNoIndifference(t *testing.T) {
 		Preferences: nil,
 	}
 
-	w0.Preferences[m1.Id] = 0
-	w0.Preferences[m0.Id] = 1
-	w1.Preferences[m1.Id] = 0
-	w1.Preferences[m0.Id] = 1
+	w0.Preferences[m1.Id] = propcheck.Pair[int, *Man]{0, m1}
+	w0.Preferences[m0.Id] = propcheck.Pair[int, *Man]{1, m0}
+	w1.Preferences[m1.Id] = propcheck.Pair[int, *Man]{0, m1}
+	w1.Preferences[m0.Id] = propcheck.Pair[int, *Man]{1, m0}
 
 	var allMen *linked_list.LinkedList[*Man]
 	var manPreferences *linked_list.LinkedList[*Woman]
@@ -41,25 +41,28 @@ func TestStableMatchingWomanConflictsNoIndifference(t *testing.T) {
 	m1.Preferences = manPreferences
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
-	actual := Match(allMen, womanPrefersMe)
+	Match(allMen, womanPrefersMe)
 	if w0.EngagedTo.Id != m1.Id {
 		t.Errorf("Expected woman 1 to be engaged to man 1")
 	}
 	if w1.EngagedTo.Id != m0.Id {
 		t.Errorf("Expected woman 2 to be engaged to man 2")
 	}
-	fmt.Println(actual)
+	unstableMatchings := unstableMatchings([]*Woman{w0, w1})
+	if len(unstableMatchings) > 0 {
+		t.Errorf("There were unstable matchings as follow:%v", unstableMatchings)
+	}
 }
 
 func TestStableMatchingWomanConflicts2(t *testing.T) {
 	w0 := &Woman{
 		Id:          "0",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 	w1 := &Woman{
 		Id:          "1",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 
@@ -82,11 +85,11 @@ func TestStableMatchingWomanConflicts2(t *testing.T) {
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
 
-	w0.Preferences[m1.Id] = 1
-	w0.Preferences[m0.Id] = 0
-	w1.Preferences[m1.Id] = 0
-	w1.Preferences[m0.Id] = 1
-	actual := Match(allMen, womanPrefersMe)
+	w0.Preferences[m1.Id] = propcheck.Pair[int, *Man]{1, m1}
+	w0.Preferences[m0.Id] = propcheck.Pair[int, *Man]{0, m0}
+	w1.Preferences[m1.Id] = propcheck.Pair[int, *Man]{0, m1}
+	w1.Preferences[m0.Id] = propcheck.Pair[int, *Man]{1, m0}
+	Match(allMen, womanPrefersMe)
 	if w0.EngagedTo.Id != m0.Id {
 		t.Errorf("Expected woman 0 to be engaged to man 0")
 	}
@@ -94,18 +97,21 @@ func TestStableMatchingWomanConflicts2(t *testing.T) {
 		t.Errorf("Expected woman 1 to be engaged to man 1")
 	}
 
-	fmt.Println(actual)
+	unstableMatchings := unstableMatchings([]*Woman{w0, w1})
+	if len(unstableMatchings) > 0 {
+		t.Errorf("There were unstable matchings as follow:%v", unstableMatchings)
+	}
 }
 
 func TestStableMatchingNoWomanPreferenceConflicts(t *testing.T) {
 	w0 := &Woman{
 		Id:          "0",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 	w1 := &Woman{
 		Id:          "1",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 
@@ -131,36 +137,38 @@ func TestStableMatchingNoWomanPreferenceConflicts(t *testing.T) {
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
 
-	w0.Preferences[m1.Id] = 0
-	w0.Preferences[m0.Id] = 1
-	w1.Preferences[m1.Id] = 1
-	w1.Preferences[m0.Id] = 0
-	actual := Match(allMen, womanPrefersMe)
+	w0.Preferences[m1.Id] = propcheck.Pair[int, *Man]{0, m1}
+	w0.Preferences[m0.Id] = propcheck.Pair[int, *Man]{1, m0}
+	w1.Preferences[m1.Id] = propcheck.Pair[int, *Man]{1, m1}
+	w1.Preferences[m0.Id] = propcheck.Pair[int, *Man]{0, m0}
+	Match(allMen, womanPrefersMe)
 	if w0.EngagedTo.Id != m0.Id {
 		t.Errorf("Expected woman 0 to be engaged to man 0")
 	}
 	if w1.EngagedTo.Id != m1.Id {
 		t.Errorf("Expected woman 1 to be engaged to man 1")
 	}
-
-	fmt.Println(actual)
+	unstableMatchings := unstableMatchings([]*Woman{w0, w1})
+	if len(unstableMatchings) > 0 {
+		t.Errorf("There were unstable matchings as follow:%v", unstableMatchings)
+	}
 }
 
 func TestIndifferentStableMatching(t *testing.T) {
 	w0 := &Woman{
 		Id:          "0",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 	w1 := &Woman{
 		Id:          "1",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 
 	w2 := &Woman{
 		Id:          "2",
-		Preferences: make(map[string]int),
+		Preferences: make(map[string]propcheck.Pair[int, *Man]),
 		EngagedTo:   nil,
 	}
 
@@ -190,12 +198,12 @@ func TestIndifferentStableMatching(t *testing.T) {
 	allMen = linked_list.Push(m1, allMen)
 	allMen = linked_list.Push(m0, allMen)
 
-	w0.Preferences[m1.Id] = 1
-	w0.Preferences[m0.Id] = 0
-	w1.Preferences[m1.Id] = 0
-	w1.Preferences[m0.Id] = 1
+	w0.Preferences[m1.Id] = propcheck.Pair[int, *Man]{1, m1}
+	w0.Preferences[m0.Id] = propcheck.Pair[int, *Man]{0, m0}
+	w1.Preferences[m1.Id] = propcheck.Pair[int, *Man]{0, m1}
+	w1.Preferences[m0.Id] = propcheck.Pair[int, *Man]{1, m0}
 	//w2 is indifferent to all men
-	actual := Match(allMen, womanPrefersMe)
+	Match(allMen, womanPrefersMe)
 	if w0.EngagedTo.Id != m0.Id {
 		t.Errorf("Expected woman 0 to be engaged to man 0")
 	}
@@ -205,6 +213,8 @@ func TestIndifferentStableMatching(t *testing.T) {
 	if w2.EngagedTo.Id != m2.Id {
 		t.Errorf("Expected woman 2 to be engaged to man 2")
 	}
-
-	fmt.Println(actual)
+	unstableMatchings := unstableMatchings([]*Woman{w0, w1, w2})
+	if len(unstableMatchings) > 0 {
+		t.Errorf("There were unstable matchings as follow:%v", unstableMatchings)
+	}
 }

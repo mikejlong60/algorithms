@@ -57,9 +57,9 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 
 			for _, s := range allTheWomen {
 				wpref := shuffleAny(allTheMen)
-				var wprefMap = make(map[string]int, len(wpref))
+				var wprefMap = make(map[string]propcheck.Pair[int, *Man], len(wpref))
 				for i, m := range wpref {
-					wprefMap[m.Id] = i
+					wprefMap[m.Id] = propcheck.Pair[int, *Man]{i, m}
 				}
 				s.Preferences = wprefMap
 			}
@@ -109,6 +109,10 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 				errors = multierror.Append(errors, fmt.Errorf("All men were not married"))
 				fmt.Printf("These men never got married:%v\n", arrays.SetMinus(allMenIds, allHusbandIds, mEq))
 			}
+			unstableMatchings := unstableMatchings(allWomen)
+			if len(unstableMatchings) > 0 {
+				errors = multierror.Append(errors, fmt.Errorf("There were unstable matchings as follow:%v", unstableMatchings))
+			}
 			if errors != nil {
 				return false, errors
 			} else {
@@ -122,7 +126,7 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 }
 
 //Algorithm for determining unstable matchings
-//   Make a new list r of strings of UnstableMatchings
+//   Make a new list r of strings that you will return as the potential list of Unstable Matchings
 //   For1 each woman w from all women
 //        grab w's husband as m
 //        make a new list ipw of potential instabilities
@@ -139,3 +143,35 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 //    End For1
 
 //If len(r) > 1 you have unstable matching and you should print list to console
+
+func unstableMatchings(allWomen []*Woman) []string {
+	var unstableMatchings []string
+	var womanRanking = func(w *Woman, currentWomanPreferences *linked_list.LinkedList[*Woman]) int {
+		i := linked_list.ToArray(currentWomanPreferences)
+		for k, w2 := range i {
+			if w.Id == w2.Id {
+				return k
+			}
+		}
+		return len(i) - 1 //Return lowest possible ranking if man has no preference for his current woman
+	}
+	for _, w := range allWomen { //for1
+		m := w.EngagedTo
+		var ipw []*Man
+		for _, m2 := range w.Preferences { //for2
+			//Get man for m2 id
+			//Then determine if new woman w ranks above his current womanhis current woman in his preferences versus woman w
+			if womanRanking(w, m2.B.Preferences) > womanRanking(m2.B.EngagedTo, m2.B.Preferences) {
+				ipw = append(ipw, m2.B)
+			}
+		} //end for2
+		for _, m3 := range ipw { //for3
+			if w.Preferences[m3.Id].A > w.Preferences[m.Id].A {
+				//log.Printf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity", w.Id, m3.Id, m.Id)
+				unstableMatchings = append(unstableMatchings, fmt.Sprintf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity", w.Id, m3.Id, m.Id))
+			}
+		} //end for3
+		return unstableMatchings
+	} //end for1
+	return []string{}
+}
