@@ -5,6 +5,7 @@ import (
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/linked_list"
 	"github.com/greymatter-io/golangz/propcheck"
+	"github.com/greymatter-io/golangz/sets"
 	"github.com/hashicorp/go-multierror"
 	"math/rand"
 	"testing"
@@ -25,18 +26,18 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 	var allTheMen []*Man
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	g0 := propcheck.ChooseInt(0, 100)
+	g0 := propcheck.ChooseInt(0, 1000)
 	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.LinkedList[*Man], propcheck.SimpleRNG) {
 		allTheMen = []*Man{}
 		allTheWomen = []*Woman{}
-		mw := func(mIds []string, wIds []string) *linked_list.LinkedList[*Man] {
+		mw := func(mIds []int) *linked_list.LinkedList[*Man] {
 			if len(allTheWomen) != len(allTheMen) {
 				t.Error("length of men and women arrays were not equal")
 			}
 			for _, s := range mIds {
 				allTheMen = append(allTheMen, &Man{Id: s})
 			}
-			for _, s := range wIds {
+			for _, s := range mIds {
 				allTheWomen = append(allTheWomen, &Woman{Id: s})
 			}
 
@@ -58,7 +59,7 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 
 			for _, s := range allTheWomen {
 				wpref := shuffleAny(allTheMen)
-				var wprefMap = make(map[string]propcheck.Pair[int, *Man], len(wpref))
+				var wprefMap = make(map[int]propcheck.Pair[int, *Man], len(wpref))
 				for i, m := range wpref {
 					wprefMap[m.Id] = propcheck.Pair[int, *Man]{i, m}
 				}
@@ -67,9 +68,25 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 
 			return freeMen
 		}
-		ra := propcheck.ArrayOfN(a, propcheck.String(100))
-		rb := propcheck.ArrayOfN(a, propcheck.String(100))
-		return propcheck.Map2(ra, rb, mw)
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
+		}
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		//Make these sets intead of arays
+		g00 := propcheck.ChooseInt(1, 3000)
+		g1 := sets.ChooseSet(0, 1000, g00, lt, eq)
+		return propcheck.Map(g1, mw)
 	}
 
 	g := propcheck.FlatMap(g0, fa)
@@ -86,7 +103,7 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 		func(allWomen []*Woman) (bool, error) {
 			var errors error
 
-			var allHusbandIds []string
+			var allHusbandIds []int
 			for _, j := range allWomen {
 				if j.EngagedTo == nil {
 					errors = multierror.Append(errors, fmt.Errorf("Woman:%v was not married ", j.Id))
@@ -94,12 +111,12 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 				allHusbandIds = append(allHusbandIds, j.EngagedTo.Id)
 			}
 
-			var allMenIds []string
+			var allMenIds []int
 			for _, man := range allTheMen {
 				allMenIds = append(allMenIds, man.Id)
 			}
 
-			mEq := func(m1 string, m2 string) bool {
+			mEq := func(m1, m2 int) bool {
 				if m1 == m2 {
 					return true
 				} else {
@@ -121,27 +138,27 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{10, rng})
+	result := prop.Run(propcheck.RunParms{20, rng})
 	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
 	fmt.Println(rng)
 }
 
-func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
+func TestStableMatchingPropertiesIndiffernceTest(t *testing.T) {
 	var allTheMen []*Man
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	g0 := propcheck.ChooseInt(0, 100)
+	g0 := propcheck.ChooseInt(0, 3000)
 	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.LinkedList[*Man], propcheck.SimpleRNG) {
 		allTheMen = []*Man{}
 		allTheWomen = []*Woman{}
-		mw := func(mIds []string, wIds []string) *linked_list.LinkedList[*Man] {
+		mw := func(mIds []int) *linked_list.LinkedList[*Man] {
 			if len(allTheWomen) != len(allTheMen) {
 				t.Error("length of men and women arrays were not equal")
 			}
 			for _, s := range mIds {
 				allTheMen = append(allTheMen, &Man{Id: s})
 			}
-			for _, s := range wIds {
+			for _, s := range mIds {
 				allTheWomen = append(allTheWomen, &Woman{Id: s})
 			}
 
@@ -163,7 +180,7 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 
 			for _, s := range allTheWomen {
 				wpref := shuffleAny(allTheMen)
-				var wprefMap = make(map[string]propcheck.Pair[int, *Man], len(wpref)/2)
+				var wprefMap = make(map[int]propcheck.Pair[int, *Man], len(wpref)/2)
 				for i, m := range wpref {
 					wprefMap[m.Id] = propcheck.Pair[int, *Man]{i, m}
 					if i > len(wpref)/2 { //Make every woman indifferent to half the men by excluding them from her preference list
@@ -175,15 +192,31 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 
 			return freeMen
 		}
-		ra := propcheck.ArrayOfN(a, propcheck.String(100))
-		rb := propcheck.ArrayOfN(a, propcheck.String(100))
-		return propcheck.Map2(ra, rb, mw)
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
+		}
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		//Make these sets intead of arays
+		g00 := propcheck.ChooseInt(1, 3000)
+		g1 := sets.ChooseSet(0, 1000, g00, lt, eq)
+		return propcheck.Map(g1, mw)
 	}
 
 	g := propcheck.FlatMap(g0, fa)
 
 	prop := propcheck.ForAll(g,
-		"Make a bunch of men and women where the women are undecided about some men and match them up and verify that all matches are stable \n",
+		"Make a bunch of men and women and match them up and see if all matches are stable \n",
 		func(freeMen *linked_list.LinkedList[*Man]) []*Woman {
 			len := linked_list.Len(freeMen)
 			start := time.Now()
@@ -194,7 +227,7 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 		func(allWomen []*Woman) (bool, error) {
 			var errors error
 
-			var allHusbandIds []string
+			var allHusbandIds []int
 			for _, j := range allWomen {
 				if j.EngagedTo == nil {
 					errors = multierror.Append(errors, fmt.Errorf("Woman:%v was not married ", j.Id))
@@ -202,12 +235,12 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 				allHusbandIds = append(allHusbandIds, j.EngagedTo.Id)
 			}
 
-			var allMenIds []string
+			var allMenIds []int
 			for _, man := range allTheMen {
 				allMenIds = append(allMenIds, man.Id)
 			}
 
-			mEq := func(m1 string, m2 string) bool {
+			mEq := func(m1, m2 int) bool {
 				if m1 == m2 {
 					return true
 				} else {
@@ -229,13 +262,13 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{10, rng})
+	result := prop.Run(propcheck.RunParms{20, rng})
 	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
 	fmt.Println(rng)
 }
 
 //Algorithm for determining unstable matchings
-//   Make a new list r of strings that you will return as the potential list of Unstable Matchings
+//   Make a new list r of strings that you will return as the list of Unstable Matchings
 //   For1 each woman w from all women
 //        grab w's husband as m
 //        make a new list ipw of potential instabilities
@@ -255,7 +288,7 @@ func TestStableMatchingWithWomanWhoAreIndifferentAboutSomeMen(t *testing.T) {
 
 func unstableMatchings(allWomen []*Woman) []string {
 	var unstableMatchings []string
-	var womanRanking = func(w *Woman, currentWomanPreferences []*Woman, manId string) int {
+	var womanRanking = func(w *Woman, currentWomanPreferences []*Woman) int {
 		for k, w2 := range currentWomanPreferences {
 			if w.Id == w2.Id {
 				return k
@@ -266,7 +299,7 @@ func unstableMatchings(allWomen []*Woman) []string {
 	for _, w := range allWomen { //for1
 		m := w.EngagedTo
 		var ipw []*Man
-		var wPrefs []string
+		var wPrefs []int
 		for _, k := range w.Preferences {
 			wPrefs = append(wPrefs, k.B.Id)
 		}
@@ -274,19 +307,19 @@ func unstableMatchings(allWomen []*Woman) []string {
 			//Get man for m2 id
 			//Then determine for each man if new woman w ranks above his current woman in his preferences list versus the woman to whom he is currently engaged and add that
 			//man to the list of instability candidates for evaluation in the next for loop.
-			mansRankingOfCurrentWoman := womanRanking(w, m2.B.Preferences, m2.B.Id)
-			mansRankingOfCurrentSpouse := womanRanking(m2.B.EngagedTo, m2.B.Preferences, m2.B.Id)
-			fmt.Printf("\n\nMan %v ranking of current woman:%v --- ", m2.A, mansRankingOfCurrentWoman)
-			fmt.Printf("versus his ranking of current spouse:%v", mansRankingOfCurrentSpouse)
+			mansRankingOfCurrentWoman := womanRanking(w, m2.B.Preferences)
+			mansRankingOfCurrentSpouse := womanRanking(m2.B.EngagedTo, m2.B.Preferences)
+			//fmt.Printf("\n\nMan %v ranking of current woman %v is:%v --- ", m2.B.Id, w.Id, mansRankingOfCurrentWoman)
+			//fmt.Printf("versus his ranking of current spouse:%v", mansRankingOfCurrentSpouse)
 			if mansRankingOfCurrentWoman < mansRankingOfCurrentSpouse { //lower is a higher preference
-				fmt.Printf(" adding him as an instability candidate\n")
+				//fmt.Printf(" adding him as an instability candidate\n")
 				ipw = append(ipw, m2.B)
 			}
 		}
 		//end for2
 		for _, m3 := range ipw { //for3
 			if w.Preferences[m3.Id].A < w.Preferences[m.Id].A { //lower on the preference list is better
-				fmt.Printf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity\n", w.Id, m3.Id, m.Id)
+				//fmt.Printf("\nWoman:%v prefers Man:%v over her current husband:%v and this is an instablity\n", w.Id, m3.Id, m.Id)
 				unstableMatchings = append(unstableMatchings, fmt.Sprintf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity", w.Id, m3.Id, m.Id))
 			}
 		} //end for3

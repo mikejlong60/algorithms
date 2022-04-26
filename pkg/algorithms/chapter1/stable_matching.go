@@ -14,33 +14,33 @@ import (
 //the preference list of the woman is ever disregarded. That would mean some matches would be unstable because a woman would be married to a man
 //that violated the definition of a stable match given above.
 type Man struct {
-	Id                string
+	Id                int
 	HaveNotProposedTo *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
 	Preferences       []*Woman                        //A list of preferences for man, lower index is a higher preference
 	EngagedTo         *Woman
 }
 
 type Woman struct {
-	Id          string
-	Preferences map[string]propcheck.Pair[int, *Man] // The key is the man's Id and the value is that man's ranking with 0 being the highest and a pointer to the complete Man.  No duplicate rankings are allowed.
+	Id          int
+	Preferences map[int]propcheck.Pair[int, *Man] // The key is the man's Id and the value is that man's ranking with 0 being the highest and a pointer to the complete Man.  No duplicate rankings are allowed.
 	EngagedTo   *Man
 }
 
-func (w Man) String() string {
-	var prefs []string
-	for _, iw := range w.Preferences {
-		prefs = append(prefs, iw.Id)
-	}
-	return fmt.Sprintf("Man{Id:%v, EngagedTo:%v, Preferences:%v}", w.Id, w.EngagedTo.Id, prefs)
-}
-
-func (w Woman) String() string {
-	var prefs = make(map[string]string) //map[string]int
-	for _, iw := range w.Preferences {
-		prefs[iw.B.Id] = fmt.Sprintf("Prefs:%v popp", iw.A)
-	}
-	return fmt.Sprintf("Woman{Id:%v, EngagedTo:%v, Preferences:%v}", w.Id, w.EngagedTo.Id, prefs)
-}
+//func (w Man) String() string {
+//	var prefs []string
+//	for _, iw := range w.Preferences {
+//		prefs = append(prefs, iw.Id)
+//	}
+//	return fmt.Sprintf("Man{Id:%v, EngagedTo:%v, Preferences:%v}", w.Id, w.EngagedTo.Id, prefs)
+//}
+//
+//func (w Woman) String() string {
+//	var prefs = make(map[string]string) //map[string]int
+//	for _, iw := range w.Preferences {
+//		prefs[iw.B.Id] = fmt.Sprintf("Prefs:%v popp", iw.A)
+//	}
+//	return fmt.Sprintf("Woman{Id:%v, EngagedTo:%v, Preferences:%v}", w.Id, w.EngagedTo.Id, prefs)
+//}
 
 var womanPrefersMe = func(wp *Woman, courtier *Man) bool { //Does woman prefer this man to the one to which she is currently assigned?
 	//This function assumes that the wp woman is already engaged.
