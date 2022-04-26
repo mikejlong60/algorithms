@@ -25,7 +25,7 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 	var allTheMen []*Man
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	g0 := propcheck.ChooseInt(0, 3000)
+	g0 := propcheck.ChooseInt(0, 50)
 	fa := func(a int) func(propcheck.SimpleRNG) (*linked_list.LinkedList[*Man], propcheck.SimpleRNG) {
 		allTheMen = []*Man{}
 		allTheWomen = []*Woman{}
@@ -52,7 +52,8 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 				for _, s := range womenForMan {
 					allWomen = linked_list.Push(s, allWomen)
 				}
-				allTheMen[i].Preferences = allWomen
+				allTheMen[i].HaveNotProposedTo = allWomen
+				allTheMen[i].Preferences = linked_list.ToArray(allWomen)
 			}
 
 			for _, s := range allTheWomen {
@@ -146,32 +147,34 @@ func TestStableMatchingTODOWithLyingWoman(t *testing.T) {
 
 func unstableMatchings(allWomen []*Woman) []string {
 	var unstableMatchings []string
-	var womanRanking = func(w *Woman, currentWomanPreferences *linked_list.LinkedList[*Woman]) int {
-		i := linked_list.ToArray(currentWomanPreferences)
-		for k, w2 := range i {
+	var womanRanking = func(w *Woman, currentWomanPreferences []*Woman, manId string) int {
+		for k, w2 := range currentWomanPreferences {
 			if w.Id == w2.Id {
 				return k
 			}
 		}
-		return len(i) - 1 //Return lowest possible ranking if man has no preference for his current woman
+		return len(currentWomanPreferences) - 1 //Return lowest possible ranking if man has no preference for his current woman
 	}
 	for _, w := range allWomen { //for1
 		m := w.EngagedTo
 		var ipw []*Man
+		var wPrefs []string
+		for _, k := range w.Preferences {
+			wPrefs = append(wPrefs, k.B.Id)
+		}
 		for _, m2 := range w.Preferences { //for2
 			//Get man for m2 id
-			//Then determine if new woman w ranks above his current womanhis current woman in his preferences versus woman w
-			if womanRanking(w, m2.B.Preferences) > womanRanking(m2.B.EngagedTo, m2.B.Preferences) {
+			//Then determine if new woman w ranks above his current woman his current woman in his preferences versus woman w
+			if womanRanking(w, m2.B.Preferences, m2.B.Id) < womanRanking(m2.B.EngagedTo, m2.B.Preferences, m2.B.Id) { //lower is a higher preference
 				ipw = append(ipw, m2.B)
 			}
-		} //end for2
+		}
+		//end for2
 		for _, m3 := range ipw { //for3
-			if w.Preferences[m3.Id].A > w.Preferences[m.Id].A {
-				//log.Printf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity", w.Id, m3.Id, m.Id)
+			if w.Preferences[m3.Id].A < w.Preferences[m.Id].A { //lower on the perference list is better
 				unstableMatchings = append(unstableMatchings, fmt.Sprintf("Woman:%v prefers Man:%v over her current husband:%v and this is an instablity", w.Id, m3.Id, m.Id))
 			}
 		} //end for3
-		return unstableMatchings
 	} //end for1
-	return []string{}
+	return unstableMatchings
 }

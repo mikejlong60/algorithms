@@ -8,9 +8,10 @@ import (
 
 //This algorithm accomodates both weak and strong instabilities.
 type Man struct {
-	Id          string
-	Preferences *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
-	EngagedTo   *Woman
+	Id                string
+	HaveNotProposedTo *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
+	Preferences       []*Woman                        //A list of preferences for man, lower index is a higher preference
+	EngagedTo         *Woman
 }
 
 type Woman struct {
@@ -48,12 +49,12 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 	if linked_list.Len(freeMen) == 0 {
 		return []*Woman{}
 	}
-	allWomen := linked_list.ToArray(linked_list.Head(freeMen).Preferences) //Every man must have every woman in his list of preferences
+	allWomen := linked_list.ToArray(linked_list.Head(freeMen).HaveNotProposedTo) //Every man must have every woman in his list of preferences
 
 	for freeMen != nil {
 		m := linked_list.Head(freeMen)
-		for m.Preferences != nil {
-			wp := linked_list.Head(m.Preferences)
+		for m.HaveNotProposedTo != nil {
+			wp := linked_list.Head(m.HaveNotProposedTo)
 			if wp.EngagedTo == nil {
 				wp.EngagedTo = m
 				m.EngagedTo = wp
@@ -75,7 +76,7 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 					//fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
 				}
 			}
-			m.Preferences, _ = linked_list.Tail(m.Preferences)
+			m.HaveNotProposedTo, _ = linked_list.Tail(m.HaveNotProposedTo)
 		} //end woman for
 		freeMen, _ = linked_list.Tail(freeMen)
 	} // end man for
