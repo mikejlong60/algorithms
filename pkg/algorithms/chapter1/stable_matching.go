@@ -16,7 +16,7 @@ import (
 type Man struct {
 	Id                int
 	HaveNotProposedTo *linked_list.LinkedList[*Woman] //A stack of women I want in order of preferences. When a woman is missing from it he has already proposed to her.
-	Preferences       []*Woman                        //A list of preferences for man, lower index is a higher preference
+	Preferences       []*Woman                        //A list of preferences for man, lower index is a higher preference. It's an immutable representation of the Man's original preference list in HaveNotProposedTo above.
 	EngagedTo         *Woman
 }
 
@@ -53,7 +53,7 @@ var womanPrefersMe = func(wp *Woman, courtier *Man) bool { //Does woman prefer t
 	} else if courtierIsInPreferredList && !currentFianceeIsInPreferredList { //Woman is indifferent to her current husband but not the courtier. So she chooses the courtier.
 		//fmt.Printf("Woman:%v is indifferent to her current husband:%v but not the courtier:%v. So she chooses the courtier.\n", wp.Id, wp.EngagedTo.Id, courtier.Id)
 		return true
-	} else if !courtierIsInPreferredList && currentFianceeIsInPreferredList { //Woman is indifferent to the courtier but she prefers her current fiancee is in her list of preferences.
+	} else if !courtierIsInPreferredList && currentFianceeIsInPreferredList { //Woman is indifferent to the courtier but she prefers her current fiancee because he is in her list of preferences.
 		//So she sticks with her current fiancee
 		//fmt.Printf("Woman:%v is indifferent to the courtier:%v but her current fiancee:%v in in her preference list. So she sticks with her current fiancee\n", wp.Id, courtier.Id, wp.EngagedTo.Id)
 		return false
@@ -91,11 +91,8 @@ func Match(freeMen *linked_list.LinkedList[*Man], wPrefersMe func(wp *Woman, me 
 					///Set up current man with this woman
 					wp.EngagedTo = m
 					m.EngagedTo = wp
-					freeMen = linked_list.AddLast(oldMan, freeMen)
-					//fmt.Printf("Woman %v prefers me(%v) and just broke engagement to %v\n", wp.Id, m.Id, oldMan.Id)
+					freeMen = linked_list.AddLast(oldMan, freeMen) //TODO Make a doubly-linked list in your library and use this instead for freeMen.
 					break
-				} else {
-					//fmt.Printf("Woman %v prefers her current fiance %v over me (%v)\n", wp.Id, wp.EngagedTo.Id, m.Id)
 				}
 			}
 			m.HaveNotProposedTo, _ = linked_list.Tail(m.HaveNotProposedTo)

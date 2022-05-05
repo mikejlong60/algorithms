@@ -143,7 +143,7 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 	fmt.Println(rng)
 }
 
-func TestStableMatchingPropertiesIndiffernceTest(t *testing.T) {
+func TestStableMatchingPropertiesIndifferenceTest(t *testing.T) {
 	var allTheMen []*Man
 	var allTheWomen []*Woman
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
