@@ -39,7 +39,7 @@ func MakeSwitches(wires propcheck.Pair[[]*InputWire, []*OutputWire]) []*OutputWi
 	}
 
 	if len(wires.A) != len(wires.B) {
-		panic("input wires array must be same size as outoutwires array")
+		panic("input wires array must be same size as outputwires array")
 	}
 	if len(wires.A) == 0 {
 		return []*OutputWire{}
