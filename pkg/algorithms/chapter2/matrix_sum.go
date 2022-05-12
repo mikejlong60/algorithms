@@ -32,7 +32,7 @@ func matrixSumWitoutInnerLoop(source []int) [][]int64 {
 	return result
 }
 
-//This algorithm has a constant running time of O(n) but is a bit slower(maybe 20%) than it's loop counterpart above, but much faster than the first sum above.
+//This algorithm has a constant running time of O(n) but is a bit slower(maybe 20%) than it's loop counterpart above, but much faster than the first sum above.  I think it's a little slower because in Golang range the loop variable is a pointer.
 func matrixSumWithFoldRight(source []int) [][]int64 {
 	var inner [][]int64
 	var append = func(x int, xs [][]int64) [][]int64 {
@@ -49,5 +49,24 @@ func matrixSumWithFoldRight(source []int) [][]int64 {
 		return xs
 	}
 	result := arrays.FoldRight(source, inner, append)
+	return result
+}
+
+func matrixSumWithFoldLeft(source []int) [][]int64 {
+	var inner [][]int64
+	var append = func(xs [][]int64, x int) [][]int64 {
+		var result = make([]int64, 2)
+		currentX := int64(x)
+		result[0] = currentX
+		currentAccumLen := len(xs)
+		if currentAccumLen == 0 { //Set first sum to first element value
+			result[1] = currentX
+		} else { //Just grab previous sum
+			result[1] = xs[currentAccumLen-1][1] + currentX
+		}
+		xs = append(xs, result)
+		return xs
+	}
+	result := arrays.FoldLeft(source, inner, append)
 	return result
 }
