@@ -10,6 +10,9 @@ func ParentIdx(i int) int {
 	}
 }
 
+//Definition of almost-a-heap. Only one node in the tree has a value less than it's parent as per the lt function and that
+//node is at the bottom rung of the heap.
+//Definition of a heap.  Every node in the tree has a greater value than it's parent as per the lt function.
 //This is a pure function because I copy the array each time.  r only gets mutated internally which is OK because its a copy.
 func HeapifyUp(heap []int, i int) []int {
 	if len(heap) == 0 {
