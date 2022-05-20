@@ -3,102 +3,66 @@ package chapter2
 import (
 	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
-	"github.com/greymatter-io/golangz/sets"
 	"github.com/hashicorp/go-multierror"
-	"math/rand"
 	"testing"
 	"time"
 )
 
-var shuffle = func(toBeShuffled []int) []int {
-	r := make([]int, len(toBeShuffled))
-	copy(r, toBeShuffled)
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(r), func(i, j int) {
-		r[i], r[j] = r[j], r[i]
-	})
-	return r
-}
-var lt = func(l, r int) bool {
-	if l < r {
-		return true
-	} else {
-		return false
-	}
-}
-
-var eq = func(l, r int) bool {
-	if l == r {
-		return true
-	} else {
-		return false
-	}
-}
-
 var parentIsLess = func(heap []int, lastIdx int) error {
 	var parentIdx = ParentIdx(lastIdx)
-	//var currentParsent = heap[lastIdx]
 	var childIdx = lastIdx
 	var errors error
 	for parentIdx > 0 {
 		fmt.Printf("parents value:%v child's value:%v\n", heap[parentIdx], heap[childIdx])
 		if heap[parentIdx] > heap[childIdx] {
 			errors = multierror.Append(errors, fmt.Errorf("parent:%v value was not less than child's:%v\n", heap[parentIdx], heap[childIdx]))
-			//fmt.Printf("parent:%v value was not less than child's:%v\n", heap[parentIdx], currentParent)
 		}
 		childIdx = parentIdx
 		parentIdx = ParentIdx(childIdx)
-		//currentParent = heap[parentIdx]
 	}
 	return errors
 }
 
 func TestHeapifyUp(t *testing.T) {
-	g0 := sets.ChooseSet(0, 100, propcheck.ChooseInt(0, 1000), lt, eq)
-	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
-	prop := propcheck.ForAll(g0,
-		"Validate HeapifyUp  \n",
-		func(xs []int) []int {
-			//xss := shuffle(xs)
-			//TODO verify this with random arrays
-			xss := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 17, 15, 8, 16, 3}
+	xss0 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 17, 15, 8, 16, 3}
+	xss1 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 17, 15, 8, 3, 16}
+	xss2 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 17, 15, 3, 8, 16}
+	xss3 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 17, 3, 8, 16, 15}
+	xss4 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 20, 3, 15, 8, 16, 17}
+	xss5 := []int{2, 4, 5, 10, 9, 7, 11, 15, 17, 3, 17, 15, 8, 16, 20}
+	xss6 := []int{2, 4, 5, 10, 9, 7, 11, 15, 3, 20, 17, 15, 8, 16, 17}
+	xss7 := []int{2, 4, 5, 10, 9, 7, 11, 3, 17, 20, 17, 15, 8, 16, 15}
 
-			start := time.Now()
-			fmt.Printf("Array Before HeapifyUp:%v\n", xss)
-			lastIdx := len(xss) - 1
-			r := HeapifyUp(xss, lastIdx)
-			fmt.Printf("HeapUp algorithm for an array of length:%v took:%v\n", len(xss), time.Since(start))
-			fmt.Printf("Array Before HeapifyUp:%v\n", r)
-			return r
-		},
-		func(xss []int) (bool, error) {
-			lastIdx := len(xss) - 1
-			errors := parentIsLess(xss, lastIdx)
-			if errors != nil {
-				return false, errors
-			} else {
-				return true, nil
-			}
-		},
-	)
-	result := prop.Run(propcheck.RunParms{1, rng})
-	propcheck.ExpectSuccess[[]int](t, result)
-	fmt.Println(rng)
+	var elem = 14 //The element you want to add to the almost-a-heap. It's always 3 but position shifts
+	var errors error
+	for _, xss := range [][]int{xss0, xss1, xss2, xss3, xss4, xss5, xss6, xss7} {
+		r := HeapifyUp(xss, elem)
+		fmt.Println(r)
+		errors = parentIsLess(r, elem)
+		elem = elem - 1
+	}
+	if errors != nil {
+		t.Errorf("\033[31m Test Falsified with: %v  \u001B[30m \n", errors)
+	}
 }
 
 func TestHeapifyDown(t *testing.T) {
-	g0 := sets.ChooseSet(0, 100, propcheck.ChooseInt(0, 1000), lt, eq)
-	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(0, 10))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()} //366368000} //time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g0,
 		"Validate HeapifyUp  \n",
-		func(xs []int) []int {
-			xss := shuffle(xs)
+		func(xss []int) []int {
 			start := time.Now()
-			fmt.Printf("Array Before HeapifyUp:%v\n", xss)
-			lastIdx := len(xss) - 1
+			///
+			lastIdx := (len(xss) - 1) / 2
+			fmt.Println(rng)
+			fmt.Printf("Array Before HeapifyDown   :%v\n", xss)
 			r := HeapifyDown(xss, lastIdx)
-			fmt.Printf("HeapUp algorithm for an array of length:%v took:%v\n", len(xss), time.Since(start))
-			fmt.Printf("Array Before HeapifyUp:%v\n", r)
+			//HeapifyDown(xss, lastIdx)
+			fmt.Printf("HeapifyDown algorithm for an array of length:%v took:%v\n", len(xss), time.Since(start))
+			fmt.Printf("Array After HeapifyDown    :%v\n", xss)
+			fmt.Printf("Array After PureHeapifyDown:%v\n", r)
+			//
 			return r
 		},
 		func(xss []int) (bool, error) {

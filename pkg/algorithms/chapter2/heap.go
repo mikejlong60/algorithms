@@ -10,7 +10,7 @@ func ParentIdx(i int) int {
 	}
 }
 
-//This is a pure function.  But it's slower than the impure version because I copy the heap array every time.
+//This is a pure function because I copy the array each time.  r only gets mutated internally which is OK because its a copy.
 func HeapifyUp(heap []int, i int) []int {
 	if len(heap) == 0 {
 		return []int{}
@@ -26,12 +26,13 @@ func HeapifyUp(heap []int, i int) []int {
 			temp2 := r[j]
 			r[j] = temp
 			r[i] = temp2
-			HeapifyUp(r, j)
+			r = HeapifyUp(r, j)
 		}
 	}
 	return r
 }
 
+//This is a pure function because I copy the array each time.  r only gets mutated internally which is OK because its a copy.
 func HeapifyDown(heap []int, i int) []int {
 	if len(heap) == 0 {
 		return []int{}
@@ -40,7 +41,7 @@ func HeapifyDown(heap []int, i int) []int {
 	copy(r, heap)
 
 	var j int
-	n := len(heap)
+	n := len(r)
 	if 2*i > n {
 		return r
 	} else if 2*i < n {
@@ -64,7 +65,7 @@ func HeapifyDown(heap []int, i int) []int {
 		temp2 := r[j]
 		r[j] = temp
 		r[i] = temp2
-		HeapifyDown(r, j)
+		r = HeapifyDown(r, j)
 	}
 	return r
 }
