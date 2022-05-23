@@ -18,7 +18,7 @@ func sum(source []int) [][]int64 {
 }
 
 //This algorithm has a constant running time of O(n)
-func matrixSumWitoutInnerLoop(source []int) [][]int64 {
+func matrixSumWithoutInnerLoop(source []int) [][]int64 {
 	var result = make([][]int64, len(source))
 	for i, j := range source {
 		result[i] = make([]int64, 2)

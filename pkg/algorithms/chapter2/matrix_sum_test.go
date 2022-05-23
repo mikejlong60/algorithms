@@ -53,7 +53,7 @@ func TestMatrixSumWithoutInnerLoop(t *testing.T) {
 		"Validate exercise 2.6, a sort-of sum of a matrix. This is more efficient that the previous version  \n",
 		func(xs []int) [][]int64 {
 			start := time.Now()
-			r := matrixSumWitoutInnerLoop(xs)
+			r := matrixSumWithoutInnerLoop(xs)
 			fmt.Printf("Summing algorithm with only 1 loop for an array of length:%v took:%v\n", len(xs), time.Since(start))
 			return r
 		},
