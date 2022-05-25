@@ -1,7 +1,7 @@
 package chapter2
 
 //Key for now is the array index, starting with zero.
-func ParentIdx(i int) int {
+func parentIdx(i int) int {
 	//Odd number
 	if i%2 > 0 {
 		return i / 2
@@ -14,6 +14,7 @@ func ParentIdx(i int) int {
 //node is at the bottom rung of the heap.
 //Definition of a heap.  Every node in the tree has a greater value than it's parent as per the lt function.
 //This is a pure function because I copy the array each time.  r only gets mutated internally which is OK because its a copy.
+//O(log N) assuming that the array is almost-a-heap with the key: heap(i) too small.
 func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool) []A {
 	if len(heap) == 0 {
 		return []A{}
@@ -22,7 +23,7 @@ func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool) []A {
 	copy(r, heap)
 
 	if i > 1 {
-		j := ParentIdx(i)
+		j := parentIdx(i)
 		if lt(r[i], r[j]) {
 			//Swap elements
 			temp := r[i]
@@ -36,6 +37,7 @@ func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool) []A {
 }
 
 //This is a pure function because I copy the array each time.  r only gets mutated internally which is OK because its a copy.
+//O(log N) assuming that the array is almost-a-heap with the key: heap(i) too big.
 func HeapifyDown[A any](heap []A, i int, lt func(l, r A) bool) []A {
 	if len(heap) == 0 {
 		return []A{}
@@ -73,17 +75,17 @@ func HeapifyDown[A any](heap []A, i int, lt func(l, r A) bool) []A {
 	return r
 }
 
-//Make an empty heap to store at most n elements
+//Make an empty heap to store at most n elements. O(N)
 func StartHeap[A any](n int) []A {
 	return make([]A, n)
 }
 
-//Returns the minimum element in the given heap without removing it
-func HeapMin[A any](heap []A) A {
+//Returns the minimum element in the given heap without removing it. O(1)
+func FindMin[A any](heap []A) A {
 	return heap[0]
 }
 
-//Inserts an element into the given heap and returns a new heap. This is a pure funciton
+//Inserts an element into the given heap and returns a new heap. This is a pure funciton. O(log n)
 func HeapInsert[A any](heap []A, a A, lt func(l, r A) bool, isZeroVal func(a A) bool) []A {
 	if len(heap) == 0 {
 		return []A{}
