@@ -105,3 +105,17 @@ func HeapInsert[A any](heap []A, a A, lt func(l, r A) bool, isZeroVal func(a A) 
 	r[l] = a
 	return HeapifyUp(r, l, lt)
 }
+
+//Deletes an element into the given heap and returns a new heap. This is a pure funciton. O(log n)
+func HeapDelete[A any](heap []A, i int, lt func(l, r A) bool, zeroVal A) []A {
+	if len(heap) == 0 {
+		return []A{}
+	}
+	r := make([]A, len(heap))
+	copy(r, heap)
+
+	//Zero out the given element
+	r[i] = zeroVal
+	r = HeapifyUp(r, i, lt)
+	return r
+}

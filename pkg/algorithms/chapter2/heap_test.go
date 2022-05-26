@@ -139,3 +139,36 @@ func TestHeapInsertAndFindMinAndHeapifyUp(t *testing.T) {
 	propcheck.ExpectSuccess[[]int](t, result)
 	fmt.Println(rng)
 }
+
+func TestHeapDelete(t *testing.T) {
+
+	var deleteFromHeap = func(xss []int) []int {
+		r := insertIntoHeap(xss) //TODO top element is not correct for heap after insertion.  This is a problem in your HeapInsert function
+		//Delete half of the elements from the heap
+		//		n := len(r) / 2
+		fmt.Printf("Now a heap:%v\n", r)
+		m := len(r) - 1
+		var new []int
+		for i := m; i >= 0; i-- {
+			//0 is the zero val for integers
+			new = HeapDelete(r, i, lt, 0)
+			fmt.Printf("Just deleted element:%v and now heap is:%v\n", i, new)
+			//if i >= n { //Only delete half the elements starting at the top
+			//	break
+			//}
+		}
+		fmt.Printf("Just deleted all elements and now heap is:%v\n", new)
+		return r
+	}
+
+	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(1, 20))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	prop := propcheck.ForAll(g0,
+		"Validate HeapDelete  \n",
+		deleteFromHeap,
+		propcheck.AssertionAnd(parentLess, topIsMin),
+	)
+	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]int](t, result)
+	fmt.Println(rng)
+}
