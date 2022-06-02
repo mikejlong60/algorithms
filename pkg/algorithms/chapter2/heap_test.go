@@ -17,6 +17,14 @@ func lt(l, r int) bool {
 	}
 }
 
+func gt(l, r int) bool {
+	if l > r {
+		return true
+	} else {
+		return false
+	}
+}
+
 var eq = func(l, r int) bool {
 	if l == r {
 		return true
@@ -24,61 +32,28 @@ var eq = func(l, r int) bool {
 		return false
 	}
 }
+var intZeroVal = -1
+
 var isZeroVal = func(s int) bool {
-	if s == -1 {
+	if s == intZeroVal {
 		return true
 	} else {
 		return false
 	}
 }
 
-func insertIntoHeap(xss []int, zeroVal int) []int {
-	var r = StartHeap(len(xss), zeroVal)
-
-	start := time.Now()
-	for _, x := range xss {
-		r = HeapInsert(r, x, lt, isZeroVal, zeroVal)
-	}
-	fmt.Printf("Heap HeapInsert algorithm for an array of length:%v took:%v\n", len(xss), time.Since(start))
-	return r
-}
-
-var parentIsLess = func(heap []int, lastIdx int) error {
-	var pIdx = parentIdx(lastIdx)
+func parentIsGreater[A any](heap []A, lastIdx int, parentGT func(l, r A) bool) error {
+	var pIdx = ParentIdx(lastIdx)
 	var cIdx = lastIdx
 	var errors error
 	for pIdx > 0 {
-		//		fmt.Printf("parents value:%v child's value:%v\n", heap[parentIdx], heap[childIdx])
-		if heap[pIdx] > heap[cIdx] {
+		if parentGT(heap[pIdx], heap[cIdx]) {
 			errors = multierror.Append(errors, fmt.Errorf("parent:%v value was not less than or equal to child's:%v\n", heap[pIdx], heap[cIdx]))
 		}
 		cIdx = pIdx
-		pIdx = parentIdx(cIdx)
+		pIdx = ParentIdx(cIdx)
 	}
 	return errors
-}
-
-var parentLess = func(xss []int) (bool, error) {
-	lastIdx := len(xss) - 1
-	errors := parentIsLess(xss, lastIdx)
-	if errors != nil {
-		return false, errors
-	} else {
-		return true, nil
-	}
-}
-
-var topIsMin = func(heap []int) (bool, error) {
-	s := sorting.QuickSort(heap, lt)
-	var errors error
-	if s[0] != FindMin(heap) {
-		errors = multierror.Append(errors, fmt.Errorf("top of heap was not smallest. expected:%v actual:%v\n", s[0], heap[0]))
-	}
-	if errors != nil {
-		return false, errors
-	} else {
-		return true, nil
-	}
 }
 
 //func TestHeapifyDown(t *testing.T) {
@@ -127,7 +102,7 @@ var topIsMin = func(heap []int) (bool, error) {
 //	fmt.Println(rng)
 //}
 
-func TestHeapInsertAndStartHeapAndHeapifyUp(t *testing.T) {
+func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 	g := propcheck.ChooseArray(0, 10, propcheck.ChooseInt(0, 10))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	insertIntoHeap := func(xss []int) []int {
@@ -148,7 +123,7 @@ func TestHeapInsertAndStartHeapAndHeapifyUp(t *testing.T) {
 	validateIsAHeap := func(p []int) (bool, error) {
 		var errors error
 		for idx, _ := range p {
-			errors = parentIsLess(p, idx)
+			errors = parentIsGreater(p, idx, gt)
 		}
 		if errors != nil {
 			return false, errors
@@ -179,35 +154,137 @@ func TestHeapInsertAndStartHeapAndHeapifyUp(t *testing.T) {
 	fmt.Println(rng)
 }
 
-//func TestHeapDelete(t *testing.T) {
-//
-//	var deleteFromHeap = func(xss []int) []int {
-//		r := insertIntoHeap(xss, -1) //TODO top element is not correct for heap after insertion.  This is a problem in your HeapInsert function
-//		//Delete half of the elements from the heap
-//		//		n := len(r) / 2
-//		fmt.Printf("Now a heap:%v\n", r)
-//		m := len(r) - 1
-//		var new []int
-//		for i := m; i >= 0; i-- {
-//			//0 is the zero val for integers
-//			new = HeapDelete(r, i, lt, 0)
-//			fmt.Printf("Just deleted element:%v and now heap is:%v\n", i, new)
-//			//if i >= n { //Only delete half the elements starting at the top
-//			//	break
-//			//}
-//		}
-//		fmt.Printf("Just deleted all elements and now heap is:%v\n", new)
-//		return r
-//	}
-//
-//	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(1, 20))
-//	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
-//	prop := propcheck.ForAll(g0,
-//		"Validate HeapDelete  \n",
-//		deleteFromHeap,
-//		propcheck.AssertionAnd(parentLess, topIsMin),
-//	)
-//	result := prop.Run(propcheck.RunParms{100, rng})
-//	propcheck.ExpectSuccess[[]int](t, result)
-//	fmt.Println(rng)
-//}
+func TestHeapInsertAndStartHeapAndHeapifyUpWithStrings(t *testing.T) {
+	zero := "Donald Trump"
+	isZeroVal := func(s string) bool {
+		if s == zero {
+			return true
+		} else {
+			return false
+		}
+	}
+	gt := func(l, r string) bool {
+		if l > r {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	lt := func(l, r string) bool {
+		if l < r {
+			return true
+		} else {
+			return false
+		}
+	}
+	g := propcheck.ChooseArray(0, 10, propcheck.String(5))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	insertIntoHeap := func(xss []string) []string {
+		var r = StartHeap[string](len(xss), zero)
+		for _, x := range xss {
+			r = HeapInsert(r, x, lt, isZeroVal, zero)
+		}
+		fmt.Println("======================")
+		fmt.Println(xss)
+		fmt.Println(r)
+		fmt.Println("======================")
+		return r
+	}
+	insert := func(p []string) []string {
+		xss := insertIntoHeap(p)
+		return xss
+	}
+	validateIsAHeap := func(p []string) (bool, error) {
+		var errors error
+		for idx, _ := range p {
+			errors = parentIsGreater(p, idx, gt)
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+	validateHeapMin := func(p []string) (bool, error) {
+		var errors error
+		sorted := sorting.QuickSort(p, lt)
+		if len(p) > 0 && FindMin(p) != sorted[0] {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	prop := propcheck.ForAll(g,
+		"Validate HeapifyUp for String \n",
+		insert,
+		validateIsAHeap, validateHeapMin,
+	)
+	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]string](t, result)
+	fmt.Println(rng)
+}
+
+func TestHeapDelete(t *testing.T) {
+
+	insertIntoHeap := func(xss []int) []int {
+		var r = StartHeap[int](len(xss), -1)
+		for _, x := range xss {
+			r = HeapInsert(r, x, lt, isZeroVal, -1)
+		}
+		fmt.Println("======================")
+		fmt.Println(xss)
+		fmt.Println(r)
+		fmt.Println("======================")
+		return r
+	}
+
+	var deleteFromHeap = func(xss []int) []int {
+		r := insertIntoHeap(xss)
+		fmt.Printf("Now a heap:%v\n", r)
+		m := len(r) / 2 // Delete an element near middle of heap
+		//TODO test deletion of other elements
+		r = HeapDelete(r, m, lt, isZeroVal, intZeroVal)
+		fmt.Printf("Just deleted element:%v and now heap is:%v\n", m, r)
+		return r
+	}
+
+	validateIsAHeap := func(p []int) (bool, error) {
+		var errors error
+		for idx, _ := range p {
+			errors = parentIsGreater(p, idx, gt)
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+	validateHeapMin := func(p []int) (bool, error) {
+		var errors error
+		sorted := sorting.QuickSort(p, lt)
+		if len(p) > 0 && FindMin(p) != sorted[0] {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(1, 20))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	prop := propcheck.ForAll(g0,
+		"Validate HeapDelete  \n",
+		deleteFromHeap,
+		validateIsAHeap, validateHeapMin,
+	)
+	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]int](t, result)
+	fmt.Println(rng)
+}
