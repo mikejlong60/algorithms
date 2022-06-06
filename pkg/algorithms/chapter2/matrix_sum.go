@@ -2,7 +2,7 @@ package chapter2
 
 import "github.com/greymatter-io/golangz/arrays"
 
-//Big O for this algorithm is O(2 times n to (N-1)th power)
+//Big O for this algorithm is O squared
 func sum(source []int) [][]int64 {
 	var result = make([][]int64, len(source))
 	for i, j := range source {
@@ -25,7 +25,7 @@ func matrixSumWithoutInnerLoop(source []int) [][]int64 {
 		result[i][0] = int64(j)
 		if i == 0 { //Set first sum to first element value
 			result[i][1] = result[i][0]
-		} else { //Just grqab previous sum
+		} else { //Just grab previous sum
 			result[i][1] = result[i-1][1] + result[i][0]
 		}
 	}

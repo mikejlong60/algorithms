@@ -17,8 +17,8 @@ func lt(l, r int) bool {
 	}
 }
 
-func gt(l, r int) bool {
-	if l > r {
+func gtWhenNonDefaultChild(l, r int) bool {
+	if l > r && r != -1 {
 		return true
 	} else {
 		return false
@@ -56,52 +56,6 @@ func parentIsGreater[A any](heap []A, lastIdx int, parentGT func(l, r A) bool) e
 	return errors
 }
 
-//func TestHeapifyDown(t *testing.T) {
-//	g0 := sets.ChooseSet(5, 10, propcheck.ChooseInt(0, 10), lt, eq)
-//	biggerInt := propcheck.ChooseInt(100, 1000)
-//	g1 := propcheck.Product(g0, biggerInt)
-//	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
-//	insertIntoHeap := func(xss []int) []int {
-//		var r = StartHeap[int](len(xss), -1)
-//		for _, x := range xss {
-//			r = HeapInsert(r, x, lt, isZeroVal, -1)
-//		}
-//		fmt.Println("======================")
-//		fmt.Println(xss)
-//		fmt.Println(r)
-//		fmt.Println("======================")
-//		return r
-//	}
-//	prop := propcheck.ForAll(g1,
-//		"Validate HeapifyDown  \n",
-//		func(p propcheck.Pair[[]int, int]) propcheck.Pair[[]int, int] {
-//			//Insert this guaranteed larger element at element position 3 in the heap array
-//			xss := insertIntoHeap(p.A)
-//			xss[2] = p.B
-//			r := HeapifyDown(xss, 2, lt)
-//			return propcheck.Pair[[]int, int]{r, p.B}
-//		},
-//		func(p propcheck.Pair[[]int, int]) (bool, error) {
-//			//Find the big element in the array so you can tell that it got pushed down
-//			var bigElementPos = 0
-//			for i, x := range p.A {
-//				if x == p.B {
-//					bigElementPos = i
-//				}
-//			}
-//			errors := parentIsLess(p.A, bigElementPos)
-//			if errors != nil {
-//				return false, errors
-//			} else {
-//				return true, nil
-//			}
-//		},
-//	)
-//	result := prop.Run(propcheck.RunParms{1, rng})
-//	propcheck.ExpectSuccess[propcheck.Pair[[]int, int]](t, result)
-//	fmt.Println(rng)
-//}
-
 func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 	g := propcheck.ChooseArray(0, 10, propcheck.ChooseInt(0, 10))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
@@ -110,10 +64,6 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 		for _, x := range xss {
 			r = HeapInsert(r, x, lt, isZeroVal, -1)
 		}
-		fmt.Println("======================")
-		fmt.Println(xss)
-		fmt.Println(r)
-		fmt.Println("======================")
 		return r
 	}
 	insert := func(p []int) []int {
@@ -123,7 +73,7 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 	validateIsAHeap := func(p []int) (bool, error) {
 		var errors error
 		for idx, _ := range p {
-			errors = parentIsGreater(p, idx, gt)
+			errors = parentIsGreater(p, idx, gtWhenNonDefaultChild)
 		}
 		if errors != nil {
 			return false, errors
@@ -185,10 +135,6 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithStrings(t *testing.T) {
 		for _, x := range xss {
 			r = HeapInsert(r, x, lt, isZeroVal, zero)
 		}
-		fmt.Println("======================")
-		fmt.Println(xss)
-		fmt.Println(r)
-		fmt.Println("======================")
 		return r
 	}
 	insert := func(p []string) []string {
@@ -236,27 +182,29 @@ func TestHeapDelete(t *testing.T) {
 		for _, x := range xss {
 			r = HeapInsert(r, x, lt, isZeroVal, -1)
 		}
-		fmt.Println("======================")
-		fmt.Println(xss)
-		fmt.Println(r)
-		fmt.Println("======================")
 		return r
 	}
 
 	var deleteFromHeap = func(xss []int) []int {
 		r := insertIntoHeap(xss)
-		fmt.Printf("Now a heap:%v\n", r)
-		m := len(r) / 2 // Delete an element near middle of heap
-		//TODO test deletion of other elements
-		r = HeapDelete(r, m, lt, isZeroVal, intZeroVal)
-		fmt.Printf("Just deleted element:%v and now heap is:%v\n", m, r)
+		l := len(r)
+		r = HeapDelete(r, l/2, lt, isZeroVal, intZeroVal)
+		if l > 0 {
+			r = HeapDelete(r, l-1, lt, isZeroVal, intZeroVal)
+		}
+		if l > 1 {
+			r = HeapDelete(r, l-2, lt, isZeroVal, intZeroVal)
+		}
+		if l > 2 {
+			r = HeapDelete(r, l-3, lt, isZeroVal, intZeroVal)
+		}
 		return r
 	}
 
 	validateIsAHeap := func(p []int) (bool, error) {
 		var errors error
 		for idx, _ := range p {
-			errors = parentIsGreater(p, idx, gt)
+			errors = parentIsGreater(p, idx, gtWhenNonDefaultChild)
 		}
 		if errors != nil {
 			return false, errors
@@ -277,14 +225,15 @@ func TestHeapDelete(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(1, 20))
+	g0 := propcheck.ChooseArray(5, 1000, propcheck.ChooseInt(1, 2000))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	fmt.Println(rng)
 	prop := propcheck.ForAll(g0,
 		"Validate HeapDelete  \n",
 		deleteFromHeap,
 		validateIsAHeap, validateHeapMin,
 	)
-	result := prop.Run(propcheck.RunParms{100, rng})
+	result := prop.Run(propcheck.RunParms{6, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 	fmt.Println(rng)
 }

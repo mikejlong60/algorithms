@@ -170,7 +170,7 @@ func HeapDelete[A any](heap []A, i int, lt func(l, r A) bool, isZeroVal func(a A
 	r[i] = r[l]
 	r[l] = zeroVal
 	parent := ParentIdx(i)
-	if lt(r[i], r[parent]) {
+	if parent > 0 && lt(r[i], r[parent]) {
 		r = HeapifyUp(r, i, lt, zeroVal)
 	} else {
 		r = HeapifyDown(r, i, lt)
