@@ -52,20 +52,20 @@ func matrixSumWithFoldRight(source []int) [][]int64 {
 	return result
 }
 
-func matrixSumWithFoldLeft[T2 any](source []T2, sum func(T2, T2) T2) [][]T2 {
-	var inner [][]T2
+func matrixSumWithFoldLeft[T2 any](source []T2, concat func(T2, T2) T2) [][]T2 {
+	var zeroV [][]T2
 	var append = func(xs [][]T2, x T2) [][]T2 {
 		var result = make([]T2, 2)
 		result[0] = x
 		currentAccumLen := len(xs)
-		if currentAccumLen == 0 { //Set first sum to first element value
+		if currentAccumLen == 0 { //Set first concat to first element value
 			result[1] = x
-		} else { //Just grab previous sum
-			result[1] = sum(xs[currentAccumLen-1][1], x)
+		} else { //Just grab previous concat
+			result[1] = concat(xs[currentAccumLen-1][1], x)
 		}
 		xs = append(xs, result)
 		return xs
 	}
-	result := arrays.FoldLeft[T2](source, inner, append)
+	result := arrays.FoldLeft[T2](source, zeroV, append)
 	return result
 }
