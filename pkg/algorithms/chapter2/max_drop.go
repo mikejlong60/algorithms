@@ -1,20 +1,28 @@
 package chapter2
 
-func findBreakingPointWithoutBreakingJar(ladder []int, breakingPoint int) int {
-	breakingPointIsHigher := ladder[0] <= breakingPoint
+func findBreakingPointWithoutBreakingJar(originalLadder, slicedLadder []int, breakingPoint int) int {
+	breakingPointIsHigher := slicedLadder[0] <= breakingPoint
 	var wrungB4BreakingPoint = -1
-
-	if breakingPointIsHigher {
-		for i := 0; i < len(ladder); i++ {
-			if ladder[i] >= breakingPoint {
-				wrungB4BreakingPoint = ladder[i-1] //the wrung of the ladder right before the breaking point
-				break
+	if slicedLadder[0] == breakingPoint { //special  case where highest wrung is at beginning of slice
+		//Find breaking point in original ladder and get one before
+		for i := 0; i < len(originalLadder); i++ {
+			if originalLadder[i] == breakingPoint {
+				return originalLadder[i-1]
 			}
 		}
+	}
+	if breakingPointIsHigher {
+		for i := 0; i < len(slicedLadder); i++ {
+			if slicedLadder[i] >= breakingPoint {
+				wrungB4BreakingPoint = slicedLadder[i-1] //the wrung of the slicedLadder right before the breaking point
+				break
+			}
+
+		}
 	} else { //breaking point is lower
-		for i := len(ladder) - 1; i >= 0; i-- {
-			if ladder[i] >= breakingPoint {
-				wrungB4BreakingPoint = ladder[i-1] //the wrung of the ladder right before the breaking point
+		for i := len(slicedLadder) - 1; i >= 0; i-- {
+			if slicedLadder[i] >= breakingPoint {
+				wrungB4BreakingPoint = slicedLadder[i-1] //the wrung of the slicedLadder right before the breaking point
 				break
 			}
 		}
@@ -22,20 +30,24 @@ func findBreakingPointWithoutBreakingJar(ladder []int, breakingPoint int) int {
 	return wrungB4BreakingPoint
 }
 
+var numberOfSteps = 0
+
 //asymptotic lower bound is (n Log n)
 //theta is (n + (n log n))
 //asymptotic upper bound is (n)
 //breaking point is assumed to be an ordered set of integers from low to high
-func HighestBreakingPoint(ladder []int, breakingPoint, budget, usedBudget int) int {
+func HighestBreakingPoint(originalLadder, ladder []int, breakingPoint, budget, usedBudget int) int {
+	numberOfSteps = numberOfSteps + 1
 	if usedBudget+1 == budget {
-		return findBreakingPointWithoutBreakingJar(ladder, breakingPoint)
+		return findBreakingPointWithoutBreakingJar(originalLadder, ladder, breakingPoint)
 	} else { //Divide in half again
 		lowerHalf := ladder[0 : len(ladder)/2]
 		upperHalf := ladder[len(ladder)/2:]
-		if breakingPoint <= upperHalf[0] {
-			return HighestBreakingPoint(lowerHalf, breakingPoint, budget, usedBudget+1)
+		lastLowerHalfIdx := len(lowerHalf) - 1
+		if breakingPoint <= lowerHalf[lastLowerHalfIdx] {
+			return HighestBreakingPoint(originalLadder, lowerHalf, breakingPoint, budget, usedBudget+1)
 		} else {
-			return HighestBreakingPoint(upperHalf, breakingPoint, budget, usedBudget+1)
+			return HighestBreakingPoint(originalLadder, upperHalf, breakingPoint, budget, usedBudget+1)
 		}
 	}
 }

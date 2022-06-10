@@ -26,8 +26,8 @@ func TestMaxDropGivenBudget(t *testing.T) { //This reverses the order because fo
 		}
 	}
 
-	g0 := propcheck.ChooseInt(0, 100)
-	g1 := sets.ChooseSet(6, 20, g0, lt, eq) //This array comes back sorted
+	g0 := propcheck.ChooseInt(0, 10000)
+	g1 := sets.ChooseSet(6, 2000, g0, lt, eq) //This array comes back sorted
 
 	f := func(xss []int) func(propcheck.SimpleRNG) (propcheck.Pair[[]int, int], propcheck.SimpleRNG) {
 		g := propcheck.ChooseInt(4, len(xss)-1)
@@ -45,21 +45,36 @@ func TestMaxDropGivenBudget(t *testing.T) { //This reverses the order because fo
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
 	fmt.Println(rng)
-	budget := 2 //TODO make this a random value between 2 and the size of the generated array.
+	budget := 3 //TODO make this a random value between 2 and the size of the generated array.
 	prop := propcheck.ForAll(g2,
 		"Exercise 2.8b, the max jar drop given a budget of not-to-exceed broken jars.",
 		func(xs propcheck.Pair[[]int, int]) propcheck.Pair[int, propcheck.Pair[[]int, int]] {
 			//A is the ladder, B is the breaking point on the ladder(the actual value in the array, not its index).
-			r := HighestBreakingPoint(xs.A, xs.B, budget, 0)
+			numberOfSteps = 0
+			r := HighestBreakingPoint(xs.A, xs.A, xs.B, budget, 0)
+			fmt.Printf("number of steps for array of size:%v - %v\n", len(xs.A), numberOfSteps)
 			return propcheck.Pair[int, propcheck.Pair[[]int, int]]{r, xs}
 		},
 		func(highestWrungAEtAll propcheck.Pair[int, propcheck.Pair[[]int, int]]) (bool, error) {
 			var errors error
 			breakingPoint := highestWrungAEtAll.B.B
 			highestWrung := highestWrungAEtAll.A
-			if highestWrung >= breakingPoint {
+			ladder := highestWrungAEtAll.B.A
+			var highestWrungIdx = -1
+			for i := 0; i < len(ladder); i++ {
+				if ladder[i] == highestWrung {
+					if ladder[i] == highestWrung {
+						highestWrungIdx = i
+						break
+					}
+				}
+			}
+			if ladder[highestWrungIdx] != highestWrung {
 				errors = multierror.Append(errors, fmt.Errorf("Expected highest non-breaking wrung withing budget to be:%v but was:%v", highestWrung, breakingPoint))
 			}
+			//if highestWrung >= breakingPoint {
+			//	errors = multierror.Append(errors, fmt.Errorf("Expected highest non-breaking wrung withing budget to be:%v but was:%v", highestWrung, breakingPoint))
+			//}
 			if errors != nil {
 				return false, errors
 			} else {
