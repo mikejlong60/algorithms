@@ -6,6 +6,7 @@ func findBreakingPointWithoutBreakingJar(originalLadder, slicedLadder []int, bre
 	if slicedLadder[0] == breakingPoint { //special  case where highest wrung is at beginning of slice
 		//Find breaking point in original ladder and get one before
 		for i := 0; i < len(originalLadder); i++ {
+			numberOfSingleSteps = numberOfSingleSteps + 1
 			if originalLadder[i] == breakingPoint {
 				return originalLadder[i-1]
 			}
@@ -13,6 +14,7 @@ func findBreakingPointWithoutBreakingJar(originalLadder, slicedLadder []int, bre
 	}
 	if breakingPointIsHigher {
 		for i := 0; i < len(slicedLadder); i++ {
+			numberOfSingleSteps = numberOfSingleSteps + 1
 			if slicedLadder[i] >= breakingPoint {
 				wrungB4BreakingPoint = slicedLadder[i-1] //the wrung of the slicedLadder right before the breaking point
 				break
@@ -31,6 +33,7 @@ func findBreakingPointWithoutBreakingJar(originalLadder, slicedLadder []int, bre
 }
 
 var numberOfSteps = 0
+var numberOfSingleSteps = 0
 
 //asymptotic lower bound is (n Log n)
 //theta is (n + (n log n))

@@ -27,34 +27,38 @@ func TestMaxDropGivenMaxBrokenJars(t *testing.T) { //This reverses the order bec
 	}
 
 	g0 := propcheck.ChooseInt(0, 10000000)
-	g1 := sets.ChooseSet(0, 200000, g0, lt, eq) //This array comes back sorted
+	g1 := sets.ChooseSet(0, 500000, g0, lt, eq) //This array comes back sorted
 
-	f := func(xss []int) func(propcheck.SimpleRNG) (propcheck.Pair[[]int, int], propcheck.SimpleRNG) {
-		g := propcheck.ChooseInt(0, len(xss)-1) //breakingPoint index
-		//	gg := propcheck.ChooseInt(0, len(xss)-1)//Maximum Number of broken jars
-		i := func(x int) propcheck.Pair[[]int, int] {
-			return propcheck.Pair[[]int, int]{
-				xss,
-				xss[x],
+	f := func(xss []int) func(propcheck.SimpleRNG) (propcheck.Pair[int, propcheck.Pair[[]int, int]], propcheck.SimpleRNG) {
+		g := propcheck.ChooseInt(0, len(xss)-1)  //breakingPoint index
+		gg := propcheck.ChooseInt(2, len(xss)/2) //Maximum Number of broken jars
+		i := func(x, maxBrokenJars int) propcheck.Pair[int, propcheck.Pair[[]int, int]] {
+			ladderAndBreakingPoint := propcheck.Pair[[]int, int]{
+				A: xss,
+				B: xss[x],
 			}
+			r := propcheck.Pair[int, propcheck.Pair[[]int, int]]{
+				A: maxBrokenJars,
+				B: ladderAndBreakingPoint,
+			}
+			return r
 		}
-		h := propcheck.Map(g, i)
+		h := propcheck.Map2(g, gg, i)
 		return h
 	}
 
 	g2 := propcheck.FlatMap(g1, f)
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
-	fmt.Println(rng)
-	budget := 300 //TODO make this a random value between 2 and the size of the generated array.
 	prop := propcheck.ForAll(g2,
 		"Exercise 2.8b, the max jar drop given a budget of not-to-exceed broken jars.",
-		func(xs propcheck.Pair[[]int, int]) propcheck.Pair[int, propcheck.Pair[[]int, int]] {
+		func(xs propcheck.Pair[int, propcheck.Pair[[]int, int]]) propcheck.Pair[int, propcheck.Pair[[]int, int]] {
 			//A is the ladder, B is the breaking point on the ladder(the actual value in the array, not its index).
 			numberOfSteps = 0
-			r := HighestBreakingPoint(xs.A, xs.A, xs.B, budget, 0)
-			fmt.Printf("number of steps for array of size:%v - %v\n", len(xs.A), numberOfSteps)
-			return propcheck.Pair[int, propcheck.Pair[[]int, int]]{r, xs}
+			numberOfSingleSteps = 0
+			r := HighestBreakingPoint(xs.B.A, xs.B.A, xs.B.B, xs.A, 0)
+			fmt.Printf("number of steps == numberOfSingleSteps:%v + numberOfBinarySearches:%v for array of size:%v total steps:%v\n", numberOfSingleSteps, numberOfSteps, len(xs.B.A), numberOfSingleSteps+numberOfSteps)
+			return propcheck.Pair[int, propcheck.Pair[[]int, int]]{r, xs.B}
 		},
 		func(highestWrungAEtAll propcheck.Pair[int, propcheck.Pair[[]int, int]]) (bool, error) {
 			var errors error
@@ -73,9 +77,6 @@ func TestMaxDropGivenMaxBrokenJars(t *testing.T) { //This reverses the order bec
 			if ladder[highestWrungIdx] != highestWrung {
 				errors = multierror.Append(errors, fmt.Errorf("Expected highest non-breaking wrung withing budget to be:%v but was:%v", highestWrung, breakingPoint))
 			}
-			//if highestWrung >= breakingPoint {
-			//	errors = multierror.Append(errors, fmt.Errorf("Expected highest non-breaking wrung withing budget to be:%v but was:%v", highestWrung, breakingPoint))
-			//}
 			if errors != nil {
 				return false, errors
 			} else {
@@ -84,5 +85,5 @@ func TestMaxDropGivenMaxBrokenJars(t *testing.T) { //This reverses the order bec
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[propcheck.Pair[[]int, int]](t, result)
+	propcheck.ExpectSuccess[propcheck.Pair[int, propcheck.Pair[[]int, int]]](t, result)
 }
