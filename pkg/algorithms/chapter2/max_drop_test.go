@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestMaxDropGivenBudget(t *testing.T) { //This reverses the order because foldRight does that. There is a Reverse function in Golangz if that matters to you.
+func TestMaxDropGivenMaxBrokenJars(t *testing.T) { //This reverses the order because foldRight does that. There is a Reverse function in Golangz if that matters to you.
 	lt := func(l, r int) bool {
 		if l < r {
 			return true
@@ -26,11 +26,12 @@ func TestMaxDropGivenBudget(t *testing.T) { //This reverses the order because fo
 		}
 	}
 
-	g0 := propcheck.ChooseInt(0, 10000)
-	g1 := sets.ChooseSet(6, 2000, g0, lt, eq) //This array comes back sorted
+	g0 := propcheck.ChooseInt(0, 10000000)
+	g1 := sets.ChooseSet(0, 200000, g0, lt, eq) //This array comes back sorted
 
 	f := func(xss []int) func(propcheck.SimpleRNG) (propcheck.Pair[[]int, int], propcheck.SimpleRNG) {
-		g := propcheck.ChooseInt(4, len(xss)-1)
+		g := propcheck.ChooseInt(0, len(xss)-1) //breakingPoint index
+		//	gg := propcheck.ChooseInt(0, len(xss)-1)//Maximum Number of broken jars
 		i := func(x int) propcheck.Pair[[]int, int] {
 			return propcheck.Pair[[]int, int]{
 				xss,
@@ -45,7 +46,7 @@ func TestMaxDropGivenBudget(t *testing.T) { //This reverses the order because fo
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
 	fmt.Println(rng)
-	budget := 3 //TODO make this a random value between 2 and the size of the generated array.
+	budget := 300 //TODO make this a random value between 2 and the size of the generated array.
 	prop := propcheck.ForAll(g2,
 		"Exercise 2.8b, the max jar drop given a budget of not-to-exceed broken jars.",
 		func(xs propcheck.Pair[[]int, int]) propcheck.Pair[int, propcheck.Pair[[]int, int]] {

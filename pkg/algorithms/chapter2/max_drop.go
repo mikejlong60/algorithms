@@ -41,8 +41,12 @@ func HighestBreakingPoint(originalLadder, ladder []int, breakingPoint, budget, u
 	if usedBudget+1 == budget {
 		return findBreakingPointWithoutBreakingJar(originalLadder, ladder, breakingPoint)
 	} else { //Divide in half again
-		lowerHalf := ladder[0 : len(ladder)/2]
-		upperHalf := ladder[len(ladder)/2:]
+		halfWayPoint := len(ladder) / 2
+		if ladder[halfWayPoint] == breakingPoint { //We are done under budget
+			return ladder[halfWayPoint-1]
+		}
+		lowerHalf := ladder[0:halfWayPoint]
+		upperHalf := ladder[halfWayPoint:]
 		lastLowerHalfIdx := len(lowerHalf) - 1
 		if breakingPoint <= lowerHalf[lastLowerHalfIdx] {
 			return HighestBreakingPoint(originalLadder, lowerHalf, breakingPoint, budget, usedBudget+1)
