@@ -3,6 +3,7 @@ package chapter3
 import (
 	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
+	"github.com/greymatter-io/golangz/sets"
 	"testing"
 )
 
@@ -34,8 +35,8 @@ func topologicalOrdering(graph []Node, topo []Node) ([]Node, []Node) { //1st ret
 	removeIFromOandI := func(g []Node, nodeId int) []Node {
 		var r []Node
 		for _, j := range g {
-			out := arrays.SetMinus(j.OutgoingEdges, []int{nodeId}, eqInt)
-			in := arrays.SetMinus(j.IncomingEdges, []int{nodeId}, eqInt)
+			out := sets.SetMinus(j.OutgoingEdges, []int{nodeId}, eqInt)
+			in := sets.SetMinus(j.IncomingEdges, []int{nodeId}, eqInt)
 			n := Node{Id: j.Id,
 				OutgoingEdges: out,
 				IncomingEdges: in,
@@ -57,7 +58,7 @@ func topologicalOrdering(graph []Node, topo []Node) ([]Node, []Node) { //1st ret
 	if x != -1 {
 		//remove i from all incoming and outgoing edge arrays for every Node
 		r = removeIFromOandI(r, x)
-		return topologicalOrdering(arrays.SetMinus(r, []Node{r[x]}, eq), append(topo, r[x]))
+		return topologicalOrdering(sets.SetMinus(r, []Node{r[x]}, eq), append(topo, r[x]))
 	} else {
 		return r, topo
 	}
@@ -98,10 +99,22 @@ func TestGraphContainsACycle(t *testing.T) {
 	}
 
 	graph := []Node{v7, v6, v5, v4, v3, v2, v1}
+	expected := []Node{v1, v2, v3, v4, v5, v6, v7}
 	//graph := []Node{v1, v2, v3, v4, v5, v6, v7}
 	r, topo := topologicalOrdering(graph, []Node{})
 	fmt.Printf("graph:%v\n", r)
 	fmt.Printf("topological ordering:%v\n", topo)
+	eq := func(a, b Node) bool {
+		if a.Id == b.Id {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	if !arrays.ArrayEquality(topo, expected, eq) {
+		t.Errorf("\nActual:  %v\nExpected:%v", topo, expected)
+	}
 
 	//graph:[Node{Id:7, IncomingEdges:[6 5 1], OutGoingEdges:[]} Node{Id:6, IncomingEdges:[2 5], OutGoingEdges:[7]} Node{Id:5, IncomingEdges:[1 2 3 4], OutGoingEdges:[6 7]} Node{Id:4, IncomingEdges:[3 1], OutGoingEdges:[5]} Node{Id:3, IncomingEdges:[2], OutGoingEdges:[5 4]}]
 	//	topological ordering:[Node{Id:2, IncomingEdges:[], OutGoingEdges:[6 5 3]} Node{Id:1, IncomingEdges:[], OutGoingEdges:[7 5 4]}]

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
+	"github.com/greymatter-io/golangz/sets"
 )
 
 type InputWire struct {
@@ -52,7 +53,7 @@ func MakeSwitches(wires propcheck.Pair[[]*InputWire, []*OutputWire]) []*OutputWi
 	}
 
 	for _, ow := range wires.B {
-		otherJunctions := arrays.SetMinus(wires.A, ow.InputJunctions, iwEq)
+		otherJunctions := sets.SetMinus(wires.A, ow.InputJunctions, iwEq)
 		ow.InputJunctions = arrays.Append(otherJunctions, ow.InputJunctions)
 	}
 	return wires.B

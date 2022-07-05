@@ -1,8 +1,8 @@
 package chapter1
 
 import (
-	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/linked_list"
+	"github.com/greymatter-io/golangz/sets"
 	"testing"
 )
 
@@ -82,10 +82,10 @@ func TestResidentHospitalMatching(t *testing.T) {
 	for _, y := range hosp2.Residents {
 		hosp2Residents = append(hosp2Residents, y.Id)
 	}
-	if !arrays.SetEquality(hosp1Residents, []string{"4", "3"}, eq) {
+	if !sets.SetEquality(hosp1Residents, []string{"4", "3"}, eq) {
 		t.Errorf("Actual:%v Expected:%v", hosp1Residents, []string{"4", "3"})
 	}
-	if !arrays.SetEquality(hosp2Residents, []string{"2", "1"}, eq) {
+	if !sets.SetEquality(hosp2Residents, []string{"2", "1"}, eq) {
 		t.Errorf("Actual:%v Expected:%v", hosp2Residents, []string{"2", "1"})
 	}
 }

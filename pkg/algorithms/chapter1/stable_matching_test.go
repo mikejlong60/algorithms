@@ -2,7 +2,6 @@ package chapter1
 
 import (
 	"fmt"
-	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/linked_list"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
@@ -123,9 +122,9 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 					return false
 				}
 			}
-			if !arrays.SetEquality(allMenIds, allHusbandIds, mEq) {
+			if !sets.SetEquality(allMenIds, allHusbandIds, mEq) {
 				errors = multierror.Append(errors, fmt.Errorf("All men were not married"))
-				fmt.Printf("These men never got married:%v\n", arrays.SetMinus(allMenIds, allHusbandIds, mEq))
+				fmt.Printf("These men never got married:%v\n", sets.SetMinus(allMenIds, allHusbandIds, mEq))
 			}
 			unstableMatchings := unstableMatchings(allWomen)
 			if len(unstableMatchings) > 0 {
@@ -247,9 +246,9 @@ func TestStableMatchingPropertiesIndifferenceTest(t *testing.T) {
 					return false
 				}
 			}
-			if !arrays.SetEquality(allMenIds, allHusbandIds, mEq) {
+			if !sets.SetEquality(allMenIds, allHusbandIds, mEq) {
 				errors = multierror.Append(errors, fmt.Errorf("All men were not married"))
-				fmt.Printf("These men never got married:%v\n", arrays.SetMinus(allMenIds, allHusbandIds, mEq))
+				fmt.Printf("These men never got married:%v\n", sets.SetMinus(allMenIds, allHusbandIds, mEq))
 			}
 			unstableMatchings := unstableMatchings(allWomen)
 			if len(unstableMatchings) > 0 {
