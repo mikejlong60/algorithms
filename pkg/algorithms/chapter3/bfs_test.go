@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-//..
 type BFSNode struct {
 	Id          int
 	Connections []int //Ids of the nodes to which this Node has connections
