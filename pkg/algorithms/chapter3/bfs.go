@@ -1,6 +1,7 @@
 package chapter3
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
 )
@@ -17,9 +18,9 @@ type Edge struct {
 	v int //the Id of the ending node of the edge
 }
 
-type NodeLayer struct {
+type NodeLayerTuple struct {
 	Id    int //The node Id
-	layer int // Zero indexed array index indicating the layer(1st array index) in the BFS array the node lives
+	layer int // Zero indexed array index indicating the layer(array index) in the BFS array the node lives
 }
 
 //Breadth-First search with cycle detection
@@ -27,10 +28,11 @@ type NodeLayer struct {
 //  graph a hashmap of all the nodes in te graph. Facilitates n log n lookup
 //  rootId the Node Id of the root node, the one at the top of the mobile from which all the other nodes hang
 //Returns:
-//   BFS  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v pairs)
+//   BFS  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
 //   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
-func BFSearch(graph map[int]Node, rootId int) (BFS, bool) {
-	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayer) bool {
+//   int - the number of nodes in the BFS
+func BFSearch(graph map[int]Node, rootId int) (BFS, bool, int) {
+	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
 		if currentLayer-2 >= l.layer { //there is a cycle
 			return true
@@ -43,8 +45,8 @@ func BFSearch(graph map[int]Node, rootId int) (BFS, bool) {
 	l0 := []Edge{{u: -1, v: rootId}}
 
 	//A lookup map so you can look up whether or not a Node has been seen and if so what layer it is in.
-	layersLookup := make(map[int]NodeLayer, len(graph))
-	layersLookup[rootId] = NodeLayer{
+	layersLookup := make(map[int]NodeLayerTuple, len(graph))
+	layersLookup[rootId] = NodeLayerTuple{
 		Id:    rootId,
 		layer: 0,
 	}
@@ -61,7 +63,7 @@ func BFSearch(graph map[int]Node, rootId int) (BFS, bool) {
 				_, alreadySeen := layersLookup[m.Id]
 				if !alreadySeen {
 					pendingLayer = append(pendingLayer, Edge{u: k.v, v: m.Id})
-					layersLookup[m.Id] = NodeLayer{Id: m.Id, layer: i + 1}
+					layersLookup[m.Id] = NodeLayerTuple{Id: m.Id, layer: i + 1}
 				} else { //Don't add it since we already know about this Node. But DO see if its a cycle.
 					if !graphHasACycle { //Can only set this value to true one time
 						graphHasACycle = hasCycle(m.Id, i, layersLookup)
@@ -76,7 +78,7 @@ func BFSearch(graph map[int]Node, rootId int) (BFS, bool) {
 			break
 		}
 	}
-	return bfs, graphHasACycle
+	return bfs, graphHasACycle, len(layersLookup)
 }
 
 func BFSEquality(a, b []Edge) bool {
@@ -94,7 +96,28 @@ func BFSEquality(a, b []Edge) bool {
 	}
 }
 
-//TODO make a "real" that creates random graphs generator. You have alredy done this on your other machine but it's not in the repo yet because thr maching is getting replaced.
+func Rule3_2(graph map[int]Node, rootNode int) (bool, string) {
+
+	//TODO add any two implies the third rule.
+	//TODO test the tree generated, not the original graph
+	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
+
+	fmt.Println(bfsTree)
+	numEdgesInTree := func(tree BFS) int {
+		var edges int
+		for _, node := range tree {
+			edges = edges + len(node)
+		}
+		return edges - 1
+	}
+
+	numEdges := numEdgesInTree(bfsTree)
+	isConnected := true //len(bfsTree) == numNodes
+	hasN_1Edges := numNodes-1 == numEdges
+	return !hasCycle && isConnected && hasN_1Edges, fmt.Sprintf("Has No Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", !hasCycle, isConnected, hasN_1Edges)
+}
+
+//TODO make a "real" random graphs generator. You have alredy done this on your other machine but it's not in the repo yet because thr maching is getting replaced.
 // Generates a graph of Node structures with A size in the indicated range using the given Gen
 func GraphGen() func(propcheck.SimpleRNG) (map[int]Node, propcheck.SimpleRNG) {
 	return func(rng propcheck.SimpleRNG) (map[int]Node, propcheck.SimpleRNG) {
