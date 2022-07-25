@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
+	"time"
 )
 
 type Node struct {
 	Id          int
-	Connections []Node
+	Connections []*Node
 }
 
 type BFS = [][]Edge
@@ -31,7 +32,7 @@ type NodeLayerTuple struct {
 //   BFS  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
 //   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
 //   int - the number of nodes in the BFS
-func BFSearch(graph map[int]Node, rootId int) (BFS, bool, int) {
+func BFSearch(graph map[int]*Node, rootId int) (BFS, bool, int) {
 	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
 		if currentLayer-2 >= l.layer { //there is a cycle
@@ -96,13 +97,10 @@ func BFSEquality(a, b []Edge) bool {
 	}
 }
 
-func Rule3_2(graph map[int]Node, rootNode int) (bool, string) {
-
-	//TODO add any two implies the third rule.
-	//TODO test the tree generated, not the original graph
+func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
+	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
-
-	fmt.Println(bfsTree)
+	fmt.Printf("BFS Search on a tree of %v nodes took: %v\n", len(graph), time.Since(start))
 	numEdgesInTree := func(tree BFS) int {
 		var edges int
 		for _, node := range tree {
@@ -112,64 +110,49 @@ func Rule3_2(graph map[int]Node, rootNode int) (bool, string) {
 	}
 
 	numEdges := numEdgesInTree(bfsTree)
-	isConnected := true //len(bfsTree) == numNodes
+	isConnected := true
 	hasN_1Edges := numNodes-1 == numEdges
-	return !hasCycle && isConnected && hasN_1Edges, fmt.Sprintf("Has No Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", !hasCycle, isConnected, hasN_1Edges)
+
+	//hasCycle is based upon the original graph. The resulting bfsTree has no cycles
+	return !hasCycle, isConnected && hasN_1Edges, fmt.Sprintf("Has Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", hasCycle, isConnected, hasN_1Edges)
 }
 
-//TODO make a "real" random graphs generator. You have alredy done this on your other machine but it's not in the repo yet because thr maching is getting replaced.
-// Generates a graph of Node structures with A size in the indicated range using the given Gen
-func GraphGen() func(propcheck.SimpleRNG) (map[int]Node, propcheck.SimpleRNG) {
-	return func(rng propcheck.SimpleRNG) (map[int]Node, propcheck.SimpleRNG) {
+func GraphGenReal(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
 
-		n0 := Node{
-			Id:          0,
-			Connections: nil,
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
 		}
-		n1 := Node{
-			Id:          1,
-			Connections: nil,
+
+		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+
+		graph := make(map[int]*Node, len(nodeIds))
+		for _, j := range nodeIds {
+			graph[j] = &Node{Id: j}
 		}
-		n2 := Node{
-			Id:          2,
-			Connections: nil,
+
+		var rng3 = rng2
+		var connectionIds []int
+		for _, k := range graph {
+			var connections []*Node
+			connectionIds, rng3 = sets.ChooseSet(0, len(graph), propcheck.ChooseInt(0, len(graph)), lt, eq)(rng3)
+			for _, l := range connectionIds {
+				connections = append(connections, graph[nodeIds[l]])
+			}
+			k.Connections = connections
 		}
-		n3 := Node{
-			Id:          03,
-			Connections: nil,
-		}
-		n4 := Node{
-			Id:          4,
-			Connections: nil,
-		}
-		n5 := Node{
-			Id:          5,
-			Connections: nil,
-		}
-		n6 := Node{
-			Id:          6,
-			Connections: nil,
-		}
-		n7 := Node{
-			Id:          7,
-			Connections: nil,
-		}
-		n0.Connections = []Node{n1, n2}
-		n1.Connections = []Node{n4}
-		n2.Connections = []Node{n3}
-		n3.Connections = []Node{n5, n6, n7}
-		n7.Connections = []Node{n7}
-		n5.Connections = []Node{n7}
-		n6.Connections = []Node{n4}
-		graph := make(map[int]Node, 7) //First field of pair is the layer the node is in, -1 means it's never been seen before and is thus not in any layer
-		graph[0] = n0
-		graph[1] = n1
-		graph[2] = n2
-		graph[3] = n3
-		graph[4] = n4
-		graph[5] = n5
-		graph[6] = n6
-		graph[7] = n7
-		return graph, rng
+		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
+		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
 	}
 }
