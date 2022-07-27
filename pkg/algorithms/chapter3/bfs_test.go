@@ -63,7 +63,7 @@ func TestBFSRoot7(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 7)
 	expected := [][]Edge{{{-1, 7}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -83,7 +83,7 @@ func TestBFSRoot6(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 6)
 	expected := [][]Edge{{{-1, 6}}, {{6, 4}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -103,7 +103,7 @@ func TestBFSRoot5(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 5)
 	expected := [][]Edge{{{-1, 5}}, {{5, 7}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -124,7 +124,7 @@ func TestBFSRoot4(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 4)
 	expected := [][]Edge{{{-1, 4}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -145,7 +145,7 @@ func TestBFSRoot3(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 3)
 	expected := [][]Edge{{{-1, 3}}, {{3, 5}, {3, 7}, {3, 6}}, {{6, 4}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -166,7 +166,7 @@ func TestBFSRoot2(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 2)
 	expected := [][]Edge{{{-1, 2}}, {{2, 3}}, {{3, 5}, {3, 6}, {3, 7}}, {{6, 4}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -187,7 +187,7 @@ func TestBFSRoot1(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 1)
 	expected := [][]Edge{{{-1, 1}}, {{1, 4}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -206,7 +206,7 @@ func TestBFSRoot0(t *testing.T) {
 	graph := Graph()
 	tree, hasCycle, numNodes := BFSearch(graph, 0)
 	expected := [][]Edge{{{-1, 0}}, {{0, 2}, {0, 1}}, {{1, 4}, {2, 3}}, {{3, 5}, {3, 6}, {3, 7}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if hasCycle {
@@ -273,7 +273,7 @@ func TestHasCycle(t *testing.T) {
 	graph[7] = &n7
 	tree, hasCycle, numNodes := BFSearch(graph, 0)
 	expected := [][]Edge{{{-1, 0}}, {{0, 2}, {0, 1}}, {{1, 4}, {2, 3}}, {{3, 5}, {3, 6}, {3, 7}}}
-	if !arrays.ArrayEquality(tree, expected, BFSEquality) {
+	if !arrays.ArrayEquality(tree, expected, TreeEquality) {
 		t.Errorf("Actual:%v Expected:%v", tree, expected)
 	}
 	if !hasCycle {
@@ -326,8 +326,8 @@ func TestRule3_2(t *testing.T) {
 func TestRule3_2RandomGraph(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	prop := propcheck.ForAll(GraphGenReal(1, 1000),
-		"Generate a random graph and do a BFS search starting from some root.",
+	prop := propcheck.ForAll(GraphGen(1, 1000),
+		"Generate a random graph and do a Tree search starting from some root.",
 		func(graph propcheck.Pair[map[int]*Node, int]) propcheck.Pair[propcheck.Pair[bool, bool], string] {
 			hasCycle, N_1EdgesAndConnected, err := Rule3_2(graph.A, graph.B)
 			a := propcheck.Pair[bool, bool]{hasCycle, N_1EdgesAndConnected}

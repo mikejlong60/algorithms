@@ -12,7 +12,7 @@ type Node struct {
 	Connections []*Node
 }
 
-type BFS = [][]Edge
+type Tree = [][]Edge
 
 type Edge struct {
 	u int //the Id of the beginning node of the edge
@@ -21,7 +21,7 @@ type Edge struct {
 
 type NodeLayerTuple struct {
 	Id    int //The node Id
-	layer int // Zero indexed array index indicating the layer(array index) in the BFS array the node lives
+	layer int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
 }
 
 //Breadth-First search with cycle detection
@@ -29,10 +29,10 @@ type NodeLayerTuple struct {
 //  graph a hashmap of all the nodes in te graph. Facilitates n log n lookup
 //  rootId the Node Id of the root node, the one at the top of the mobile from which all the other nodes hang
 //Returns:
-//   BFS  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
+//   Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
 //   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
-//   int - the number of nodes in the BFS
-func BFSearch(graph map[int]*Node, rootId int) (BFS, bool, int) {
+//   int - the number of nodes in the Tree
+func BFSearch(graph map[int]*Node, rootId int) (Tree, bool, int) {
 	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
 		if currentLayer-2 >= l.layer { //there is a cycle
@@ -42,7 +42,7 @@ func BFSearch(graph map[int]*Node, rootId int) (BFS, bool, int) {
 		}
 	}
 
-	var bfs = [][]Edge{}
+	var tree = [][]Edge{}
 	l0 := []Edge{{u: -1, v: rootId}}
 
 	//A lookup map so you can look up whether or not a Node has been seen and if so what layer it is in.
@@ -51,13 +51,13 @@ func BFSearch(graph map[int]*Node, rootId int) (BFS, bool, int) {
 		Id:    rootId,
 		layer: 0,
 	}
-	bfs = append(bfs, l0)
+	tree = append(tree, l0)
 
 	var graphHasACycle = false
 	var i = 0 //current layer you are finding edges for
 	for {
 		var pendingLayer []Edge
-		for _, k := range bfs[i] {
+		for _, k := range tree[i] {
 			node, _ := graph[k.v]
 			for _, m := range node.Connections {
 				//Lookup tail(v) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
@@ -73,16 +73,16 @@ func BFSearch(graph map[int]*Node, rootId int) (BFS, bool, int) {
 			}
 		}
 		if len(pendingLayer) > 0 {
-			bfs = append(bfs, pendingLayer)
+			tree = append(tree, pendingLayer)
 			i = i + 1
 		} else {
 			break
 		}
 	}
-	return bfs, graphHasACycle, len(layersLookup)
+	return tree, graphHasACycle, len(layersLookup)
 }
 
-func BFSEquality(a, b []Edge) bool {
+func TreeEquality(a, b []Edge) bool {
 	edgeEq := func(a, b Edge) bool {
 		if a.u == b.u && a.v == b.v {
 			return true
@@ -100,8 +100,8 @@ func BFSEquality(a, b []Edge) bool {
 func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
-	fmt.Printf("BFS Search on a tree of %v nodes took: %v\n", len(graph), time.Since(start))
-	numEdgesInTree := func(tree BFS) int {
+	fmt.Printf("Tree Search on a tree of %v nodes took: %v\n", len(graph), time.Since(start))
+	numEdgesInTree := func(tree Tree) int {
 		var edges int
 		for _, node := range tree {
 			edges = edges + len(node)
@@ -117,10 +117,26 @@ func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	return !hasCycle, isConnected && hasN_1Edges, fmt.Sprintf("Has Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", hasCycle, isConnected, hasN_1Edges)
 }
 
-func GraphGenReal(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
 	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
 		eq := func(l, r int) bool {
 			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		nodeLt := func(l, r *Node) bool {
+			if l.Id < r.Id {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		nodeEq := func(l, r *Node) bool {
+			if l.Id == r.Id {
 				return true
 			} else {
 				return false
@@ -134,7 +150,6 @@ func GraphGenReal(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair
 				return false
 			}
 		}
-
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
 
 		graph := make(map[int]*Node, len(nodeIds))
@@ -144,13 +159,18 @@ func GraphGenReal(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair
 
 		var rng3 = rng2
 		var connectionIds []int
-		for _, k := range graph {
+		for _, node := range graph {
 			var connections []*Node
 			connectionIds, rng3 = sets.ChooseSet(0, len(graph), propcheck.ChooseInt(0, len(graph)), lt, eq)(rng3)
-			for _, l := range connectionIds {
-				connections = append(connections, graph[nodeIds[l]])
+			for _, connectedNodeId := range connectionIds {
+				connections = append(connections, graph[nodeIds[connectedNodeId]])
 			}
-			k.Connections = connections
+			node.Connections = connections
+			//Now make sure every one of the nodes in the connections array is connected to this node
+			for _, conn := range connections {
+				connectedNodeConnections := append(conn.Connections, node)
+				conn.Connections = sets.ToSet(connectedNodeConnections, nodeLt, nodeEq)
+			}
 		}
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
