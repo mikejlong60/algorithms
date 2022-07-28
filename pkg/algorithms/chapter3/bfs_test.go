@@ -326,7 +326,7 @@ func TestRule3_2(t *testing.T) {
 func TestRule3_2RandomGraph(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	prop := propcheck.ForAll(GraphGen(1, 1000),
+	prop := propcheck.ForAll(GraphGen(1, 100),
 		"Generate a random graph and do a Tree search starting from some root.",
 		func(graph propcheck.Pair[map[int]*Node, int]) propcheck.Pair[propcheck.Pair[bool, bool], string] {
 			hasCycle, N_1EdgesAndConnected, err := Rule3_2(graph.A, graph.B)

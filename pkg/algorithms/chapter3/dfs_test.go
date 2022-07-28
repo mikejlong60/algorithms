@@ -2,6 +2,7 @@ package chapter3
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
 	"time"
@@ -10,11 +11,12 @@ import (
 func TestDFS(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	prop := propcheck.ForAll(GraphGen(1, 1000),
+	prop := propcheck.ForAll(GraphGen(1, 100),
 		"Generate a random graph and do a Tree search starting from some root.",
 		func(graph propcheck.Pair[map[int]*Node, int]) propcheck.Pair[*Node, map[int]*Node] {
 			var tree []Edge
 			start := time.Now()
+			fmt.Println("starting DFS search")
 			node, seenNodes, dfsTree := DFSearch(graph.A[graph.B], make(map[int]*Node), tree)
 			fmt.Printf("DFS on a graph of size:%v took %v\n", len(graph.A), time.Since(start))
 			//fmt.Println(graph)
@@ -108,9 +110,21 @@ func TestDumb(t *testing.T) {
 	n13.Connections = []*Node{&n12}
 
 	var tree []Edge
-	node, seenNodes, dfsTree := DFSearch(&n1, make(map[int]*Node), tree)
-	//expected := []Edge{{1, 2}, {2, 3}, {3, 5}, {5, 4}, {3, 7}, {7, 8}, {5, 6}}
+	node, seenNodes, actual := DFSearch(&n1, make(map[int]*Node), tree)
+	expected := []Edge{{1, 2}, {2, 3}, {3, 5}, {5, 4}, {5, 6}, {3, 7}, {7, 8}}
+
+	edgeEq := func(a, b Edge) bool {
+		if a.u == b.u && a.v == b.v {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	if !arrays.ArrayEquality(actual, expected, edgeEq) {
+		t.Errorf("Actual:%v Expected:%v", actual, expected)
+	}
+
 	fmt.Println(node)
 	fmt.Println(seenNodes)
-	fmt.Println(dfsTree)
 }

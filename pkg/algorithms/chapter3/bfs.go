@@ -100,7 +100,7 @@ func TreeEquality(a, b []Edge) bool {
 func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
-	fmt.Printf("Tree Search on a tree of %v nodes took: %v\n", len(graph), time.Since(start))
+	fmt.Printf("Breadth-first Search on a graph of %v nodes took: %v\n", len(graph), time.Since(start))
 	numEdgesInTree := func(tree Tree) int {
 		var edges int
 		for _, node := range tree {
@@ -150,6 +150,8 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 				return false
 			}
 		}
+
+		start := time.Now()
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
 
 		graph := make(map[int]*Node, len(nodeIds))
@@ -161,18 +163,24 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 		var connectionIds []int
 		for _, node := range graph {
 			var connections []*Node
-			connectionIds, rng3 = sets.ChooseSet(0, len(graph), propcheck.ChooseInt(0, len(graph)), lt, eq)(rng3)
+			connectedNodeSize := len(nodeIds)
+			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng3)
 			for _, connectedNodeId := range connectionIds {
-				connections = append(connections, graph[nodeIds[connectedNodeId]])
+				if node.Id != graph[nodeIds[connectedNodeId]].Id {
+					connections = append(connections, graph[nodeIds[connectedNodeId]])
+				}
 			}
 			node.Connections = connections
-			//Now make sure every one of the nodes in the connections array is connected to this node
-			for _, conn := range connections {
+		}
+		for _, node := range graph {
+			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
+			for _, conn := range node.Connections {
 				connectedNodeConnections := append(conn.Connections, node)
 				conn.Connections = sets.ToSet(connectedNodeConnections, nodeLt, nodeEq)
 			}
 		}
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
+		fmt.Printf("Generating a graph of %v nodes took:%v\n", len(graph), time.Since(start))
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
 	}
 }
