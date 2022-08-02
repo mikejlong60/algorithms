@@ -12,8 +12,6 @@ type Node struct {
 	Connections []*Node
 }
 
-type Tree = [][]Edge
-
 type Edge struct {
 	u int //the Id of the beginning node of the edge
 	v int //the Id of the ending node of the edge
@@ -32,7 +30,7 @@ type NodeLayerTuple struct {
 //   Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
 //   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
 //   int - the number of nodes in the Tree
-func BFSearch(graph map[int]*Node, rootId int) (Tree, bool, int) {
+func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
 		if currentLayer-2 >= l.layer { //there is a cycle
@@ -101,7 +99,7 @@ func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
 	fmt.Printf("Breadth-first Search on a graph of %v nodes took: %v\n", len(graph), time.Since(start))
-	numEdgesInTree := func(tree Tree) int {
+	numEdgesInTree := func(tree [][]Edge) int {
 		var edges int
 		for _, node := range tree {
 			edges = edges + len(node)
