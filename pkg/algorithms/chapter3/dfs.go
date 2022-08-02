@@ -1,13 +1,15 @@
 package chapter3
 
-//Depth-First search with cycle detection
+//Depth-First search
+// A recursive algorithm for depth-first search.
 //Params:
-//  graph a hashmap of all the nodes in te graph. Facilitates n log n lookup
-//  rootId the Node Id of the root node, the one at the top of the mobile from which all the other nodes hang
+//  u - *Node the current node that gets expored by the algorithm
+//  seen - seen map[int]*Node - the accumlated map of Nodes that the algorithm has seen thus far
+//  tree- an array of Edges reflecting the current dfs tree to this point
 //Returns:
-//   Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
-//   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
-//   int - the number of nodes in the Tree
+//  u - *Node the current node that gets expored by the algorithm
+//  seen - seen map[int]*Node - the accumlated map of Nodes that the algorithm has seen thus far
+//  tree- an array of Edges reflecting the current dfs tree to this point
 
 func DFSearch(u *Node, seen map[int]*Node, tree []Edge) (*Node, map[int]*Node, []Edge) {
 	seen[u.Id] = u
