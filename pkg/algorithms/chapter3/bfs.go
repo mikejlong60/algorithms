@@ -125,21 +125,21 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 			}
 		}
 
-		nodeLt := func(l, r *Node) bool {
-			if l.Id < r.Id {
-				return true
-			} else {
-				return false
-			}
-		}
-
-		nodeEq := func(l, r *Node) bool {
-			if l.Id == r.Id {
-				return true
-			} else {
-				return false
-			}
-		}
+		//nodeLt := func(l, r *Node) bool {
+		//	if l.Id < r.Id {
+		//		return true
+		//	} else {
+		//		return false
+		//	}
+		//}
+		//
+		//nodeEq := func(l, r *Node) bool {
+		//	if l.Id == r.Id {
+		//		return true
+		//	} else {
+		//		return false
+		//	}
+		//}
 
 		lt := func(l, r int) bool {
 			if l < r {
@@ -151,6 +151,7 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 
 		start := time.Now()
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+		fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
 
 		graph := make(map[int]*Node, len(nodeIds))
 		for _, j := range nodeIds {
@@ -159,6 +160,8 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 
 		var rng3 = rng2
 		var connectionIds []int
+		start2 := time.Now()
+		fmt.Printf("Adding connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
 		for _, node := range graph {
 			var connections []*Node
 			connectedNodeSize := len(nodeIds)
@@ -170,13 +173,15 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 			}
 			node.Connections = connections
 		}
+		fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
+		start3 := time.Now()
 		for _, node := range graph {
 			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
 			for _, conn := range node.Connections {
-				connectedNodeConnections := append(conn.Connections, node)
-				conn.Connections = sets.ToSet(connectedNodeConnections, nodeLt, nodeEq)
+				conn.Connections = append(conn.Connections, node)
 			}
 		}
+		fmt.Printf("Adding other-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start3))
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
 		fmt.Printf("Generating a graph of %v nodes took:%v\n", len(graph), time.Since(start))
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
