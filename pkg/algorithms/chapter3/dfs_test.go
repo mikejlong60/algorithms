@@ -11,7 +11,7 @@ import (
 func TestDFS(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	prop := propcheck.ForAll(GraphGen(1, 100),
+	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
 		"Generate a random graph and do a Tree search starting from some root.",
 		func(graph propcheck.Pair[map[int]*Node, int]) propcheck.Pair[*Node, map[int]*Node] {
 			var tree []Edge

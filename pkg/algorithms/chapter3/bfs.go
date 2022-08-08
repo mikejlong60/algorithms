@@ -2,6 +2,7 @@ package chapter3
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
 	"time"
@@ -115,8 +116,16 @@ func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	return !hasCycle, isConnected && hasN_1Edges, fmt.Sprintf("Has Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", hasCycle, isConnected, hasN_1Edges)
 }
 
-func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
 	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+		nodeEq := func(l, r *Node) bool {
+			if l.Id == r.Id {
+				return true
+			} else {
+				return false
+			}
+		}
+
 		eq := func(l, r int) bool {
 			if l == r {
 				return true
@@ -125,21 +134,70 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 			}
 		}
 
-		//nodeLt := func(l, r *Node) bool {
-		//	if l.Id < r.Id {
-		//		return true
-		//	} else {
-		//		return false
-		//	}
-		//}
-		//
-		//nodeEq := func(l, r *Node) bool {
-		//	if l.Id == r.Id {
-		//		return true
-		//	} else {
-		//		return false
-		//	}
-		//}
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		//start := time.Now()
+		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+		//fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
+
+		graph := make(map[int]*Node, len(nodeIds))
+		for _, j := range nodeIds {
+			graph[j] = &Node{Id: j}
+		}
+
+		var rng3 = rng2
+		var connectionIds []int
+		//start2 := time.Now()
+		//fmt.Printf("Adding connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
+		for _, node := range graph {
+			var connections []*Node
+			connectedNodeSize := len(nodeIds)
+			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng3)
+			for _, connectedNodeId := range connectionIds {
+				if node.Id != graph[nodeIds[connectedNodeId]].Id {
+					connections = append(connections, graph[nodeIds[connectedNodeId]])
+				}
+			}
+			node.Connections = connections
+		}
+		//fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
+		//start3 := time.Now()
+		for _, node := range graph {
+			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
+			for _, conn := range node.Connections {
+				if !arrays.Contains(conn.Connections, node, nodeEq) {
+					conn.Connections = append(conn.Connections, node)
+				}
+			}
+		}
+		//fmt.Printf("Adding other-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start3))
+		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
+		//fmt.Printf("Generating an undirected graph of %v nodes took:%v\n", len(graph), time.Since(start))
+		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
+	}
+}
+
+type NodeForTopoOrdering struct {
+	Id            int
+	Connections   []*NodeForTopoOrdering
+	IncomingEdges []*NodeForTopoOrdering
+}
+
+func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
+	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
 
 		lt := func(l, r int) bool {
 			if l < r {
@@ -153,17 +211,16 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
 		fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
 
-		graph := make(map[int]*Node, len(nodeIds))
+		graph := make(map[int]*NodeForTopoOrdering, len(nodeIds))
 		for _, j := range nodeIds {
-			graph[j] = &Node{Id: j}
+			graph[j] = &NodeForTopoOrdering{Id: j}
 		}
 
 		var rng3 = rng2
 		var connectionIds []int
 		start2 := time.Now()
-		fmt.Printf("Adding connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
 		for _, node := range graph {
-			var connections []*Node
+			var connections []*NodeForTopoOrdering
 			connectedNodeSize := len(nodeIds)
 			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng3)
 			for _, connectedNodeId := range connectionIds {
@@ -174,16 +231,8 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 			node.Connections = connections
 		}
 		fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
-		start3 := time.Now()
-		for _, node := range graph {
-			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
-			for _, conn := range node.Connections {
-				conn.Connections = append(conn.Connections, node)
-			}
-		}
-		fmt.Printf("Adding other-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start3))
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
-		fmt.Printf("Generating a graph of %v nodes took:%v\n", len(graph), time.Since(start))
-		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
+		fmt.Printf("Generating a Directed graph of %v nodes took:%v\n", len(graph), time.Since(start))
+		return propcheck.Pair[map[int]*NodeForTopoOrdering, int]{graph, nodeIds[root]}, rng4
 	}
 }
