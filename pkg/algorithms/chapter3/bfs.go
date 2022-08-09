@@ -97,9 +97,7 @@ func TreeEquality(a, b []Edge) bool {
 }
 
 func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
-	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
-	fmt.Printf("Breadth-first Search on a graph of %v nodes took: %v\n", len(graph), time.Since(start))
 	numEdgesInTree := func(tree [][]Edge) int {
 		var edges int
 		for _, node := range tree {
@@ -142,10 +140,7 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 			}
 		}
 
-		//start := time.Now()
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
-		//fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
-
 		graph := make(map[int]*Node, len(nodeIds))
 		for _, j := range nodeIds {
 			graph[j] = &Node{Id: j}
@@ -153,8 +148,6 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 
 		var rng3 = rng2
 		var connectionIds []int
-		//start2 := time.Now()
-		//fmt.Printf("Adding connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
 		for _, node := range graph {
 			var connections []*Node
 			connectedNodeSize := len(nodeIds)
@@ -166,8 +159,6 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 			}
 			node.Connections = connections
 		}
-		//fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
-		//start3 := time.Now()
 		for _, node := range graph {
 			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
 			for _, conn := range node.Connections {
@@ -176,9 +167,7 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 				}
 			}
 		}
-		//fmt.Printf("Adding other-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start3))
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
-		//fmt.Printf("Generating an undirected graph of %v nodes took:%v\n", len(graph), time.Since(start))
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
 	}
 }
