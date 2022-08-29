@@ -53,5 +53,5 @@ func TestTopologicalOrdering(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[map[int]*NodeForTopoOrdering2](t, result)
-	fmt.Println(rng)
+	fmt.Println(rng) //
 }
