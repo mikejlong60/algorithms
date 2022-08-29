@@ -2,6 +2,7 @@ package chapter3
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
 	"time"
@@ -96,9 +97,7 @@ func TreeEquality(a, b []Edge) bool {
 }
 
 func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
-	start := time.Now()
 	bfsTree, hasCycle, numNodes := BFSearch(graph, rootNode)
-	fmt.Printf("Breadth-first Search on a graph of %v nodes took: %v\n", len(graph), time.Since(start))
 	numEdgesInTree := func(tree [][]Edge) int {
 		var edges int
 		for _, node := range tree {
@@ -115,26 +114,18 @@ func Rule3_2(graph map[int]*Node, rootNode int) (bool, bool, string) {
 	return !hasCycle, isConnected && hasN_1Edges, fmt.Sprintf("Has Cycle:%v, isConnected: %v, has n-1 edges:%v\n:", hasCycle, isConnected, hasN_1Edges)
 }
 
-func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
 	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
-		eq := func(l, r int) bool {
-			if l == r {
-				return true
-			} else {
-				return false
-			}
-		}
-
-		nodeLt := func(l, r *Node) bool {
-			if l.Id < r.Id {
-				return true
-			} else {
-				return false
-			}
-		}
-
 		nodeEq := func(l, r *Node) bool {
 			if l.Id == r.Id {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		eq := func(l, r int) bool {
+			if l == r {
 				return true
 			} else {
 				return false
@@ -149,9 +140,7 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 			}
 		}
 
-		start := time.Now()
 		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
-
 		graph := make(map[int]*Node, len(nodeIds))
 		for _, j := range nodeIds {
 			graph[j] = &Node{Id: j}
@@ -173,12 +162,66 @@ func GraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map
 		for _, node := range graph {
 			////Now make sure every node's connections array is connected to the node to which it points from the other node's perspective
 			for _, conn := range node.Connections {
-				connectedNodeConnections := append(conn.Connections, node)
-				conn.Connections = sets.ToSet(connectedNodeConnections, nodeLt, nodeEq)
+				if !arrays.Contains(conn.Connections, node, nodeEq) {
+					conn.Connections = append(conn.Connections, node)
+				}
 			}
 		}
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
-		fmt.Printf("Generating a graph of %v nodes took:%v\n", len(graph), time.Since(start))
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
+	}
+}
+
+type NodeForTopoOrdering struct {
+	Id            int
+	Connections   []*NodeForTopoOrdering
+	IncomingEdges []*NodeForTopoOrdering
+}
+
+func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
+	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		start := time.Now()
+		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+		fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
+
+		graph := make(map[int]*NodeForTopoOrdering, len(nodeIds))
+		for _, j := range nodeIds {
+			graph[j] = &NodeForTopoOrdering{Id: j}
+		}
+
+		var rng3 = rng2
+		var connectionIds []int
+		start2 := time.Now()
+		for _, node := range graph {
+			var connections []*NodeForTopoOrdering
+			connectedNodeSize := len(nodeIds)
+			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng3)
+			for _, connectedNodeId := range connectionIds {
+				if node.Id != graph[nodeIds[connectedNodeId]].Id {
+					connections = append(connections, graph[nodeIds[connectedNodeId]])
+				}
+			}
+			node.Connections = connections
+		}
+		fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
+		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
+		fmt.Printf("Generating a Directed graph of %v nodes took:%v\n", len(graph), time.Since(start))
+		return propcheck.Pair[map[int]*NodeForTopoOrdering, int]{graph, nodeIds[root]}, rng4
 	}
 }
