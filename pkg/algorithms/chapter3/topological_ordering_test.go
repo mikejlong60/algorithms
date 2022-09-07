@@ -3,18 +3,11 @@ package chapter3
 import (
 	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
-	"github.com/hashicorp/go-multierror"
 	"testing"
 	"time"
 )
 
-type NodeForTopoOrdering2 struct {
-	Id            int
-	Connections   map[int]*NodeForTopoOrdering2
-	IncomingEdges map[int]*NodeForTopoOrdering2
-}
-
-func topo(m map[int]*NodeForTopoOrdering2, accum []*NodeForTopoOrdering2) (map[int]*NodeForTopoOrdering2, []*NodeForTopoOrdering2) {
+func topo(m map[int]*NodeForTopoOrdering, accum []*NodeForTopoOrdering) (map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering) {
 	if len(m) == 0 {
 		return m, accum
 	} else {
@@ -29,21 +22,41 @@ func topo(m map[int]*NodeForTopoOrdering2, accum []*NodeForTopoOrdering2) (map[i
 func TestTopologicalOrdering(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	simpleDirectedGraph := propcheck.Id(make(map[int]*NodeForTopoOrdering2))
+	makeConnectedComponentsAsNodeForTopoOrdering := func(a propcheck.Pair[map[int]*Node, int]) []map[int]NodeForTopoOrdering {
+		graph := make(map[int]NodeForTopoOrdering, len(a.A))
+		for _, xs := range a.A { //Convert initial list of nodes to the type from which you can make a topological ordering.
+			ie := make(map[int]*NodeForTopoOrdering)
+			oe := make(map[int]*NodeForTopoOrdering)
+			graph[xs.Id] = NodeForTopoOrdering{Id: xs.Id, IncomingEdges: ie, OutgoingEdges: oe}
+		}
 
-	//TODO Add a real graph
-
-	prop := propcheck.ForAll(simpleDirectedGraph,
-		"Generate a directed graph from which you compute a topological ordering.",
-		func(graph map[int]*NodeForTopoOrdering2) propcheck.Pair[map[int]*NodeForTopoOrdering2, []*NodeForTopoOrdering2] {
-			r1, r2 := topo(graph, []*NodeForTopoOrdering2{})
-			return propcheck.Pair[map[int]*NodeForTopoOrdering2, []*NodeForTopoOrdering2]{r1, r2}
-		},
-		func(xs propcheck.Pair[map[int]*NodeForTopoOrdering2, []*NodeForTopoOrdering2]) (bool, error) {
-			var errors error
-			if len(xs.B) > 0 {
-				errors = multierror.Append(errors, fmt.Errorf("Depth-first and breadth-first search should have produced the same set of components but differed(bf - df=%v\n", xs))
+		cc := GenerateConnectedComponents(a)
+		var allConnecedComponents [][]*NodeForTopoOrdering
+		for _, xs := range cc.A {
+			var nodes []*NodeForTopoOrdering
+			for _, ys := range xs {
+				n := graph[ys.u]
+				oe := graph[ys.v]
+				n.OutgoingEdges[ys.u] = &oe
+				n.IncomingEdges[ys.v] = &n
+				nodes = append(nodes, &n)
 			}
+			allConnecedComponents = append(allConnecedComponents, nodes)
+			fmt.Println(allConnecedComponents)
+		}
+		r1 := make(map[int]NodeForTopoOrdering)
+		return []map[int]NodeForTopoOrdering{r1}
+	}
+
+	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
+		"Generate a directed graph from which you compute a topological ordering.",
+		makeConnectedComponentsAsNodeForTopoOrdering,
+		//func(graph map[int]*NodeForTopoOrdering) propcheck.Pair[map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering] {
+		//	r1, r2 := topo(graph, []*NodeForTopoOrdering{})
+		//	return propcheck.Pair[map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering]{r1, r2}
+		//},
+		func(xs []map[int]NodeForTopoOrdering) (bool, error) {
+			var errors error
 			if errors != nil {
 				return false, errors
 			} else {
@@ -52,6 +65,6 @@ func TestTopologicalOrdering(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[map[int]*NodeForTopoOrdering2](t, result)
+	propcheck.ExpectSuccess[map[int]*NodeForTopoOrdering](t, result)
 	fmt.Println(rng) //
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/greymatter-io/golangz/sets"
-	"time"
 )
 
 type Node struct {
@@ -23,14 +22,17 @@ type NodeLayerTuple struct {
 	layer int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
 }
 
-//Breadth-First search with cycle detection
-//Params:
-//  graph a hashmap of all the nodes in te graph. Facilitates n log n lookup
-//  rootId the Node Id of the root node, the one at the top of the mobile from which all the other nodes hang
-//Returns:
-//   Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
-//   bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
-//   int - the number of nodes in the Tree
+// Breadth-First search with cycle detection
+// Params:
+//
+//	graph a hashmap of all the nodes in te graph. Facilitates n log n lookup
+//	rootId the Node Id of the root node, the one at the top of the mobile from which all the other nodes hang
+//
+// Returns:
+//
+//	Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
+//	bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
+//	int - the number of nodes in the Tree
 func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
@@ -169,59 +171,5 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 		}
 		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
-	}
-}
-
-type NodeForTopoOrdering struct {
-	Id            int
-	Connections   []*NodeForTopoOrdering
-	IncomingEdges []*NodeForTopoOrdering
-}
-
-func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
-	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*NodeForTopoOrdering, int], propcheck.SimpleRNG) {
-		eq := func(l, r int) bool {
-			if l == r {
-				return true
-			} else {
-				return false
-			}
-		}
-
-		lt := func(l, r int) bool {
-			if l < r {
-				return true
-			} else {
-				return false
-			}
-		}
-
-		start := time.Now()
-		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
-		fmt.Printf("Choosing a set of %v elements took:%v\n", len(nodeIds), time.Since(start))
-
-		graph := make(map[int]*NodeForTopoOrdering, len(nodeIds))
-		for _, j := range nodeIds {
-			graph[j] = &NodeForTopoOrdering{Id: j}
-		}
-
-		var rng3 = rng2
-		var connectionIds []int
-		start2 := time.Now()
-		for _, node := range graph {
-			var connections []*NodeForTopoOrdering
-			connectedNodeSize := len(nodeIds)
-			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng3)
-			for _, connectedNodeId := range connectionIds {
-				if node.Id != graph[nodeIds[connectedNodeId]].Id {
-					connections = append(connections, graph[nodeIds[connectedNodeId]])
-				}
-			}
-			node.Connections = connections
-		}
-		fmt.Printf("Adding one-way connections to a set of %v elements took:%v\n", len(nodeIds), time.Since(start2))
-		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
-		fmt.Printf("Generating a Directed graph of %v nodes took:%v\n", len(graph), time.Since(start))
-		return propcheck.Pair[map[int]*NodeForTopoOrdering, int]{graph, nodeIds[root]}, rng4
 	}
 }
