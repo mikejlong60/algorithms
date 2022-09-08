@@ -22,7 +22,7 @@ func topo(m map[int]*NodeForTopoOrdering, accum []*NodeForTopoOrdering) (map[int
 func TestTopologicalOrdering(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	makeConnectedComponentsAsNodeForTopoOrdering := func(a propcheck.Pair[map[int]*Node, int]) []map[int]NodeForTopoOrdering {
+	makeConnectedComponentsAsNodeForTopoOrdering := func(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
 		graph := make(map[int]NodeForTopoOrdering, len(a.A))
 		for _, xs := range a.A { //Convert initial list of nodes to the type from which you can make a topological ordering.
 			ie := make(map[int]*NodeForTopoOrdering)
@@ -31,21 +31,23 @@ func TestTopologicalOrdering(t *testing.T) {
 		}
 
 		cc := GenerateConnectedComponents(a)
-		var allConnecedComponents [][]*NodeForTopoOrdering
+		var nodes = make(map[int]*NodeForTopoOrdering)
 		for _, xs := range cc.A {
-			var nodes []*NodeForTopoOrdering
-			for _, ys := range xs {
-				n := graph[ys.u]
-				oe := graph[ys.v]
-				n.OutgoingEdges[ys.u] = &oe
-				n.IncomingEdges[ys.v] = &n
-				nodes = append(nodes, &n)
+			if len(xs) > 1 { //Transform first connected component graph that is larger than one node into its equivalent NodeForTopoOrdering map for computing topo ordering
+				for _, ys := range xs {
+					n := graph[ys.u]
+					oe := graph[ys.v]
+					oe.IncomingEdges[n.Id] = &n
+					n.OutgoingEdges[ys.v] = &oe
+					if ys.u != ys.v { //Don't add top-level edge that points to itself
+						n.IncomingEdges[ys.u] = &n
+					}
+					nodes[n.Id] = &n
+				}
+				break
 			}
-			allConnecedComponents = append(allConnecedComponents, nodes)
-			fmt.Println(allConnecedComponents)
 		}
-		r1 := make(map[int]NodeForTopoOrdering)
-		return []map[int]NodeForTopoOrdering{r1}
+		return nodes
 	}
 
 	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
@@ -55,7 +57,7 @@ func TestTopologicalOrdering(t *testing.T) {
 		//	r1, r2 := topo(graph, []*NodeForTopoOrdering{})
 		//	return propcheck.Pair[map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering]{r1, r2}
 		//},
-		func(xs []map[int]NodeForTopoOrdering) (bool, error) {
+		func(xs map[int]*NodeForTopoOrdering) (bool, error) {
 			var errors error
 			if errors != nil {
 				return false, errors
