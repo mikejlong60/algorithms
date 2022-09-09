@@ -2,62 +2,23 @@ package chapter3
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
+	"github.com/hashicorp/go-multierror"
 	"testing"
 	"time"
 )
 
-func topo(m map[int]*NodeForTopoOrdering, accum []*NodeForTopoOrdering) (map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering) {
-	if len(m) == 0 {
-		return m, accum
-	} else {
-		//Find next node `n` in map `m` with no incoming edges
-		//Iterate over each `n`'s outgoing connections `p` and remove `n` from `p`'s list of incoming connections
-		//Append `n` to accum and store in `r2`
-		//Remove `n` from `m` and store in `r1`
-		return topo(m, accum)
-	}
-}
-
 func TestTopologicalOrdering(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	makeConnectedComponentsAsNodeForTopoOrdering := func(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
-		graph := make(map[int]NodeForTopoOrdering, len(a.A))
-		for _, xs := range a.A { //Convert initial list of nodes to the type from which you can make a topological ordering.
-			ie := make(map[int]*NodeForTopoOrdering)
-			oe := make(map[int]*NodeForTopoOrdering)
-			graph[xs.Id] = NodeForTopoOrdering{Id: xs.Id, IncomingEdges: ie, OutgoingEdges: oe}
-		}
-
-		cc := GenerateConnectedComponents(a)
-		var nodes = make(map[int]*NodeForTopoOrdering)
-		for _, xs := range cc.A {
-			if len(xs) > 1 { //Transform first connected component graph that is larger than one node into its equivalent NodeForTopoOrdering map for computing topo ordering
-				for _, ys := range xs {
-					n := graph[ys.u]
-					oe := graph[ys.v]
-					oe.IncomingEdges[n.Id] = &n
-					n.OutgoingEdges[ys.v] = &oe
-					if ys.u != ys.v { //Don't add top-level edge that points to itself
-						n.IncomingEdges[ys.u] = &n
-					}
-					nodes[n.Id] = &n
-				}
-				break
-			}
-		}
-		return nodes
-	}
-
 	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
-		"Generate a directed graph from which you compute a topological ordering.",
-		makeConnectedComponentsAsNodeForTopoOrdering,
-		//func(graph map[int]*NodeForTopoOrdering) propcheck.Pair[map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering] {
-		//	r1, r2 := topo(graph, []*NodeForTopoOrdering{})
-		//	return propcheck.Pair[map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering]{r1, r2}
-		//},
+		"Create a topological ordering of a non-empty directed graph",
+		MakeConnectedComponentsAsNodeForTopoOrdering,
 		func(xs map[int]*NodeForTopoOrdering) (bool, error) {
+			topo, topoOrdering := Topo(xs, []*NodeForTopoOrdering{})
+			fmt.Println(topo)
+			fmt.Println(topoOrdering)
 			var errors error
 			if errors != nil {
 				return false, errors
@@ -67,6 +28,200 @@ func TestTopologicalOrdering(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[map[int]*NodeForTopoOrdering](t, result)
+	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
+	fmt.Println(rng) //
+}
+
+func TestTopologicalOrderingFromBookExercise37(t *testing.T) {
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+
+	piss := func(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
+
+		v1 := &NodeForTopoOrdering{
+			Id:                  1,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v2 := &NodeForTopoOrdering{
+			Id:                  2,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v3 := &NodeForTopoOrdering{
+			Id:                  3,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v4 := &NodeForTopoOrdering{
+			Id:                  4,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v5 := &NodeForTopoOrdering{
+			Id:                  5,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v6 := &NodeForTopoOrdering{
+			Id:                  6,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v7 := &NodeForTopoOrdering{
+			Id:                  7,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+
+		v1.OutgoingConnections[5] = v5
+		v1.OutgoingConnections[7] = v7
+		v1.OutgoingConnections[4] = v4
+
+		v2.OutgoingConnections[6] = v6
+		v2.OutgoingConnections[5] = v5
+		v2.OutgoingConnections[3] = v3
+
+		v3.OutgoingConnections[4] = v4
+		v3.OutgoingConnections[5] = v5
+		v3.IncomingConnections[2] = v2
+
+		v4.OutgoingConnections[5] = v5
+		v4.IncomingConnections[1] = v1
+		v4.IncomingConnections[3] = v3
+
+		v5.OutgoingConnections[6] = v6
+		v5.OutgoingConnections[7] = v7
+		v5.IncomingConnections[1] = v1
+		v5.IncomingConnections[2] = v2
+		v5.IncomingConnections[3] = v3
+		v5.IncomingConnections[4] = v4
+
+		v6.OutgoingConnections[7] = v7
+		v6.IncomingConnections[5] = v5
+		v6.IncomingConnections[2] = v2
+
+		v7.IncomingConnections[6] = v6
+		v7.IncomingConnections[5] = v5
+		v7.IncomingConnections[1] = v1
+
+		connectedComponents := make(map[int]*NodeForTopoOrdering)
+		connectedComponents[1] = v1
+		connectedComponents[2] = v2
+		connectedComponents[3] = v3
+		connectedComponents[4] = v4
+		connectedComponents[5] = v5
+		connectedComponents[6] = v6
+		connectedComponents[7] = v7
+
+		return connectedComponents
+	}
+
+	makeExpectedTopo := func() []*NodeForTopoOrdering {
+		v1 := &NodeForTopoOrdering{
+			Id:                  1,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v2 := &NodeForTopoOrdering{
+			Id:                  2,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v3 := &NodeForTopoOrdering{
+			Id:                  3,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v4 := &NodeForTopoOrdering{
+			Id:                  4,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v5 := &NodeForTopoOrdering{
+			Id:                  5,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v6 := &NodeForTopoOrdering{
+			Id:                  6,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+		v7 := &NodeForTopoOrdering{
+			Id:                  7,
+			OutgoingConnections: make(map[int]*NodeForTopoOrdering),
+			IncomingConnections: make(map[int]*NodeForTopoOrdering),
+		}
+
+		v1.OutgoingConnections[5] = v5
+		v1.OutgoingConnections[7] = v7
+		v1.OutgoingConnections[4] = v4
+
+		v2.OutgoingConnections[6] = v6
+		v2.OutgoingConnections[5] = v5
+		v2.OutgoingConnections[3] = v3
+
+		v3.OutgoingConnections[4] = v4
+		v3.OutgoingConnections[5] = v5
+
+		v4.OutgoingConnections[5] = v5
+
+		v5.OutgoingConnections[6] = v6
+		v5.OutgoingConnections[7] = v7
+
+		v6.OutgoingConnections[7] = v7
+
+		return []*NodeForTopoOrdering{v1, v2, v3, v4, v5, v6, v7}
+	}
+
+	eq := func(a, b *NodeForTopoOrdering) bool {
+		nodeEq := func(aa, bb int) bool {
+			if aa == bb {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		getKeys := func(a map[int]*NodeForTopoOrdering) []int {
+			keys := make([]int, len(a))
+			i := 0
+			for k := range a {
+				keys[i] = k
+				i++
+			}
+			return keys
+		}
+
+		x := arrays.ArrayEquality(getKeys(a.OutgoingConnections), getKeys(b.OutgoingConnections), nodeEq)
+		fmt.Println(x)
+		if a.Id == b.Id &&
+			arrays.ArrayEquality(getKeys(a.IncomingConnections), getKeys(b.IncomingConnections), nodeEq) { //&&
+			//arrays.ArrayEquality(getKeys(a.OutgoingConnections), getKeys(b.OutgoingConnections), nodeEq) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
+		"Verify the topological ordering from figure 3.7 in Algorithms Book",
+		piss,
+		func(xs map[int]*NodeForTopoOrdering) (bool, error) {
+			_, actual := Topo(xs, []*NodeForTopoOrdering{})
+			expected := makeExpectedTopo()
+			var errors error
+			if !arrays.ArrayEquality(actual, expected, eq) {
+				errors = multierror.Append(errors, fmt.Errorf("expected topo:%v, actual topo:%v", expected, actual))
+			}
+			if errors != nil {
+				return false, errors
+			} else {
+				return true, nil
+			}
+		},
+	)
+	result := prop.Run(propcheck.RunParms{1, rng})
+	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
 	fmt.Println(rng) //
 }

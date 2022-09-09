@@ -3,15 +3,59 @@ package chapter3
 import "github.com/greymatter-io/golangz/propcheck"
 
 type NodeForTopoOrdering struct {
-	Id            int
-	OutgoingEdges map[int]*NodeForTopoOrdering
-	IncomingEdges map[int]*NodeForTopoOrdering
+	Id                  int
+	OutgoingConnections map[int]*NodeForTopoOrdering
+	IncomingConnections map[int]*NodeForTopoOrdering
 }
 
-func GraphOfAllConnectedComponents(graph propcheck.Pair[map[int]*Node, int]) []map[int]NodeForTopoOrdering {
+func Topo(m map[int]*NodeForTopoOrdering, accum []*NodeForTopoOrdering) (map[int]*NodeForTopoOrdering, []*NodeForTopoOrdering) {
+	if len(m) == 0 {
+		return m, accum
+	} else {
+		//Find next node `n` in map `m` with no incoming edges
+		var n *NodeForTopoOrdering
+		for _, j := range m {
+			if len(j.IncomingConnections) == 0 {
+				n = j
+				//Iterate over each `n`'s outgoing connections and remove `n` from `p`'s list of incoming connections
+				for _, p := range n.OutgoingConnections {
+					delete(p.IncomingConnections, n.Id)
+				}
+				break
+			}
+		}
+		//Append `n` to accum
+		accum = append(accum, n)
+		//Remove `n` from `m`
+		delete(m, n.Id)
+		return Topo(m, accum)
+	}
+}
 
-	r1 := make(map[int]NodeForTopoOrdering)
-	r2 := []map[int]NodeForTopoOrdering{r1}
+func MakeConnectedComponentsAsNodeForTopoOrdering(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
+	graph := make(map[int]NodeForTopoOrdering, len(a.A))
+	for _, xs := range a.A { //Convert initial list of nodes to the type from which you can make a topological ordering.
+		ie := make(map[int]*NodeForTopoOrdering)
+		oe := make(map[int]*NodeForTopoOrdering)
+		graph[xs.Id] = NodeForTopoOrdering{Id: xs.Id, IncomingConnections: ie, OutgoingConnections: oe}
+	}
 
-	return r2
+	cc := GenerateConnectedComponents(a)
+	var nodes = make(map[int]*NodeForTopoOrdering)
+	for _, xs := range cc.A {
+		if len(xs) > 1 { //Transform first connected component graph that is larger than one node into its equivalent NodeForTopoOrdering map for computing Topo ordering
+			for _, ys := range xs {
+				n := graph[ys.u]
+				oe := graph[ys.v]
+				oe.IncomingConnections[n.Id] = &n
+				n.OutgoingConnections[ys.v] = &oe
+				if ys.u != ys.v { //Don't add top-level edge that points to itself
+					n.IncomingConnections[ys.u] = &n
+				}
+				nodes[n.Id] = &n
+			}
+			break
+		}
+	}
+	return nodes
 }
