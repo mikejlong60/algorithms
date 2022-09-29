@@ -9,33 +9,10 @@ import (
 	"time"
 )
 
-func TestTopologicalOrdering(t *testing.T) {
-	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
-
-	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
-		"Create a topological ordering of a non-empty directed graph",
-		MakeConnectedComponentsAsNodeForTopoOrdering,
-		func(xs map[int]*NodeForTopoOrdering) (bool, error) {
-			topo, topoOrdering := Topo(xs, []*NodeForTopoOrdering{})
-			fmt.Println(topo)
-			fmt.Println(topoOrdering)
-			var errors error
-			if errors != nil {
-				return false, errors
-			} else {
-				return true, nil
-			}
-		},
-	)
-	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
-	fmt.Println(rng) //
-}
-
 func TestTopologicalOrderingFromBookExercise37(t *testing.T) {
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 
-	piss := func(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
+	makeExcercise37Graph := func(a propcheck.Pair[map[int]*Node, int]) map[int]*NodeForTopoOrdering {
 
 		v1 := &NodeForTopoOrdering{
 			Id:                  1,
@@ -206,7 +183,7 @@ func TestTopologicalOrderingFromBookExercise37(t *testing.T) {
 
 	prop := propcheck.ForAll(UndirectedGraphGen(1, 100),
 		"Verify the topological ordering from figure 3.7 in Algorithms Book",
-		piss,
+		makeExcercise37Graph,
 		func(xs map[int]*NodeForTopoOrdering) (bool, error) {
 			_, actual := Topo(xs, []*NodeForTopoOrdering{})
 			expected := makeExpectedTopo()

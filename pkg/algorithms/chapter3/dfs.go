@@ -12,8 +12,8 @@ import (
 //  seen - seen map[int]*Node - the accumlated map of Nodes that the algorithm has seen thus far
 //  tree- an array of Edges reflecting the current dfs tree to this point
 //Returns:
-//  u - *Node the current node that gets expored by the algorithm
-//  seen - seen map[int]*Node - the accumlated map of Nodes that the algorithm has seen thus far
+//  u - *Node the current node that gets explored by the algorithm
+//  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
 //  tree- an array of Edges reflecting the current dfs tree to this point
 
 func DFSearch(u *Node, seen map[int]*Node, tree []Edge) (*Node, map[int]*Node, []Edge) {
