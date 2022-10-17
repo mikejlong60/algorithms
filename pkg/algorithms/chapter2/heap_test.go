@@ -101,7 +101,6 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
-	fmt.Println(rng)
 }
 
 func TestHeapInsertAndStartHeapAndHeapifyUpWithStrings(t *testing.T) {
@@ -172,7 +171,6 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithStrings(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]string](t, result)
-	fmt.Println(rng)
 }
 
 func TestHeapDelete(t *testing.T) {
@@ -227,7 +225,6 @@ func TestHeapDelete(t *testing.T) {
 
 	g0 := propcheck.ChooseArray(5, 1000, propcheck.ChooseInt(1, 2000))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
-	fmt.Println(rng)
 	prop := propcheck.ForAll(g0,
 		"Validate HeapDelete  \n",
 		deleteFromHeap,
@@ -235,5 +232,4 @@ func TestHeapDelete(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{6, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
-	fmt.Println(rng)
 }

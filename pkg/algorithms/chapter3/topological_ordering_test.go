@@ -200,5 +200,4 @@ func TestTopologicalOrderingFromBookExercise37(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{1, rng})
 	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
-	fmt.Println(rng) //
 }

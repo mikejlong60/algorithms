@@ -173,3 +173,34 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
 	}
 }
+
+func EvenNumberOfNodesGen(lower, upperExc int) func(propcheck.SimpleRNG) (map[int]*Node, propcheck.SimpleRNG) {
+	return func(rng propcheck.SimpleRNG) (map[int]*Node, propcheck.SimpleRNG) {
+		eq := func(l, r int) bool {
+			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		lt := func(l, r int) bool {
+			if l < r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+		graph := make(map[int]*Node, len(nodeIds))
+		for _, j := range nodeIds {
+			graph[j] = &Node{Id: j}
+		}
+		if len(graph) > 0 && len(graph)%2 != 0 {
+			delete(graph, nodeIds[0])
+		}
+
+		return graph, rng2
+	}
+}
