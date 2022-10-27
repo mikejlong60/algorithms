@@ -78,7 +78,7 @@ func GenerateConnectedComponents(graph propcheck.Pair[map[int]*Node, int]) propc
 	return propcheck.Pair[[][]Edge, []int]{allConnectedComponents, allNodes}
 }
 
-func ConnectEveryNodeToAtLeastHalfOfTheOtherNodes(graph map[int]*Node) propcheck.Pair[[][]Edge, []int] {
+func MakeConnectionComponents(graph map[int]*Node) propcheck.Pair[[][]Edge, []int] {
 
 	lt := func(l, r int) bool {
 		if l < r {

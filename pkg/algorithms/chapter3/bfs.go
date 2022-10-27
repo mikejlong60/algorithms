@@ -176,8 +176,24 @@ func UndirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propchec
 
 func EvenNumberOfNodesGen(lower, upperExc int) func(propcheck.SimpleRNG) (map[int]*Node, propcheck.SimpleRNG) {
 	return func(rng propcheck.SimpleRNG) (map[int]*Node, propcheck.SimpleRNG) {
+		nodeEq := func(l, r *Node) bool {
+			if l.Id == r.Id {
+				return true
+			} else {
+				return false
+			}
+		}
+
 		eq := func(l, r int) bool {
 			if l == r {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		nodeLt := func(l, r *Node) bool {
+			if l.Id < r.Id {
 				return true
 			} else {
 				return false
@@ -201,6 +217,32 @@ func EvenNumberOfNodesGen(lower, upperExc int) func(propcheck.SimpleRNG) (map[in
 			delete(graph, nodeIds[0])
 		}
 
-		return graph, rng2
+		var nodes []*Node
+		for _, j := range graph {
+			nodes = append(nodes, j)
+		}
+
+		//Now connect each node to at least half of the other nodes
+		var rng3 = rng2
+		var connections []int
+		for _, j := range graph {
+			connections, rng3 = sets.ChooseSet(len(nodes)/2, len(nodes), propcheck.ChooseInt(0, len(nodes)), lt, eq)(rng3)
+			for _, l := range connections {
+				graph[j.Id].Connections = append(graph[j.Id].Connections, nodes[l])
+			}
+			var connectionsSet []*Node
+			if len(graph[j.Id].Connections) < len(nodes)/2 { //Add elements until you reach half connections because your previous set operation did not get enough.
+				connectionsSet = sets.ToSet(graph[j.Id].Connections, nodeLt, nodeEq)
+				for _, y := range graph {
+					if len(connectionsSet) >= len(nodes)/2 {
+						break
+					} else {
+						connectionsSet = sets.SetUnion(connectionsSet, []*Node{y})
+					}
+				}
+				graph[j.Id].Connections = connectionsSet
+			}
+		}
+		return graph, rng3
 	}
 }
