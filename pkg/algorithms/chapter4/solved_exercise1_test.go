@@ -6,10 +6,18 @@ import (
 	"time"
 )
 
+var gt = func(a, b int) bool {
+	if a > b {
+		return true
+	} else {
+		return false
+	}
+}
+
 func TestSolvedExercise1(t *testing.T) {
 	a := []int{0, 1, 2, 3, 4, 5, 6, 7, 9, 3, 2}
 	fmt.Printf("len of a:%v\n", len(a))
-	b := PeakOfAList(a, 1)
+	b := PeakOfAList(a, 1, gt)
 	if b != 9 {
 		t.Errorf("Actual:%v Expected:%v", b, 9)
 	}
@@ -18,7 +26,7 @@ func TestSolvedExercise1(t *testing.T) {
 func TestMax(t *testing.T) {
 	a := []int{0, 1, 20, 200, 3, 4, 5, 6, 7, 201, 3, 2}
 	fmt.Printf("len of a:%v\n", len(a))
-	b := PeakOfAList(a, 1)
+	b := PeakOfAList(a, 1, gt)
 	if b != 201 {
 		t.Errorf("Actual:%v Expected:%v", b, 201)
 	}
@@ -27,7 +35,7 @@ func TestMax(t *testing.T) {
 func TestSolvedExercise1bug(t *testing.T) {
 	a := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 3}
 	fmt.Printf("len of a:%v\n", len(a))
-	b := PeakOfAList(a, 1)
+	b := PeakOfAList(a, 1, gt)
 	if b != 9 {
 		t.Errorf("Actual:%v Expected:%v", b, 9)
 	}
@@ -36,7 +44,7 @@ func TestSolvedExercise1bug(t *testing.T) {
 func TestSolvedExercise1a(t *testing.T) {
 	a := []int{0, 1, 2}
 	fmt.Printf("len of a:%v\n", len(a))
-	b := PeakOfAList(a, 1)
+	b := PeakOfAList(a, 1, gt)
 	if b != 2 {
 		t.Errorf("Actual:%v Expected:%v", b, 2)
 	}
@@ -49,7 +57,7 @@ func TestSolvedExercise1b(t *testing.T) {
 	a := append(aa, aa...)
 	fmt.Printf("len of a:%v\n", len(a))
 	start := time.Now()
-	b := PeakOfAList(a, 4)
+	b := PeakOfAList(a, 10, gt)
 	fmt.Printf("Took:%v", time.Since(start))
 	if b != 3000010 {
 		t.Errorf("Actual:%v Expected:%v", b, 3000010)
