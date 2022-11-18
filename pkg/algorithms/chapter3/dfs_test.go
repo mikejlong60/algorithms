@@ -73,5 +73,4 @@ func TestEqualityOfNodesInDfAndBfSearch(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
-	fmt.Println(rng)
 }

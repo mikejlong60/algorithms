@@ -139,7 +139,6 @@ func TestStableMatchingPropertiesTest(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{20, rng})
 	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
-	fmt.Println(rng)
 }
 
 func TestStableMatchingPropertiesIndifferenceTest(t *testing.T) {
@@ -263,7 +262,6 @@ func TestStableMatchingPropertiesIndifferenceTest(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{20, rng})
 	propcheck.ExpectSuccess[*linked_list.LinkedList[*Man]](t, result)
-	fmt.Println(rng)
 }
 
 //Algorithm for determining unstable matchings
