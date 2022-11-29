@@ -44,11 +44,11 @@ func maxIntOrEmpty(xs []int) []int {
 }
 
 func TestMaxInt(t *testing.T) {
-	g0 := propcheck.ChooseArray(1000, 10000, propcheck.ChooseInt(0, 10000000))
+	g0 := propcheck.ChooseArray(1000, 50000, propcheck.ChooseInt(0, 10000000))
 
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g0,
-		"Exercise 1a, the peak valus of an array of ints.",
+		"Exercise 1a, the peak value of an array of ints.",
 		func(xs []int) []int {
 			return xs
 		},
