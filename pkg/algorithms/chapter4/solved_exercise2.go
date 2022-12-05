@@ -33,28 +33,64 @@ var minS = func(xs []DayStockPrice) DayStockPrice {
 	return currMin
 }
 
-var maxMinS = func(max, min DayStockPrice) []DayStockPrice {
-	if max.price > math.MinInt && min.price > math.MinInt && max.price > min.price && max.day > min.day {
-		return []DayStockPrice{min, max}
-	} else if max.price > math.MinInt && min.price > math.MinInt && max.price > min.price && max.day < min.day {
-		return []DayStockPrice{max}
-	} else {
-		return []DayStockPrice{}
-	}
-}
-
 func MostProfit(xs []DayStockPrice) []DayStockPrice { //If no solution return the min
 	if len(xs) == 0 {
-		return xs
-		//	} else if len(xs) == 1 {
-		//		return xs //[]DayStockPrice{}
+		return []DayStockPrice{}
 	} else if len(xs) == 2 {
-		//return xs
-		return maxMinS(maxS(xs), minS(xs))
-	} else if len(xs) == 3 { //return highest positive price difference over time or empty
-		return maxMinS(maxS(xs), minS(xs))
-		//	} else if len(xs) == 4 { //return highest positive price difference over time or empty
-		//		return maxMinS(maxS(xs), minS(xs))
+		if xs[1].price > xs[0].price {
+			return xs
+		} else {
+			return []DayStockPrice{}
+		}
+	} else if len(xs) == 3 {
+		if xs[2].price > xs[1].price && xs[1].price > xs[0].price { //descending price
+			return []DayStockPrice{xs[0], xs[2]}
+		} else if xs[2].price > xs[1].price && xs[1].price < xs[0].price { //peak last element and 2nd element is smaller than first
+			return []DayStockPrice{xs[1], xs[2]}
+		} else if xs[2].price < xs[1].price && xs[1].price > xs[0].price { //peak middle element and 1st element is smaller than middle
+			return []DayStockPrice{xs[0], xs[1]}
+		} else { //no valid peak
+			return []DayStockPrice{}
+		}
+	} else if len(xs) == 4 {
+		if xs[3].price > xs[2].price &&
+			xs[2].price > xs[1].price &&
+			xs[1].price > xs[0].price { //descending price -- no solution
+			return []DayStockPrice{xs[0], xs[3]}
+		} else if xs[3].price > xs[2].price &&
+			xs[3].price > xs[1].price &&
+			xs[3].price > xs[0].price &&
+			xs[1].price < xs[0].price &&
+			xs[1].price < xs[2].price { //peak 4th element and 2nd element is min
+			return []DayStockPrice{xs[1], xs[3]}
+		} else if xs[3].price > xs[2].price &&
+			xs[3].price > xs[1].price &&
+			xs[3].price > xs[0].price &&
+			xs[2].price < xs[1].price &&
+			xs[2].price < xs[0].price { //peak 4th element and 3rd element is min
+			return []DayStockPrice{xs[2], xs[3]}
+		} else if xs[3].price > xs[2].price &&
+			xs[3].price > xs[1].price &&
+			xs[3].price > xs[0].price &&
+			xs[0].price < xs[1].price &&
+			xs[0].price < xs[2].price { //peak 4th element and 1st element is min
+			return []DayStockPrice{xs[2], xs[3]}
+		} else if xs[2].price > xs[3].price &&
+			xs[2].price > xs[1].price &&
+			xs[2].price > xs[0].price &&
+			xs[1].price < xs[0].price { //peak 3rd element and 2nd element is min
+			return []DayStockPrice{xs[1], xs[3]}
+		} else if xs[2].price > xs[3].price &&
+			xs[2].price > xs[1].price &&
+			xs[2].price > xs[0].price { //peak 3rd element and 1st element is min
+			return []DayStockPrice{xs[0], xs[2]}
+		} else if xs[1].price > xs[2].price &&
+			xs[1].price > xs[3].price &&
+			xs[1].price > xs[0].price { //peak 2nd element and 1st element is min
+			return []DayStockPrice{xs[0], xs[1]}
+		} else { //no valid peak
+			return []DayStockPrice{}
+		}
 	} else {
 		//slice the array in half and send it off recursively
 		i := len(xs) / 2
@@ -70,9 +106,6 @@ func MostProfit(xs []DayStockPrice) []DayStockPrice { //If no solution return th
 		if len(b) == 0 {
 			b = []DayStockPrice{maxS(right)}
 		}
-		//TODO
-		//If a is empty(no profit) make a the min of left.
-		//If b is empty(no profit) make b the max of right
 		return MostProfit(append(a, b...))
 	}
 }
