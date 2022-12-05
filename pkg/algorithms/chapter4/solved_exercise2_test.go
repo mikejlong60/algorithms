@@ -273,7 +273,7 @@ func TestMostProfit8PeakLeft(t *testing.T) {
 	}
 }
 
-func TestMostProfit8PeakLeftbusted(t *testing.T) {
+func TestMostProfit8PeakLeft2(t *testing.T) {
 	a := DayStockPrice{
 		day:   0,
 		price: 10,
@@ -310,6 +310,49 @@ func TestMostProfit8PeakLeftbusted(t *testing.T) {
 
 	actual := MostProfit([]DayStockPrice{a, b, c, d, e, f, g, h})
 	expected := []DayStockPrice{a, c}
+
+	if !arrays.ArrayEquality(actual, expected, eq) {
+		t.Errorf("Actual:%v Expected:%v", actual, expected)
+	}
+}
+
+func TestMostProfit8SolutionSplitAcrossHalves(t *testing.T) {
+	a := DayStockPrice{
+		day:   0,
+		price: 10,
+	}
+	b := DayStockPrice{
+		day:   1,
+		price: 3,
+	}
+	c := DayStockPrice{
+		day:   2,
+		price: 12,
+	}
+	d := DayStockPrice{
+		day:   3,
+		price: 13,
+	}
+
+	e := DayStockPrice{
+		day:   4,
+		price: 14,
+	}
+	f := DayStockPrice{
+		day:   5,
+		price: 15,
+	}
+	g := DayStockPrice{
+		day:   6,
+		price: 160,
+	}
+	h := DayStockPrice{
+		day:   7,
+		price: 17,
+	}
+
+	actual := MostProfit([]DayStockPrice{a, b, c, d, e, f, g, h})
+	expected := []DayStockPrice{b, g}
 
 	if !arrays.ArrayEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v Expected:%v", actual, expected)
