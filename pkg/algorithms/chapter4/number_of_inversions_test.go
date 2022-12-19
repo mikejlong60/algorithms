@@ -11,11 +11,9 @@ import (
 	"time"
 )
 
-// Interesting fact about my quicksort versus golang one versus my non-parallel merge sort.  My Quicksort implementation is faster than Golang's
-// as the number of duplicate elements decreases. Golang's sort gets faster the more duplication exists.
-// Merge sort is always about 7x slower that either.
-func TestMergeSortPerformanceVersusYourQuicksortAndGolangQuicksort(t *testing.T) {
+func TestNumberOfInversions(t *testing.T) {
 
+	//TODO the number of inversions is: the number of times you choose the top of the right stack over the top of the left stack when the left stack is not empty
 	lt := func(l, r int) bool {
 		if l < r {
 			return true
@@ -31,7 +29,7 @@ func TestMergeSortPerformanceVersusYourQuicksortAndGolangQuicksort(t *testing.T)
 		}
 	}
 	g0 := propcheck.ChooseInt(1, 300)
-	g1 := propcheck.ChooseArray(0, 500000, g0)
+	g1 := propcheck.ChooseArray(1000000, 1000000, g0)
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g1,
 		"Test Mergesort  \n",
@@ -69,7 +67,7 @@ func TestMergeSortPerformanceVersusYourQuicksortAndGolangQuicksort(t *testing.T)
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{10, rng})
+	result := prop.Run(propcheck.RunParms{1, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 
 }
