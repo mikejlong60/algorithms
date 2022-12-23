@@ -83,7 +83,9 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 	}
 	validateHeapMin := func(p []int) (bool, error) {
 		var errors error
-		sorted := sorting.QuickSort(p, lt)
+		var sorted = make([]int, len(p))
+		copy(sorted, p)
+		sorting.QuickSort(sorted, lt)
 		if len(p) > 0 && FindMin(p) != sorted[0] {
 			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
 		}
@@ -153,7 +155,9 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithStrings(t *testing.T) {
 	}
 	validateHeapMin := func(p []string) (bool, error) {
 		var errors error
-		sorted := sorting.QuickSort(p, lt)
+		var sorted = make([]string, len(p))
+		copy(sorted, p)
+		sorting.QuickSort(sorted, lt)
 		if len(p) > 0 && FindMin(p) != sorted[0] {
 			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
 		}
@@ -212,7 +216,9 @@ func TestHeapDelete(t *testing.T) {
 	}
 	validateHeapMin := func(p []int) (bool, error) {
 		var errors error
-		sorted := sorting.QuickSort(p, lt)
+		var sorted = make([]int, len(p))
+		copy(sorted, p)
+		sorting.QuickSort(sorted, lt)
 		if len(p) > 0 && FindMin(p) != sorted[0] {
 			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
 		}
@@ -223,7 +229,7 @@ func TestHeapDelete(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseArray(5, 1000, propcheck.ChooseInt(1, 2000))
+	g0 := propcheck.ChooseArray(5, 10, propcheck.ChooseInt(1, 2000))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g0,
 		"Validate HeapDelete  \n",
