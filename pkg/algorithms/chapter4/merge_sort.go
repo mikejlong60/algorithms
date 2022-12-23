@@ -17,7 +17,9 @@ func MergeSortWithInversionChecking[T any](xs []T, inversions int, isInversion f
 				if lt(r, l) {
 					_, r, rs = Pop(rs)
 					result[i] = r
-					inversions = inversions + 1 //If right is less than left that's an inversion
+					if isInversion(l, r) {
+						inversions = inversions + 1 //If right is less than left that's an inversion
+					}
 				} else {
 					_, l, ls = Pop(ls)
 					result[i] = l
@@ -56,6 +58,24 @@ func MergeSortWithInversionChecking[T any](xs []T, inversions int, isInversion f
 		merged, inversions := merge(left, right, inversions, lt)
 		return merged, inversions
 	}
+}
+
+func NumberOfEquivalences[T any](xs []T, eq func(l, r T) bool, lt func(l, r T) bool) bool {
+	ys := MergeSort(xs, lt)
+	le := len(ys)
+	var previous T
+	var duplicates int
+	for _, x := range ys {
+		if eq(previous, x) {
+			duplicates = duplicates + 1
+		}
+		previous = x
+		if duplicates >= le/2 {
+			return true
+		}
+	}
+	return duplicates >= le/2
+
 }
 
 func MergeSort[T any](xs []T, lt func(l, r T) bool) []T {

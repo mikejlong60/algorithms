@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNumberOfInversionsGTDoubleOfLeft(t *testing.T) {
+func TestNumberOfInversionsGTDouble(t *testing.T) {
 	lt := func(l, r int) bool {
 		if l < r {
 			return true
