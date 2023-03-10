@@ -259,3 +259,89 @@ func TestLocalMinimumFromLeafNode(t *testing.T) {
 
 	log.Infof("Local Minimum:%v, Total Steps:%v", r, totalSteps)
 }
+
+func TestFirstLocalMinimum(t *testing.T) {
+	a := Node{
+		Value: 140,
+	}
+
+	b := Node{
+		Value: 130,
+	}
+	c := Node{
+		Value: 120,
+	}
+	d := Node{
+		Value: 1, //110,
+	}
+	e := Node{
+		Value: 2, //100,
+	}
+	f := Node{
+		Value: 90,
+	}
+	g := Node{
+		Value: 80,
+	}
+	h := Node{
+		Value: 70,
+	}
+	i := Node{
+		Value: 60,
+	}
+	j := Node{
+		Value: 50,
+	}
+	k := Node{
+		Value: 40,
+	}
+	l := Node{
+		Value: 3,
+	}
+	m := Node{
+		Value: 20,
+	}
+	n := Node{
+		Value: 10,
+	}
+	o := Node{
+		Value: 1800,
+	}
+	a.Left = &b
+	a.Right = &c
+	b.Parent = &a
+	c.Parent = &a
+	d.Parent = &b
+	e.Parent = &b
+	f.Parent = &c
+	g.Parent = &c
+
+	h.Parent = &d
+	i.Parent = &d
+	j.Parent = &e
+	k.Parent = &e
+	l.Parent = &f
+	m.Parent = &f
+	n.Parent = &g
+	o.Parent = &g
+
+	b.Left = &d
+	b.Right = &e
+	c.Left = &f
+	c.Right = &g
+	d.Left = &h
+	d.Right = &i
+	e.Left = &j
+	e.Right = &k
+	f.Left = &l
+	f.Right = &m
+	g.Left = &n
+	g.Right = &o
+	r := FirstLocalMinimum(&b)
+	log.Info(len(r))
+
+	for _, j := range r {
+		log.Info(j)
+	}
+	log.Infof("Total Steps:%v", totalSteps)
+}
