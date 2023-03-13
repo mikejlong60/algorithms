@@ -9,7 +9,8 @@ type Node struct {
 
 var totalSteps int
 
-func FirstLocalMinimum(guess *Node) []*Node {
+// TODO you also have to be less then your sibling if you have one
+func LocalMinimum(guess *Node) []*Node {
 	totalSteps = totalSteps + 1
 	var r []*Node
 	//Cases for returning
@@ -37,38 +38,14 @@ func FirstLocalMinimum(guess *Node) []*Node {
 		guess.Parent != nil &&
 		guess.Value < guess.Parent.Value { //This is case 3
 		return []*Node{guess}
+	} else if guess.Left == nil &&
+		guess.Right == nil &&
+		guess.Parent != nil &&
+		guess.Value >= guess.Parent.Value { //If you are at a leaf and not minimum return nil
+		return nil
 	} else { //Divide and Conquer until you get to a node less than all its neighbors
-		r = append(r, FirstLocalMinimum(guess.Left)...)
-		r = append(r, FirstLocalMinimum(guess.Right)...)
+		r = append(r, LocalMinimum(guess.Left)...)
+		r = append(r, LocalMinimum(guess.Right)...)
 		return r
 	}
-}
-
-func localMinimum(currentMin int, guess *Node) int {
-	totalSteps = totalSteps + 1
-	lesserValue := func(currentMin, guess int) int {
-		if currentMin < guess {
-			return currentMin
-		} else {
-			return guess
-		}
-	}
-	var x int
-	if guess.Parent != nil {
-		x = lesserValue(currentMin, guess.Parent.Value)
-	} else {
-		x = currentMin
-	}
-
-	if guess.Left == nil || guess.Right == nil { //At a leaf of the complete binary tree
-		return lesserValue(x, guess.Value)
-	} else { //Divide and Conquer until you get to a leaf
-		l := localMinimum(x, guess.Left)
-		r := localMinimum(x, guess.Right)
-		return lesserValue(l, r)
-	}
-}
-
-func LocalMinimum(guess *Node) int {
-	return localMinimum(guess.Value, guess)
 }
