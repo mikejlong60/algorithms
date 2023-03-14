@@ -9,8 +9,7 @@ type Node struct {
 
 var totalSteps int
 
-// TODO you also have to be less then your sibling if you have one
-func LocalMinimum(guess *Node) []*Node {
+func LocalMinimums(guess *Node) []*Node {
 	totalSteps = totalSteps + 1
 	var r []*Node
 	//Cases for returning
@@ -44,8 +43,8 @@ func LocalMinimum(guess *Node) []*Node {
 		guess.Value >= guess.Parent.Value { //If you are at a leaf and not minimum return nil
 		return nil
 	} else { //Divide and Conquer until you get to a node less than all its neighbors
-		r = append(r, LocalMinimum(guess.Left)...)
-		r = append(r, LocalMinimum(guess.Right)...)
+		r = append(r, LocalMinimums(guess.Left)...)
+		r = append(r, LocalMinimums(guess.Right)...)
 		return r
 	}
 }

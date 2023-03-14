@@ -1,6 +1,7 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/sets"
 	log "github.com/sirupsen/logrus"
 	"testing"
@@ -16,6 +17,7 @@ var nodeEq = func(x, y int) bool {
 
 func printLocalMinimums(r []*Node) []int {
 	var mins []int
+	fmt.Print(len(r))
 	for _, j := range r {
 		log.Infof("Value:%v", j.Value)
 		mins = append(mins, j.Value)
@@ -105,9 +107,9 @@ func buildNodes() {
 	g.Right = &o
 }
 
-func TestFirstLocalMinimumFromB(t *testing.T) {
+func TestLocalMinimumsFromB(t *testing.T) {
 	buildNodes()
-	r := LocalMinimum(&b)
+	r := LocalMinimums(&b)
 	mins := printLocalMinimums(r)
 	var expected = []int{1, 2}
 	if !sets.SetEquality(mins, expected, nodeEq) {
@@ -116,11 +118,55 @@ func TestFirstLocalMinimumFromB(t *testing.T) {
 	log.Infof("Total Steps:%v", totalSteps)
 }
 
-func TestFirstLocalMinimumFromC(t *testing.T) {
+func TestLocalMinimumsFromC(t *testing.T) {
 	buildNodes()
-	r := LocalMinimum(&c)
+	r := LocalMinimums(&c)
 	mins := printLocalMinimums(r)
-	var expected = []int{3, 10}
+	var expected = []int{3, 20, 10}
+	if !sets.SetEquality(mins, expected, nodeEq) {
+		t.Errorf("Actual:%v Expected:%v", mins, expected)
+	}
+	log.Infof("Total Steps:%v", totalSteps)
+}
+
+func TestLocalMinimumsFromD(t *testing.T) {
+	buildNodes()
+	r := LocalMinimums(&d)
+	mins := printLocalMinimums(r)
+	var expected = []int{1}
+	if !sets.SetEquality(mins, expected, nodeEq) {
+		t.Errorf("Actual:%v Expected:%v", mins, expected)
+	}
+	log.Infof("Total Steps:%v", totalSteps)
+}
+
+func TestLocalMinimumsFromO(t *testing.T) {
+	buildNodes()
+	r := LocalMinimums(&o)
+	mins := printLocalMinimums(r)
+	var expected = []int{}
+	if !sets.SetEquality(mins, expected, nodeEq) {
+		t.Errorf("Actual:%v Expected:%v", mins, expected)
+	}
+	log.Infof("Total Steps:%v", totalSteps)
+}
+
+func TestLocalMinimumsFromG(t *testing.T) {
+	buildNodes()
+	r := LocalMinimums(&g)
+	mins := printLocalMinimums(r)
+	var expected = []int{10}
+	if !sets.SetEquality(mins, expected, nodeEq) {
+		t.Errorf("Actual:%v Expected:%v", mins, expected)
+	}
+	log.Infof("Total Steps:%v", totalSteps)
+}
+
+func TestLocalMinimumsFromA(t *testing.T) {
+	buildNodes()
+	r := LocalMinimums(&a)
+	mins := printLocalMinimums(r)
+	var expected = []int{1, 2, 3, 20, 10}
 	if !sets.SetEquality(mins, expected, nodeEq) {
 		t.Errorf("Actual:%v Expected:%v", mins, expected)
 	}
