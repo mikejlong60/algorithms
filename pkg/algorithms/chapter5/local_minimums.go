@@ -1,4 +1,4 @@
-package chapter4
+package chapter5
 
 type Node struct {
 	Parent *Node
