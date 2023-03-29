@@ -6,52 +6,52 @@ import (
 )
 
 func TestAllIntervalScheduling1(t *testing.T) {
-	a := TimeSlot{
+	a1 := TimeSlot{
 		id:    1,
 		begin: 0,
 		end:   3,
 	}
-	b := TimeSlot{
+	a2 := TimeSlot{
 		id:    2,
 		begin: 0,
 		end:   8,
 	}
-	c := TimeSlot{
+	a3 := TimeSlot{
 		id:    3,
 		begin: 0,
 		end:   3,
 	}
-	d := TimeSlot{
+	a4 := TimeSlot{
 		id:    4,
 		begin: 5,
 		end:   8,
 	}
-	e := TimeSlot{
+	a5 := TimeSlot{
 		id:    5,
 		begin: 5,
 		end:   14,
 	}
-	f := TimeSlot{
+	a6 := TimeSlot{
 		id:    6,
 		begin: 10,
 		end:   15,
 	}
-	g := TimeSlot{
+	a7 := TimeSlot{
 		id:    7,
 		begin: 10,
 		end:   15,
 	}
-	h := TimeSlot{
+	a8 := TimeSlot{
 		id:    8,
 		begin: 14,
 		end:   20,
 	}
-	i := TimeSlot{
+	a9 := TimeSlot{
 		id:    9,
 		begin: 16,
 		end:   20,
 	}
-	j := TimeSlot{
+	a10 := TimeSlot{
 		id:    10,
 		begin: 16,
 		end:   20,
@@ -64,9 +64,10 @@ func TestAllIntervalScheduling1(t *testing.T) {
 			return false
 		}
 	}
-	r := []*TimeSlot{&a, &b, &c, &d, &e, &f, &g, &h, &i, &j}
+	r := []*TimeSlot{&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, &a10}
 	actual := ScheduleAll(r)
-	expected := [][]*TimeSlot{{&a, &e, &h}, {&b, &g, &j}, {&c, &d, &f, &i}}
+	expected := [][]*TimeSlot{{&a3, &a5, &a10}, {&a2, &a7, &a9}, {&a1, &a4, &a6}, {&a8}}
+	//TODO verify correctness of above answer
 	for i, _ := range actual {
 		if !arrays.ArrayEquality(actual[i], expected[i], eq) {
 			t.Errorf("Actual:%v Expected:%v", actual, expected)

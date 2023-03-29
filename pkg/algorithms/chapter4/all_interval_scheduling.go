@@ -13,13 +13,13 @@ func ScheduleAll(r []*TimeSlot) [][]*TimeSlot { //Each row of the returned array
 		}
 	}
 	rr := chapter5.MergeSort(r, lt)
-	_, a := scheduleAll(rr, []*TimeSlot{})
+	_, a := scheduleAll(rr, [][]*TimeSlot{})
 	return a
 }
 
-func scheduleAll(remainingTimeSlots, scheduledThreads []*TimeSlot) ([]*TimeSlot, []*TimeSlot) {
+func scheduleAll(remainingTimeSlots []*TimeSlot, scheduledThreads [][]*TimeSlot) ([]*TimeSlot, [][]*TimeSlot) {
 	timeSlotsOverlap := func(x *TimeSlot, y *TimeSlot) bool {
-		if x.begin < y.end {
+		if x.end >= y.begin {
 			return true
 		} else {
 			return false //exclude b Timeslot because it overlaps with x
@@ -29,14 +29,19 @@ func scheduleAll(remainingTimeSlots, scheduledThreads []*TimeSlot) ([]*TimeSlot,
 	if len(remainingTimeSlots) == 0 {
 		return remainingTimeSlots, scheduledThreads
 	} else {
-		x := scheduledThreads[0]
-		y := remainingTimeSlots[0]
-		if !timeSlotsOverlap(x, y) { // Add x to scheduled thread
-			scheduledThreads = append(scheduledThreads, y)
-			remainingTimeSlots = remainingTimeSlots[1:]
-		} else {
-			remainingTimeSlots = remainingTimeSlots[x:]
-			return scheduleAll(remainingTimeSlots, scheduledThreads)
+		//Iterate over remaining time slots
+		nextThread := []*TimeSlot{}
+		nextRemainingTimeSlots := []*TimeSlot{}
+		for _, j := range remainingTimeSlots {
+			if len(nextThread) == 0 {
+				nextThread = append(nextThread, j)
+			} else if !timeSlotsOverlap(nextThread[len(nextThread)-1], j) { // Add x to scheduled thread
+				nextThread = append(nextThread, j)
+			} else {
+				nextRemainingTimeSlots = append(nextRemainingTimeSlots, j)
+			}
 		}
+		scheduledThreads = append(scheduledThreads, nextThread)
+		return scheduleAll(nextRemainingTimeSlots, scheduledThreads)
 	}
 }
