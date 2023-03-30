@@ -17,9 +17,11 @@ func ScheduleAll(r []*TimeSlot) [][]*TimeSlot { //Each row of the returned array
 	return a
 }
 
+var totalSteps1 int
+
 func scheduleAll(remainingTimeSlots []*TimeSlot, scheduledThreads [][]*TimeSlot) ([]*TimeSlot, [][]*TimeSlot) {
 	timeSlotsOverlap := func(x *TimeSlot, y *TimeSlot) bool {
-		if x.end >= y.begin {
+		if x.end > y.begin {
 			return true
 		} else {
 			return false //exclude b Timeslot because it overlaps with x
@@ -33,6 +35,7 @@ func scheduleAll(remainingTimeSlots []*TimeSlot, scheduledThreads [][]*TimeSlot)
 		nextThread := []*TimeSlot{}
 		nextRemainingTimeSlots := []*TimeSlot{}
 		for _, j := range remainingTimeSlots {
+			totalSteps1 = totalSteps1 + 1
 			if len(nextThread) == 0 {
 				nextThread = append(nextThread, j)
 			} else if !timeSlotsOverlap(nextThread[len(nextThread)-1], j) { // Add x to scheduled thread

@@ -2,56 +2,57 @@ package chapter4
 
 import (
 	"github.com/greymatter-io/golangz/arrays"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
-func TestAllIntervalScheduling1(t *testing.T) {
+func TestAllIntervalScheduling(t *testing.T) {
 	a1 := TimeSlot{
 		id:    1,
 		begin: 0,
 		end:   3,
 	}
-	a2 := TimeSlot{
+	b2 := TimeSlot{
 		id:    2,
 		begin: 0,
 		end:   8,
 	}
-	a3 := TimeSlot{
+	c3 := TimeSlot{
 		id:    3,
 		begin: 0,
 		end:   3,
 	}
-	a4 := TimeSlot{
+	d4 := TimeSlot{
 		id:    4,
 		begin: 5,
 		end:   8,
 	}
-	a5 := TimeSlot{
+	e5 := TimeSlot{
 		id:    5,
 		begin: 5,
 		end:   14,
 	}
-	a6 := TimeSlot{
+	f6 := TimeSlot{
 		id:    6,
 		begin: 10,
 		end:   15,
 	}
-	a7 := TimeSlot{
+	g7 := TimeSlot{
 		id:    7,
 		begin: 10,
 		end:   15,
 	}
-	a8 := TimeSlot{
+	h8 := TimeSlot{
 		id:    8,
 		begin: 14,
 		end:   20,
 	}
-	a9 := TimeSlot{
+	i9 := TimeSlot{
 		id:    9,
 		begin: 16,
 		end:   20,
 	}
-	a10 := TimeSlot{
+	j10 := TimeSlot{
 		id:    10,
 		begin: 16,
 		end:   20,
@@ -64,13 +65,13 @@ func TestAllIntervalScheduling1(t *testing.T) {
 			return false
 		}
 	}
-	r := []*TimeSlot{&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, &a10}
+	r := []*TimeSlot{&a1, &b2, &c3, &d4, &e5, &f6, &g7, &h8, &i9, &j10}
 	actual := ScheduleAll(r)
-	expected := [][]*TimeSlot{{&a3, &a5, &a10}, {&a2, &a7, &a9}, {&a1, &a4, &a6}, {&a8}}
-	//TODO verify correctness of above answer
+	expected := [][]*TimeSlot{{&c3, &e5, &h8}, {&b2, &g7, &j10}, {&a1, &d4, &f6, &i9}}
 	for i, _ := range actual {
 		if !arrays.ArrayEquality(actual[i], expected[i], eq) {
 			t.Errorf("Actual:%v Expected:%v", actual, expected)
 		}
 	}
+	log.Infof("total steps:%v", totalSteps1)
 }

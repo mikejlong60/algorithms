@@ -2,10 +2,11 @@ package chapter4
 
 import (
 	"github.com/greymatter-io/golangz/arrays"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
-func TestIntervalScheduling1(t *testing.T) {
+func TestIntervalScheduling(t *testing.T) {
 	a1 := TimeSlot{
 		id:    1,
 		begin: 0,
@@ -64,6 +65,6 @@ func TestIntervalScheduling1(t *testing.T) {
 	expected := []*TimeSlot{&a1, &a3, &a5, &a8}
 	if !arrays.ArrayEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v Expected:%v", actual, expected)
-
 	}
+	log.Infof("totalSteps:%v", totalSteps0)
 }
