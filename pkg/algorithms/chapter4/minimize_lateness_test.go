@@ -33,9 +33,12 @@ func TestScheduleWithDeadline1(t *testing.T) {
 	r := []*Process{&job1, &job2, &job3}
 	actual, maxLate := MinimizeLateness(r)
 	expected := []*Process{&job1, &job2, &job3}
-	if !arrays.ArrayEquality(actual, expected, eq) && maxLate != &job2 && maxLate.finishTime != 11 {
+	if !(arrays.ArrayEquality(actual, expected, eq) && maxLate == &job3 && maxLate.finishTime == 6 && maxLate.finishTime-maxLate.deadline <= 0) {
 		t.Errorf("Actual Schedule:%v Expected Schedule:%v, Max Late:=%v", actual, expected, maxLate)
 	}
+	//if !arrays.ArrayEquality(actual, expected, eq) && maxLate != &job2 && maxLate.finishTime != 11 {
+	//	t.Errorf("Actual Schedule:%v Expected Schedule:%v, Max Late:=%v", actual, expected, maxLate)
+	//}
 }
 
 func TestScheduleWithDeadline2(t *testing.T) {
@@ -60,7 +63,7 @@ func TestScheduleWithDeadline2(t *testing.T) {
 	r := []*Process{&job1, &job2}
 	actual, maxLate := MinimizeLateness(r)
 	expected := []*Process{&job2, &job1}
-	if !arrays.ArrayEquality(actual, expected, eq) && maxLate != &job2 && maxLate.finishTime != 11 {
+	if !(arrays.ArrayEquality(actual, expected, eq) && maxLate == &job1 && maxLate.finishTime == 11 && maxLate.finishTime-maxLate.deadline <= 0) {
 		t.Errorf("Actual Schedule:%v Expected Schedule:%v, Max Late:=%v", actual, expected, maxLate)
 	}
 }
@@ -87,7 +90,7 @@ func TestScheduleWithDeadline3(t *testing.T) {
 	r := []*Process{&job1, &job2}
 	actual, maxLate := MinimizeLateness(r)
 	expected := []*Process{&job1, &job2}
-	if !arrays.ArrayEquality(actual, expected, eq) && maxLate != &job2 && maxLate.finishTime != 11 {
+	if !(arrays.ArrayEquality(actual, expected, eq) && maxLate == &job2 && maxLate.finishTime == 11 && maxLate.finishTime-maxLate.deadline == 1) {
 		t.Errorf("Actual Schedule:%v Expected Schedule:%v, Max Late:=%v", actual, expected, maxLate)
 	}
 }

@@ -1,6 +1,7 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter5"
 )
 
@@ -9,6 +10,10 @@ type Process struct {
 	length     int
 	deadline   int
 	finishTime int
+}
+
+func (p Process) String() string {
+	return fmt.Sprintf("Process{Id:%v, length:%v, deadline: %v, finishTime: %v, }", p.id, p.length, p.deadline, p.finishTime)
 }
 
 // O(n) cost plus sort cost which is O(n log n). So it's still O(n log n)
@@ -27,7 +32,7 @@ func MinimizeLateness(r []*Process) ([]*Process, *Process) {
 	for _, j := range rr {
 		timeline = timeline + j.length
 		j.finishTime = timeline
-		if maxLate.deadline <= j.deadline {
+		if maxLate.deadline < j.deadline {
 			maxLate = j
 		}
 	}
