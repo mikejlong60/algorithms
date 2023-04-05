@@ -1,0 +1,35 @@
+package chapter4
+
+import (
+	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter5"
+)
+
+type Process struct {
+	id         int
+	length     int
+	deadline   int
+	finishTime int
+}
+
+// O(n) cost plus sort cost which is O(n log n). So it's still O(n log n)
+func MinimizeLateness(r []*Process) ([]*Process, *Process) {
+	lt := func(l, r *Process) bool {
+		if l.deadline < r.deadline {
+			return true
+		} else {
+			return false
+		}
+	}
+	rr := chapter5.MergeSort(r, lt)
+
+	var timeline = 0
+	var maxLate = &Process{}
+	for _, j := range rr {
+		timeline = timeline + j.length
+		j.finishTime = timeline
+		if maxLate.deadline <= j.deadline {
+			maxLate = j
+		}
+	}
+	return rr, maxLate
+}
