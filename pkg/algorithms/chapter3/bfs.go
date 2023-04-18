@@ -13,13 +13,13 @@ type Node struct {
 }
 
 type Edge struct {
-	u int //the Id of the beginning node of the edge
-	v int //the Id of the ending node of the edge
+	U int //the Id of the beginning node of the edge
+	V int //the Id of the ending node of the edge
 }
 
 type NodeLayerTuple struct {
 	Id    int //The node Id
-	layer int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
+	Layer int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
 }
 
 // Breadth-First search with cycle detection
@@ -30,13 +30,13 @@ type NodeLayerTuple struct {
 //
 // Returns:
 //
-//	Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(u, v)
+//	Tree  - the search tree represented as an array of layers, each layer constisting of an array of Edges(U, V)
 //	bool - whether or not the resulting search tree contained a cycle. A cycle is a relationship between two nodes that is farther than one layer apart.
 //	int - the number of nodes in the Tree
 func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 	hasCycle := func(nodeId int, currentLayer int, layers map[int]NodeLayerTuple) bool {
 		l := layers[nodeId]
-		if currentLayer-2 >= l.layer { //there is a cycle
+		if currentLayer-2 >= l.Layer { //there is a cycle
 			return true
 		} else {
 			return false
@@ -44,13 +44,13 @@ func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 	}
 
 	var tree = [][]Edge{}
-	l0 := []Edge{{u: -1, v: rootId}}
+	l0 := []Edge{{U: -1, V: rootId}}
 
 	//A lookup map so you can look up whether or not a Node has been seen and if so what layer it is in.
 	layersLookup := make(map[int]NodeLayerTuple, len(graph))
 	layersLookup[rootId] = NodeLayerTuple{
 		Id:    rootId,
-		layer: 0,
+		Layer: 0,
 	}
 	tree = append(tree, l0)
 
@@ -59,13 +59,13 @@ func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 	for {
 		var pendingLayer []Edge
 		for _, k := range tree[i] {
-			node, _ := graph[k.v]
+			node, _ := graph[k.V]
 			for _, m := range node.Connections {
-				//Lookup tail(v) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
+				//Lookup tail(V) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
 				_, alreadySeen := layersLookup[m.Id]
 				if !alreadySeen {
-					pendingLayer = append(pendingLayer, Edge{u: k.v, v: m.Id})
-					layersLookup[m.Id] = NodeLayerTuple{Id: m.Id, layer: i + 1}
+					pendingLayer = append(pendingLayer, Edge{U: k.V, V: m.Id})
+					layersLookup[m.Id] = NodeLayerTuple{Id: m.Id, Layer: i + 1}
 				} else { //Don't add it since we already know about this Node. But DO see if its a cycle.
 					if !graphHasACycle { //Can only set this value to true one time
 						graphHasACycle = hasCycle(m.Id, i, layersLookup)
@@ -85,7 +85,7 @@ func BFSearch(graph map[int]*Node, rootId int) ([][]Edge, bool, int) {
 
 func TreeEquality(a, b []Edge) bool {
 	edgeEq := func(a, b Edge) bool {
-		if a.u == b.u && a.v == b.v {
+		if a.U == b.U && a.V == b.V {
 			return true
 		} else {
 			return false

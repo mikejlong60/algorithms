@@ -8,11 +8,11 @@ import (
 //Depth-First search
 // A recursive algorithm for depth-first search.
 //Params:
-//  u - *Node the current node that gets explored by the algorithm
+//  U - *Node the current node that gets explored by the algorithm
 //  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
 //  tree- an array of Edges reflecting the current dfs tree to this point
 //Returns:
-//  u - *Node the current node that gets explored by the algorithm
+//  U - *Node the current node that gets explored by the algorithm
 //  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
 //  tree- an array of Edges reflecting the current dfs tree to this point
 
@@ -57,8 +57,8 @@ func GenerateConnectedComponents(graph propcheck.Pair[map[int]*Node, int]) propc
 	toNodeIdSet := func(tree []Edge) []int {
 		var r []int
 		for _, node := range tree {
-			r = append(r, node.v)
-			r = append(r, node.u)
+			r = append(r, node.V)
+			r = append(r, node.U)
 		}
 		r = sets.ToSet(r, lt, eq)
 		return r
@@ -108,8 +108,8 @@ func MakeConnectionComponents(graph map[int]*Node) propcheck.Pair[[][]Edge, []in
 	toNodeIdSet := func(tree []Edge) []int {
 		var r []int
 		for _, node := range tree {
-			r = append(r, node.v)
-			r = append(r, node.u)
+			r = append(r, node.V)
+			r = append(r, node.U)
 		}
 		r = sets.ToSet(r, lt, eq)
 		return r
