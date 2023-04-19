@@ -24,6 +24,8 @@ var totalSteps2 int
 // Returns:
 //
 //	Tree  - the search tree represented as an array of layers, each layer consisting of an array of Edges(u, v)
+// Big O for this a;gorithm is O(mn) where m is number of edges and n is number of nodes.
+//TODO improve this with a heap that keeps the minimum distance as the key.  You shold be able to make O(m log n)
 func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge {
 	var tree = [][]chapter3.Edge{}
 	l0 := []chapter3.Edge{{U: -1, V: rootId}}
@@ -43,7 +45,6 @@ func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge 
 			node, _ := graph[k.V]
 			for _, m := range node.Connections {
 				totalSteps2 = totalSteps2 + 1
-				//totalSteps2 = totalSteps2 + 1
 				//Lookup tail(v) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
 				//If it has been seen, it is already the shortest path from the root.
 				_, alreadySeen := layersLookup[m.Id]
