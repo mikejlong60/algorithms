@@ -6,6 +6,8 @@ import (
 	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter3"
 )
 
+var totalSteps2 int
+
 // The ncluding the total distance from starting node to the current node to deternine the shortest
 // path to it if you have seen it before that means that its in an earlier layer.  Therfore it is by definition
 // the shortest distance from the root.
@@ -40,6 +42,7 @@ func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge 
 		for _, k := range tree[i] {
 			node, _ := graph[k.V]
 			for _, m := range node.Connections {
+				totalSteps2 = totalSteps2 + 1
 				//totalSteps2 = totalSteps2 + 1
 				//Lookup tail(v) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
 				//If it has been seen, it is already the shortest path from the root.
