@@ -8,7 +8,13 @@ import (
 
 var totalSteps2 int
 
-// The ncluding the total distance from starting node to the current node to deternine the shortest
+type Node struct {
+	Id          int
+	Connections map[int]*Node
+}
+
+//make(map[int]chapter3.NodeLayerTuple, len(graph))
+// The including the total distance from starting node to the current node to deternine the shortest
 // path to it if you have seen it before that means that its in an earlier layer.  Therfore it is by definition
 // the shortest distance from the root.
 
@@ -24,9 +30,10 @@ var totalSteps2 int
 // Returns:
 //
 //	Tree  - the search tree represented as an array of layers, each layer consisting of an array of Edges(u, v)
+//
 // Big O for this a;gorithm is O(mn) where m is number of edges and n is number of nodes.
-//TODO improve this with a heap that keeps the minimum distance as the key.  You shold be able to make O(m log n)
-func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge {
+// TODO improve this with a heap that keeps the minimum distance as the key.  You shold be able to make O(m log n)
+func DijkstraSearch(graph map[int]*Node, rootId int) [][]chapter3.Edge {
 	var tree = [][]chapter3.Edge{}
 	l0 := []chapter3.Edge{{U: -1, V: rootId}}
 
@@ -43,11 +50,12 @@ func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge 
 		var pendingLayer []chapter3.Edge
 		for _, k := range tree[i] {
 			node, _ := graph[k.V]
+
 			for _, m := range node.Connections {
-				totalSteps2 = totalSteps2 + 1
 				//Lookup tail(v) of every edge in the layer to see if it has been seen before. If not add it to pending layer.
 				//If it has been seen, it is already the shortest path from the root.
 				_, alreadySeen := layersLookup[m.Id]
+				totalSteps2 = totalSteps2 + 1
 				if !alreadySeen {
 					pendingLayer = append(pendingLayer, chapter3.Edge{U: k.V, V: m.Id})
 					layersLookup[m.Id] = chapter3.NodeLayerTuple{Id: m.Id, Layer: i + 1}
@@ -64,8 +72,8 @@ func DijkstraSearch(graph map[int]*chapter3.Node, rootId int) [][]chapter3.Edge 
 	return tree
 }
 
-func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*chapter3.Node, int], propcheck.SimpleRNG) {
-	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*chapter3.Node, int], propcheck.SimpleRNG) {
+func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
+	return func(rng propcheck.SimpleRNG) (propcheck.Pair[map[int]*Node, int], propcheck.SimpleRNG) {
 		eq := func(l, r int) bool {
 			if l == r {
 				return true
@@ -82,27 +90,29 @@ func DirectedGraphGen(lower, upperExc int) func(propcheck.SimpleRNG) (propcheck.
 			}
 		}
 
-		var nodeIds []int
-		nodeIds, rng = sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
-		graph := make(map[int]*chapter3.Node, len(nodeIds))
+		//var nodeIds []int
+		nodeIds, rng2 := sets.ChooseSet(lower, upperExc, propcheck.ChooseInt(0, 1000000), lt, eq)(rng)
+		graph := make(map[int]*Node, len(nodeIds))
 		for _, j := range nodeIds {
-			graph[j] = &chapter3.Node{Id: j}
+			graph[j] = &Node{Id: j, Connections: make(map[int]*Node)}
 		}
 
 		var connectionIds []int
+		var rng3 propcheck.SimpleRNG
 		for _, node := range graph {
-			var connections []*chapter3.Node
+			//var connections map[int]*Node
 			connectedNodeSize := len(nodeIds)
-			connectionIds, rng = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng)
+			connectionIds, rng3 = sets.ChooseSet(0, int(connectedNodeSize), propcheck.ChooseInt(0, int(connectedNodeSize)), lt, eq)(rng2)
 			for _, connectedNodeId := range connectionIds {
 				if node.Id != graph[nodeIds[connectedNodeId]].Id {
-					connections = append(connections, graph[nodeIds[connectedNodeId]])
+					//connections = append(connections, graph[nodeIds[connectedNodeId]])
+					node.Connections[nodeIds[connectedNodeId]] = graph[nodeIds[connectedNodeId]]
+					//fmt.Print("piss")
 				}
 			}
-			node.Connections = connections
+			//node.Connections = connections
 		}
-		var root int
-		root, rng = propcheck.ChooseInt(0, len(graph))(rng)
-		return propcheck.Pair[map[int]*chapter3.Node, int]{graph, nodeIds[root]}, rng
+		root, rng4 := propcheck.ChooseInt(0, len(graph))(rng3)
+		return propcheck.Pair[map[int]*Node, int]{graph, nodeIds[root]}, rng4
 	}
 }

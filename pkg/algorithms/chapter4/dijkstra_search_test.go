@@ -1,20 +1,21 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter3"
 	log "github.com/sirupsen/logrus"
 	"testing"
-	"time"
 )
 
 func TestBFSTreeHasShortestPathFromRoot(t *testing.T) {
-	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	//rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	rng := propcheck.SimpleRNG{707521158}
 
 	prop := propcheck.ForAll(DirectedGraphGen(1, 500),
 		"Generate a random graph and do a Tree search starting from some root.",
-		func(graph propcheck.Pair[map[int]*chapter3.Node, int]) propcheck.Pair[[][]chapter3.Edge, int] {
+		func(graph propcheck.Pair[map[int]*Node, int]) propcheck.Pair[[][]chapter3.Edge, int] {
 			totalSteps2 = 0
 			xs := DijkstraSearch(graph.A, graph.B)
 			return propcheck.Pair[[][]chapter3.Edge, int]{xs, len(graph.A)}
@@ -37,36 +38,38 @@ func TestBFSTreeHasShortestPathFromRoot(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{50, rng})
-	propcheck.ExpectSuccess[propcheck.Pair[map[int]*chapter3.Node, int]](t, result)
+	fmt.Print(rng)
+	propcheck.ExpectSuccess[propcheck.Pair[map[int]*Node, int]](t, result)
 }
 
 func TestTreeWithShortestPath(t *testing.T) {
-	n0 := chapter3.Node{
+	n0 := Node{
 		Id:          0,
 		Connections: nil,
 	}
-	n1 := chapter3.Node{
+	n1 := Node{
 		Id:          1,
 		Connections: nil,
 	}
-	n2 := chapter3.Node{
+	n2 := Node{
 		Id:          2,
 		Connections: nil,
 	}
-	n3 := chapter3.Node{
+	n3 := Node{
 		Id:          03,
 		Connections: nil,
 	}
-	n4 := chapter3.Node{
+	n4 := Node{
 		Id:          4,
 		Connections: nil,
 	}
-	n0.Connections = []*chapter3.Node{&n1, &n2, &n3, &n4}
-	n1.Connections = []*chapter3.Node{&n4, &n3}
-	n2.Connections = []*chapter3.Node{&n3}
-	n3.Connections = []*chapter3.Node{&n4}
-	n4.Connections = []*chapter3.Node{&n0}
-	graph := make(map[int]*chapter3.Node, 5) //First field of pair is the layer the node is in, -1 means it's never been seen before and is thus not in any layer
+	n0.Connections = map[int]*Node{n1.Id: &n1, n2.Id: &n2, n3.Id: &n3, n4.Id: &n4} //"Mark":10,"Sandy":20}
+
+	n1.Connections = map[int]*Node{n3.Id: &n3, n4.Id: &n4} //[]*Node{&n4, &n3}
+	n2.Connections = map[int]*Node{n3.Id: &n3}             //[]*Node{&n3}
+	n3.Connections = map[int]*Node{n4.Id: &n4}             //[]*Node{&n4}
+	n4.Connections = map[int]*Node{n0.Id: &n0}             //[]*Node{&n0}
+	graph := make(map[int]*Node, 5)                        //First field of pair is the layer the node is in, -1 means it's never been seen before and is thus not in any layer
 	graph[0] = &n0
 	graph[1] = &n1
 	graph[2] = &n2
