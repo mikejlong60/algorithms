@@ -66,5 +66,5 @@ func TestIntervalScheduling(t *testing.T) {
 	if !arrays.ArrayEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v Expected:%v", actual, expected)
 	}
-	log.Infof("totalSteps:%v", totalSteps0)
+	log.Infof("totalSteps:%child", totalSteps0)
 }

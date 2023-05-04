@@ -23,13 +23,13 @@ func TestBFSTreeHasShortestPathFromRoot(t *testing.T) {
 		func(e propcheck.Pair[[][]chapter3.Edge, int]) (bool, error) {
 			var errors error
 			if len(e.A[0]) != 1 { //First layer has only starting node
-				t.Errorf("First layer should have had a single node:%v", e.A[0])
+				t.Errorf("First layer should have had a single node:%child", e.A[0])
 			}
 			var totalEdges int
 			for _, b := range e.A {
 				totalEdges = totalEdges + len(b)
 			}
-			log.Infof("total steps:%v, number of Layers:%v, numberOfNodes:%v, edges:%v", totalSteps2, len(e.A), e.B, totalEdges)
+			log.Infof("total steps:%child, number of Layers:%child, numberOfNodes:%child, edges:%child", totalSteps2, len(e.A), e.B, totalEdges)
 			if errors != nil {
 				return false, errors
 			} else {
@@ -78,6 +78,6 @@ func TestTreeWithShortestPath(t *testing.T) {
 	actual := DijkstraSearch(graph, 0)
 	expected := [][]chapter3.Edge{{{-1, 0}}, {{0, 1}, {0, 2}, {0, 3}, {0, 4}}}
 	if !arrays.ArrayEquality(actual, expected, chapter3.TreeEquality) {
-		t.Errorf("Actual:%v Expected:%v", actual, expected)
+		t.Errorf("Actual:%child Expected:%child", actual, expected)
 	}
 }

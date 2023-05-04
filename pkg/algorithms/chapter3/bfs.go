@@ -18,8 +18,9 @@ type Edge struct {
 }
 
 type NodeLayerTuple struct {
-	Id    int //The node Id
-	Layer int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
+	Id               int //The node Id
+	DistanceFromRoot int //Only used by the Djkstr4a algorithm in chapter 4
+	Layer            int // Zero indexed array index indicating the layer(array index) in the Tree array the node lives
 }
 
 // Breadth-First search with cycle detection
