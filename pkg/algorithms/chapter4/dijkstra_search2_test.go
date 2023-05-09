@@ -1,6 +1,7 @@
 package chapter4
 
 import (
+	"github.com/greymatter-io/golangz/arrays"
 	//	"github.com/greymatter-io/golangz/arrays"
 	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter3"
 	"testing"
@@ -20,7 +21,7 @@ func computeDistanceFromRoot(current *node, length int) int {
 	return length + current.distanceFromParent
 }
 
-func piss(graph map[int]*node, rootId int) [][]chapter3.Edge {
+func Dijkstra2(graph map[int]*node, rootId int) [][]chapter3.Edge {
 	var tree = [][]chapter3.Edge{}
 	l0 := []chapter3.Edge{{U: -1, V: rootId}}
 
@@ -62,40 +63,40 @@ func piss(graph map[int]*node, rootId int) [][]chapter3.Edge {
 
 func TestPiss(t *testing.T) {
 
-	//n0 := Node2{
-	//	Id:          0,
-	//	Connections: nil,
-	//}
-	//n1 := Node2{
-	//	Id:          1,
-	//	Connections: nil,
-	//}
-	//n2 := Node2{
-	//	Id:          2,
-	//	Connections: nil,
-	//}
-	//n3 := Node2{
-	//	Id:          03,
-	//	Connections: nil,
-	//}
-	//n4 := Node2{
-	//	Id:          4,
-	//	Connections: nil,
-	//}
-	//n0.Connections = []NodeDistanceTuple{{node: &n1, parent: &n0, distance: 3}, {parent: &n0, node: &n2, distance: 4}, {parent: &n0, node: &n3, distance: 5}, {parent: &n0, node: &n4, distance: 5}}
-	//n1.Connections = []NodeDistanceTuple{{parent: &n1, node: &n3, distance: 12}, {parent: &n1, node: &n4, distance: 3}}
-	//n2.Connections = []NodeDistanceTuple{{parent: &n2, node: &n3, distance: 1}, {parent: &n2, node: &n3, distance: 3}}
-	//n3.Connections = []NodeDistanceTuple{{parent: &n3, node: &n4, distance: 10}, {parent: &n3, node: &n4, distance: 2}}
-	//n4.Connections = []NodeDistanceTuple{{parent: &n4, node: &n0, distance: 13}}
-	//graph := make(map[int]*Node2, 5) //First field of pair is the layer the node is in, -1 means it's never been seen before and is thus not in any layer
-	//graph[0] = &n0
-	//graph[1] = &n1
-	//graph[2] = &n2
-	//graph[3] = &n3
-	//graph[4] = &n4
-	//actual := DijkstraSearch2(graph, 0)
-	//expected := [][]chapter3.Edge{{{-1, 0}}, {{0, 1}, {0, 2}, {0, 3}, {0, 4}}}
-	//if !arrays.ArrayEquality(actual, expected, chapter3.TreeEquality) {
-	//	t.Errorf("Actual:%child Expected:%child", actual, expected)
-	//}
+	n0 := node{
+		id: 0,
+	}
+	n1 := node{
+		id:                 1,
+		distanceFromParent: 3,
+		parent:             &n0,
+	}
+	n2 := node{
+		id:                 2,
+		distanceFromParent: 4,
+		parent:             &n0,
+	}
+	n3 := node{
+		id:                 3,
+		distanceFromParent: 5,
+		parent:             &n1,
+	}
+	n4 := node{
+		id:                 4,
+		distanceFromParent: 6,
+		parent:             &n1,
+	}
+	n0.connections = []*node{&n1, &n2, &n3, &n4}
+	n1.connections = []*node{&n3, &n4}
+	graph := make(map[int]*node, 5) //First field of pair is the layer the node is in, -1 means it's never been seen before and is thus not in any layer
+	graph[0] = &n0
+	graph[1] = &n1
+	graph[2] = &n2
+	graph[3] = &n3
+	graph[4] = &n4
+	actual := Dijkstra2(graph, 0)
+	expected := [][]chapter3.Edge{{{-1, 0}}, {{0, 1}, {0, 2}, {0, 3}, {0, 4}}}
+	if !arrays.ArrayEquality(actual, expected, chapter3.TreeEquality) {
+		t.Errorf("Actual:%child Expected:%child", actual, expected)
+	}
 }
