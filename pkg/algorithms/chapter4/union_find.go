@@ -7,9 +7,9 @@ import (
 )
 
 type UNode struct {
-	Id       string
-	Set      *UNode
-	Children []*UNode
+	Id       string //The is the label of the DIT object
+	Set      *UNode //This is the parent set of this node, empty if top of DIT and non-empty otherwise
+	Children []*UNode //This is empty for a leaf node, non-empty otherwise
 }
 
 // Returns a union-find data structure on set S(make sure S is really a set) where all elements are in separate sets.
