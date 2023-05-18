@@ -1,5 +1,11 @@
 package chapter4
 
+import (
+	log "github.com/sirupsen/logrus"
+	"strings"
+	"time"
+)
+
 type UNode struct {
 	Id       string
 	Set      *UNode
@@ -31,4 +37,50 @@ func Union(A, B *UNode) *UNode {
 		A.Children = append(A.Children, B)
 	}
 	return A
+}
+
+// Creates a set of RDNs from the whole list of User DNs(i.e. cn=test tester10,ou=people,ou=fred,ou=bigfoot,o=u.s. government,c=us)
+func MakeSetOfRDNs(users []string) []string {
+	var rdns = []string{}
+	for _, j := range users {
+		a := strings.Split(j, ",")
+		for _, k := range a {
+			rdns = append(rdns, k)
+		}
+	}
+	ff := map[string]struct{}{}
+
+	for _, b := range rdns {
+		ff[b] = struct{}{}
+	}
+	r := []string{}
+	for aa, _ := range ff {
+		r = append(r, aa)
+	}
+	return r
+}
+
+// Makes a DIT from a list of User DNs(i.e. cn=test tester10,ou=people,ou=fred,ou=bigfoot,o=u.s. government,c=us)
+// Growth of algorithm is linear, O(n) where n is the number of users.
+func MakeDirectoryInformationTree(users []string) map[string]*UNode {
+	start := time.Now()
+	a := MakeSetOfRDNs(users) //Splits up big RDN for each user into a set of strings, meaning no duplicates
+	s := MakeUnionFind(a)     //Makes a UNode for every member of set a above.
+
+	var i = make(map[string]*UNode, len(s))
+	//Turns set s into a map so you can lookup tokens in O(1)
+	for _, k := range s {
+		i[k.Id] = k
+	}
+
+	for _, j := range users { //Builds the whole DIT by unioning each object in the User DN.
+		aa := strings.Split(j, ",")
+		for index := range aa {
+			if index+1 < len(aa) {
+				Union(i[aa[index+1]], i[aa[index]])
+			}
+		}
+	}
+	log.Infof("MakeDirectoryInformationTree for %v userDNs  took:%v", len(users), time.Since(start))
+	return i
 }
