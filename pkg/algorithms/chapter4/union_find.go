@@ -1,15 +1,16 @@
 package chapter4
 
 type UNode struct {
-	Id  string
-	Set *UNode
+	Id       string
+	Set      *UNode
+	Children []*UNode
 }
 
 // Returns a union-find data structure on set S(make sure S is really a set) where all elements are in separate sets.
 func MakeUnionFind(S []string) []*UNode {
 	var r = make([]*UNode, len(S))
 	for i, j := range S {
-		r[i] = &UNode{j, nil}
+		r[i] = &UNode{Id: j, Set: nil, Children: []*UNode{}}
 	}
 	return r
 }
@@ -27,6 +28,7 @@ func Find(u *UNode) string {
 func Union(A, B *UNode) *UNode {
 	if Find(A) != Find(B) { //Make B a member of set A because it is not a member of set A
 		B.Set = A
+		A.Children = append(A.Children, B)
 	}
 	return A
 }

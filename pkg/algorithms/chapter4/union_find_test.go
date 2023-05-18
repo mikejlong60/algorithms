@@ -1,8 +1,70 @@
 package chapter4
 
 import (
+	"fmt"
+	log "github.com/sirupsen/logrus"
+	"strings"
 	"testing"
+	"time"
 )
+
+func MakeSetOfRDNs(users []string) []string {
+	var rdns = []string{}
+	for _, j := range users {
+		a := strings.Split(j, ",")
+		for _, k := range a {
+			rdns = append(rdns, k)
+		}
+	}
+	ff := map[string]struct{}{}
+
+	for _, b := range rdns {
+		ff[b] = struct{}{}
+	}
+	r := []string{}
+	for aa, _ := range ff {
+		r = append(r, aa)
+	}
+
+	return r
+}
+
+func MakeDirectoryInformationTree(users []string) map[string]*UNode {
+	start := time.Now()
+	a := MakeSetOfRDNs(users)
+	s := MakeUnionFind(a)
+
+	var i = make(map[string]*UNode, len(s))
+	//so you can Lookup tokens in O(1)
+	for _, k := range s {
+		i[k.Id] = k
+	}
+
+	for _, j := range users {
+		a := strings.Split(j, ",")
+		for index := range a {
+			if index+1 < len(a) {
+				Union(i[a[index+1]], i[a[index]])
+			}
+		}
+	}
+	log.Infof("MakeDirectoryInformationTree for %v userDNs  took:%v", len(users), time.Since(start))
+	return i
+}
+
+func TestUnionUsers(t *testing.T) {
+	makeBigUsers := func(size int, nextHighestOU string) []string {
+		var r = make([]string, size)
+		for i := 0; i < size; i++ {
+			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=people%v,ou=fred,ou=bigfoot,o=u.s. government,c=us", nextHighestOU, i, nextHighestOU)
+		}
+		return r
+	}
+
+	users := append(makeBigUsers(2000, "fred"), makeBigUsers(2000, "fred2")...)
+	r := MakeDirectoryInformationTree(users)
+	log.Info(len(r))
+}
 
 func TestUnionFind(t *testing.T) {
 	set := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
