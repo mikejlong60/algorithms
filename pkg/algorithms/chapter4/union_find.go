@@ -7,8 +7,8 @@ import (
 )
 
 type UNode struct {
-	Id       string //The is the label of the DIT object
-	Set      *UNode //This is the parent set of this node, empty if top of DIT and non-empty otherwise
+	Id       string   //The is the label of the DIT object
+	Set      *UNode   //This is the parent set of this node, empty if top of DIT and non-empty otherwise
 	Children []*UNode //This is empty for a leaf node, non-empty otherwise
 }
 
