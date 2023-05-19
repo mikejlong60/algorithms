@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestUnionUsers(t *testing.T) {
+func TestToDirectoryInformationTree(t *testing.T) {
 	makeBigUsers := func(size int, nextHighestOU string) []string {
 		var r = make([]string, size)
 		for i := 0; i < size; i++ {
@@ -15,9 +15,10 @@ func TestUnionUsers(t *testing.T) {
 		return r
 	}
 
-	users := append(makeBigUsers(2000, "fred"), makeBigUsers(2000, "fred2")...)
-	r := MakeDirectoryInformationTree(users)
-	log.Info(len(r))
+	users := append(makeBigUsers(200000, "fred"), makeBigUsers(200000, "fred2")...)
+	dit := ToDirectoryInformationTree(users)
+	log.Info(len(dit))
+	FromDirectoryInformationTree(dit, "c=us")
 }
 
 func TestUnionFind(t *testing.T) {

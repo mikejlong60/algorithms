@@ -62,7 +62,7 @@ func MakeSetOfRDNs(users []string) []string {
 
 // Makes a DIT from a list of User DNs(i.e. cn=test tester10,ou=people,ou=fred,ou=bigfoot,o=u.s. government,c=us)
 // Growth of algorithm is linear, O(n) where n is the number of users.
-func MakeDirectoryInformationTree(users []string) map[string]*UNode {
+func ToDirectoryInformationTree(users []string) map[string]*UNode {
 	start := time.Now()
 	a := MakeSetOfRDNs(users) //Splits up big RDN for each user into a set of strings, meaning no duplicates
 	s := MakeUnionFind(a)     //Makes a UNode for every member of set a above.
@@ -81,6 +81,54 @@ func MakeDirectoryInformationTree(users []string) map[string]*UNode {
 			}
 		}
 	}
-	log.Infof("MakeDirectoryInformationTree for %v userDNs  took:%v", len(users), time.Since(start))
+	log.Infof("ToDirectoryInformationTree for %v userDNs  took:%v", len(users), time.Since(start))
 	return i
+}
+
+type Edge struct {
+	U string //the Id of the beginning node of the edge
+	V string //the Id of the ending node of the edge
+}
+
+//Depth-First search
+// A recursive algorithm for depth-first search.
+//Params:
+//  U - *Node the current node that gets explored by the algorithm
+//  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
+//  tree- an array of Edges reflecting the current dfs tree to this point
+//Returns:
+//  U - *Node the current node that gets explored by the algorithm
+//  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
+//  tree- an array of Edges reflecting the current dfs tree to this point
+
+func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge) (*UNode, map[string]*UNode, []Edge) {
+	seen[u.Id] = u
+	for _, connectedNode := range u.Children {
+		_, explored := seen[connectedNode.Id]
+		if !explored {
+			tree = append(tree, Edge{u.Id, connectedNode.Id})
+			_, seen, tree = DFSearch(connectedNode, seen, tree)
+		}
+	}
+	return u, seen, tree
+}
+
+// Given a DIT produces the complete list of strings that produced the DIT.
+// This is isomorphic with the ToDirectoryInformationTree function above
+func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) []string {
+	start := time.Now()
+	//Start at the top of the tree
+	root := dit[rootId]
+	//Maybe do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
+
+	var tree []Edge
+	//r, s, t :=
+	DFSearch(root, make(map[string]*UNode), tree)
+	log.Infof("FromDirectoryInformationTree took:%v", time.Since(start))
+
+	//log.Info(r)
+	//log.Info(s)
+	//log.Info(t)
+
+	return []string{}
 }
