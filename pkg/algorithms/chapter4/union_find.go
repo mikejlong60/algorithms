@@ -115,7 +115,7 @@ func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge) (*UNode, map[string
 
 // Given a DIT produces the complete list of strings that produced the DIT.
 // This is isomorphic with the ToDirectoryInformationTree function above
-func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) []string {
+func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) (*UNode, map[string]*UNode, []Edge) {
 	start := time.Now()
 	//Start at the top of the tree
 	root := dit[rootId]
@@ -123,12 +123,12 @@ func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) []string
 
 	var tree []Edge
 	//r, s, t :=
-	DFSearch(root, make(map[string]*UNode), tree)
+	dit2, allNodes, edges := DFSearch(root, make(map[string]*UNode), tree)
 	log.Infof("FromDirectoryInformationTree took:%v", time.Since(start))
-
+	return dit2, allNodes, edges
 	//log.Info(r)
 	//log.Info(s)
 	//log.Info(t)
 
-	return []string{}
+	//return []string{}
 }

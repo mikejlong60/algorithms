@@ -21,6 +21,26 @@ func TestToDirectoryInformationTree(t *testing.T) {
 	FromDirectoryInformationTree(dit, "c=us")
 }
 
+func TestSmallToDirectoryInformationTree(t *testing.T) {
+	makeBigUsers := func(size int, nextHighestOU string) []string {
+		var r = make([]string, size)
+		for i := 0; i < size; i++ {
+			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=people%v,ou=fred,ou=bigfoot,o=u.s. government,c=us", nextHighestOU, i, nextHighestOU)
+		}
+		return r
+	}
+
+	//	users := append(makeBigUsers(5, "fred"), makeBigUsers(5, "fred2")...)
+	users := makeBigUsers(2, "fred")
+	dit := ToDirectoryInformationTree(users)
+	log.Info(len(dit))
+	dit2, allNodes, edges := FromDirectoryInformationTree(dit, "cn=fredtest tester1")
+	log.Info(dit2)
+	log.Info(allNodes)
+	log.Info(edges)
+
+}
+
 func TestUnionFind(t *testing.T) {
 	set := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
 	b := MakeUnionFind(set)
