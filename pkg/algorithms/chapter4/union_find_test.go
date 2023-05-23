@@ -2,43 +2,35 @@ package chapter4
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"github.com/greymatter-io/golangz/arrays"
 	"testing"
 )
 
-func TestToDirectoryInformationTree(t *testing.T) {
-	makeBigUsers := func(size int, nextHighestOU string) []string {
-		var r = make([]string, size)
-		for i := 0; i < size; i++ {
-			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=people%v,ou=fred,ou=bigfoot,o=u.s. government,c=us", nextHighestOU, i, nextHighestOU)
-		}
-		return r
+func eq(l, r string) bool {
+	if l == r {
+		return true
+	} else {
+		return false
 	}
-
-	users := append(makeBigUsers(200000, "fred"), makeBigUsers(200000, "fred2")...)
-	dit := ToDirectoryInformationTree(users)
-	log.Info(len(dit))
-	FromDirectoryInformationTree(dit, "c=us")
 }
-
-func TestSmallToDirectoryInformationTree(t *testing.T) {
-	makeBigUsers := func(size int, nextHighestOU string) []string {
+func TestDirectoryInformationTreeIsomorphism(t *testing.T) {
+	makeBigUsers := func(size int, a, b string) []string {
 		var r = make([]string, size)
 		for i := 0; i < size; i++ {
-			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=people%v,ou=fred,ou=bigfoot,o=u.s. government,c=us", nextHighestOU, i, nextHighestOU)
+			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=%v,ou=%v,ou=bigfoot,o=u.s. government,c=us", a, i, a, b)
 		}
 		return r
 	}
 
-	//	users := append(makeBigUsers(5, "fred"), makeBigUsers(5, "fred2")...)
-	users := makeBigUsers(2, "fred")
-	dit := ToDirectoryInformationTree(users)
-	log.Info(len(dit))
-	dit2, allNodes, edges := FromDirectoryInformationTree(dit, "cn=fredtest tester1")
-	log.Info(dit2)
-	log.Info(allNodes)
-	log.Info(edges)
-
+	originalUserDns := append(makeBigUsers(3, "fred", "joe"), makeBigUsers(3, "fred2", "joe2")...)
+	dit := ToDirectoryInformationTree(originalUserDns)
+	reconstructedUserDNs := FromDirectoryInformationTree(dit, "c=us")
+	if !(len(reconstructedUserDNs) == len(originalUserDns)) {
+		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
+	}
+	if !arrays.ArrayEquality(originalUserDns, reconstructedUserDNs, eq) && len(reconstructedUserDNs) == len(originalUserDns) {
+		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
+	}
 }
 
 func TestUnionFind(t *testing.T) {

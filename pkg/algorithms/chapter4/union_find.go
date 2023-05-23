@@ -1,6 +1,7 @@
 package chapter4
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
@@ -101,34 +102,37 @@ type Edge struct {
 //  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
 //  tree- an array of Edges reflecting the current dfs tree to this point
 
-func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge) (*UNode, map[string]*UNode, []Edge) {
+func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge, userDN string, allUserDNs []string) (*UNode, map[string]*UNode, []Edge, string, []string) {
 	seen[u.Id] = u
+	if len(u.Children) == 0 { //you are at a leaf
+
+		allUserDNs = append(allUserDNs, userDN)
+	}
 	for _, connectedNode := range u.Children {
 		_, explored := seen[connectedNode.Id]
 		if !explored {
 			tree = append(tree, Edge{u.Id, connectedNode.Id})
-			_, seen, tree = DFSearch(connectedNode, seen, tree)
+			newUserDN := fmt.Sprintf("%v,%v", connectedNode.Id, userDN)
+			//			theGuy := fmt.Sprintf("%v,%v", connectedNode.Id, userDN)
+			_, seen, tree, newUserDN, allUserDNs = DFSearch(connectedNode, seen, tree, newUserDN, allUserDNs)
+			//			_, seen, tree, theGuy, allUserDNs = DFSearch(connectedNode, seen, tree, theGuy, allUserDNs)
 		}
 	}
-	return u, seen, tree
+	//log.Info(userDN)
+	return u, seen, tree, userDN, allUserDNs
 }
 
 // Given a DIT produces the complete list of strings that produced the DIT.
 // This is isomorphic with the ToDirectoryInformationTree function above
-func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) (*UNode, map[string]*UNode, []Edge) {
+func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) []string {
 	start := time.Now()
 	//Start at the top of the tree
 	root := dit[rootId]
+
 	//Maybe do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
-
 	var tree []Edge
-	//r, s, t :=
-	dit2, allNodes, edges := DFSearch(root, make(map[string]*UNode), tree)
-	log.Infof("FromDirectoryInformationTree took:%v", time.Since(start))
-	return dit2, allNodes, edges
-	//log.Info(r)
-	//log.Info(s)
-	//log.Info(t)
 
-	//return []string{}
+	_, _, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), tree, rootId, []string{})
+	log.Infof("FromDirectoryInformationTree took:%v", time.Since(start))
+	return allUserDNs
 }
