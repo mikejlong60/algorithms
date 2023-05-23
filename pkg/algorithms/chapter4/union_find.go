@@ -105,7 +105,6 @@ type Edge struct {
 func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge, userDN string, allUserDNs []string) (*UNode, map[string]*UNode, []Edge, string, []string) {
 	seen[u.Id] = u
 	if len(u.Children) == 0 { //you are at a leaf
-
 		allUserDNs = append(allUserDNs, userDN)
 	}
 	for _, connectedNode := range u.Children {
@@ -122,17 +121,34 @@ func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge, userDN string, allU
 	return u, seen, tree, userDN, allUserDNs
 }
 
+func createPathAboveBaseDN(u *UNode, soFar string) string {
+	if u == nil { //Caller called this function with the top node of the DIT
+		return ""
+	} else if u.Set == nil { //You have reached the top node which has no parent
+		return fmt.Sprintf("%v,%v", soFar, u.Id)
+	} else { //Keep looking up until you reach the top node
+		return createPathAboveBaseDN(u.Set, fmt.Sprintf("%v,%v", soFar, u.Id))
+	}
+}
+
 // Given a DIT produces the complete list of strings that produced the DIT.
 // This is isomorphic with the ToDirectoryInformationTree function above
-func FromDirectoryInformationTree(dit map[string]*UNode, rootId string) []string {
+func FromDirectoryInformationTree(dit map[string]*UNode, baseDN string) []string {
 	start := time.Now()
 	//Start at the top of the tree
-	root := dit[rootId]
+	root := dit[baseDN]
 
 	//Maybe do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
 	var tree []Edge
 
-	_, _, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), tree, rootId, []string{})
+	//Prepend path above starting node to all leafs below that node.
+	pathAbove := createPathAboveBaseDN(root.Set, "")
+	log.Info(pathAbove)
+	_, _, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), tree, baseDN, []string{})
+	//append the path above the baseDN to the end of each userDN
+	for i := 0; i < len(allUserDNs); i++ {
+		allUserDNs[i] = fmt.Sprintf("%v%v", allUserDNs[i], pathAbove)
+	}
 	log.Infof("FromDirectoryInformationTree took:%v", time.Since(start))
 	return allUserDNs
 }

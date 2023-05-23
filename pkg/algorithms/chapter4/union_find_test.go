@@ -13,22 +13,48 @@ func eq(l, r string) bool {
 		return false
 	}
 }
-func TestDirectoryInformationTreeIsomorphism(t *testing.T) {
-	makeBigUsers := func(size int, a, b string) []string {
-		var r = make([]string, size)
-		for i := 0; i < size; i++ {
-			r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=%v,ou=%v,ou=bigfoot,o=u.s. government,c=us", a, i, a, b)
-		}
-		return r
-	}
 
-	originalUserDns := append(makeBigUsers(3, "fred", "joe"), makeBigUsers(3, "fred2", "joe2")...)
+func makeBigUsers(size int, a, b string) []string {
+	var r = make([]string, size)
+	for i := 0; i < size; i++ {
+		r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=%v,ou=%v,ou=bigfoot,o=u.s. government,c=us", a, i, a, b)
+	}
+	return r
+}
+
+func TestDirectoryInformationTreeIsomorphismStartFromMiddleOfDIT(t *testing.T) {
+
+	originalUserDns := append(makeBigUsers(30000, "fred", "joe"), makeBigUsers(30000, "fred2", "joe2")...)
+	dit := ToDirectoryInformationTree(originalUserDns)
+	reconstructedUserDNs := FromDirectoryInformationTree(dit, "ou=bigfoot")
+	if !(len(reconstructedUserDNs) == len(originalUserDns)) {
+		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
+	}
+	if !arrays.ArrayEquality(originalUserDns, reconstructedUserDNs, eq) {
+		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
+	}
+}
+
+func TestDirectoryInformationTreeIsomorphismStartFromTopOfDIT(t *testing.T) {
+	originalUserDns := append(makeBigUsers(30000, "fred", "joe"), makeBigUsers(30000, "fred2", "joe2")...)
 	dit := ToDirectoryInformationTree(originalUserDns)
 	reconstructedUserDNs := FromDirectoryInformationTree(dit, "c=us")
 	if !(len(reconstructedUserDNs) == len(originalUserDns)) {
 		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
 	}
-	if !arrays.ArrayEquality(originalUserDns, reconstructedUserDNs, eq) && len(reconstructedUserDNs) == len(originalUserDns) {
+	if !arrays.ArrayEquality(originalUserDns, reconstructedUserDNs, eq) {
+		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
+	}
+}
+
+func TestDirectoryInformationTreeIsomorphismStartFromALeafNodeOfTheDIT(t *testing.T) {
+	originalUserDns := append(makeBigUsers(30000, "fred", "joe"), makeBigUsers(30000, "fred2", "joe2")...)
+	dit := ToDirectoryInformationTree(originalUserDns)
+	reconstructedUserDNs := FromDirectoryInformationTree(dit, "cn=fredtest tester8")
+	if len(reconstructedUserDNs) != 1 {
+		t.Errorf("Expected to find just one user DN since you searched for a specific leaf")
+	}
+	if reconstructedUserDNs[0] != "cn=fredtest tester8,ou=fred,ou=joe,ou=bigfoot,o=u.s. government,c=us" {
 		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
 	}
 }
