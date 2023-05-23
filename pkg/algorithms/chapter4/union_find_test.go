@@ -17,7 +17,7 @@ func eq(l, r string) bool {
 func makeBigUsers(size int, a, b string) []string {
 	var r = make([]string, size)
 	for i := 0; i < size; i++ {
-		r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=%v,ou=%v,ou=bigfoot,o=u.s. government,c=us", a, i, a, b)
+		r[i] = fmt.Sprintf("cn=%vtest tester%v,ou=%v%v,ou=%v,ou=bigfoot,o=u.s. government,c=us", a, i, a, b, b)
 	}
 	return r
 }
@@ -54,7 +54,7 @@ func TestDirectoryInformationTreeIsomorphismStartFromALeafNodeOfTheDIT(t *testin
 	if len(reconstructedUserDNs) != 1 {
 		t.Errorf("Expected to find just one user DN since you searched for a specific leaf")
 	}
-	if reconstructedUserDNs[0] != "cn=fredtest tester8,ou=fred,ou=joe,ou=bigfoot,o=u.s. government,c=us" {
+	if reconstructedUserDNs[0] != "cn=fredtest tester8,ou=fredjoe,ou=joe,ou=bigfoot,o=u.s. government,c=us" {
 		t.Errorf("Actual:%v Expected:%v", reconstructedUserDNs, originalUserDns)
 	}
 }

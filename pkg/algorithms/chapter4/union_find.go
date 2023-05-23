@@ -141,11 +141,10 @@ func FromDirectoryInformationTree(dit map[string]*UNode, baseDN string) []string
 	//Maybe do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
 	var tree []Edge
 
-	//Prepend path above starting node to all leafs below that node.
-	pathAbove := createPathAboveBaseDN(root.Set, "")
-	log.Info(pathAbove)
 	_, _, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), tree, baseDN, []string{})
 	//append the path above the baseDN to the end of each userDN
+	pathAbove := createPathAboveBaseDN(root.Set, "")
+	log.Info(pathAbove)
 	for i := 0; i < len(allUserDNs); i++ {
 		allUserDNs[i] = fmt.Sprintf("%v%v", allUserDNs[i], pathAbove)
 	}
