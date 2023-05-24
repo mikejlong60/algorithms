@@ -61,8 +61,9 @@ func MakeSetOfRDNs(users []string) []string {
 	return r
 }
 
-// Makes a DIT from a list of User DNs(i.e. cn=test tester10,ou=people,ou=fred,ou=bigfoot,o=u.s. government,c=us)
+// Makes a DIT from an array of User DNs(i.e. cn=test tester10,ou=people,ou=fred,ou=bigfoot,o=u.s. government,c=us)
 // Growth of algorithm is linear, O(n) where n is the number of users.
+// Returns a map of UNodes that represent the set of user DNs as a DIT with no duplication.
 func ToDirectoryInformationTree(users []string) map[string]*UNode {
 	start := time.Now()
 	a := MakeSetOfRDNs(users) //Splits up big RDN for each user into a set of strings, meaning no duplicates
@@ -86,39 +87,35 @@ func ToDirectoryInformationTree(users []string) map[string]*UNode {
 	return i
 }
 
-type Edge struct {
-	U string //the Id of the beginning node of the edge
-	V string //the Id of the ending node of the edge
-}
-
 //Depth-First search
-// A recursive algorithm for depth-first search.
-//Params:
-//  U - *Node the current node that gets explored by the algorithm
-//  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
-//  tree- an array of Edges reflecting the current dfs tree to this point
+// A recursive algorithm for depth-first search. This algorithm is specialized for searching
+// for leaves in a DIT starting at any node in the DIT.
+//  It looks up the starting point (u) in O(1) time from the
+//TODO -- make the algorithm search for a list of UNodes which may themselves be regular expressions, so that a user
+//TODO --- can put in pieces of a Node(leaf or parent) and produce the list of user DNs that union them all.
+//Params: same as Returns
 //Returns:
-//  U - *Node the current node that gets explored by the algorithm
-//  seen - seen map[int]*Node - the accumulated map of Nodes that the algorithm has seen thus far
-//  tree- an array of Edges reflecting the current dfs tree to this point
+//  u - *UNode the current node that gets explored by the algorithm.
+//      This variable changes as the algorithm proceeds down the graph toward a leaf in DFS fashion.
+//  seen - seen map[string]*UNode - the accumulated map of UNodes that the algorithm has seen thus far
+//  userDN - the accumulating list of node Ids for a given path from the u above, to a single leaf.
+//     This node can be anywhere in the DIT, a leaf or a parent.
+//     This leaf is added to the allUserDNs once it's path has been totally reconstituted.
+//  allUserDNs - the accumulating array of userDNs that match the entire DIT beneath the starting UNode u.
 
-func DFSearch(u *UNode, seen map[string]*UNode, tree []Edge, userDN string, allUserDNs []string) (*UNode, map[string]*UNode, []Edge, string, []string) {
+func DFSearch(u *UNode, seen map[string]*UNode, userDN string, allUserDNs []string) (*UNode, map[string]*UNode, string, []string) {
 	seen[u.Id] = u
-	if len(u.Children) == 0 { //you are at a leaf
+	if len(u.Children) == 0 { //you are at a leaf which means the full construction of userDN is now complete.
 		allUserDNs = append(allUserDNs, userDN)
 	}
 	for _, connectedNode := range u.Children {
 		_, explored := seen[connectedNode.Id]
 		if !explored {
-			tree = append(tree, Edge{u.Id, connectedNode.Id})
 			newUserDN := fmt.Sprintf("%v,%v", connectedNode.Id, userDN)
-			//			theGuy := fmt.Sprintf("%v,%v", connectedNode.Id, userDN)
-			_, seen, tree, newUserDN, allUserDNs = DFSearch(connectedNode, seen, tree, newUserDN, allUserDNs)
-			//			_, seen, tree, theGuy, allUserDNs = DFSearch(connectedNode, seen, tree, theGuy, allUserDNs)
+			_, seen, newUserDN, allUserDNs = DFSearch(connectedNode, seen, newUserDN, allUserDNs)
 		}
 	}
-	//log.Info(userDN)
-	return u, seen, tree, userDN, allUserDNs
+	return u, seen, userDN, allUserDNs
 }
 
 func createPathAboveBaseDN(u *UNode, soFar string) string {
@@ -138,13 +135,10 @@ func FromDirectoryInformationTree(dit map[string]*UNode, baseDN string) []string
 	//Start at the top of the tree
 	root := dit[baseDN]
 
-	//Maybe do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
-	var tree []Edge
-
-	_, _, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), tree, baseDN, []string{})
+	//Do a Depth-first-search starting there and stop at leaf and add the whole path as the complete DN
+	_, _, _, allUserDNs := DFSearch(root, make(map[string]*UNode), baseDN, []string{})
 	//append the path above the baseDN to the end of each userDN
 	pathAbove := createPathAboveBaseDN(root.Set, "")
-	log.Info(pathAbove)
 	for i := 0; i < len(allUserDNs); i++ {
 		allUserDNs[i] = fmt.Sprintf("%v%v", allUserDNs[i], pathAbove)
 	}
