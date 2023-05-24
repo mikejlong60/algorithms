@@ -90,9 +90,11 @@ func ToDirectoryInformationTree(users []string) map[string]*UNode {
 //Depth-First search
 // A recursive algorithm for depth-first search. This algorithm is specialized for searching
 // for leaves in a DIT starting at any node in the DIT.
-//  It looks up the starting point (u) in O(1) time from the
-//TODO -- make the algorithm search for a list of UNodes which may themselves be regular expressions, so that a user
-//TODO --- can put in pieces of a Node(leaf or parent) and produce the list of user DNs that union them all.
+//  It looks up the starting point (u) for every recursive call in O(1) time
+// Depth-first search visits every vertex once and checks every edge in the graph once.
+// Therefore, DFS complexity is O(V+E) where V is number of vertices(UNodes) and E is number of edges from UNode to UNode.
+//TODO -- make the algorithm search for a list of UNodes which may themselves be regular expressions or something like it,
+//TODO --- so that a user can put in pieces of a Node(leaf or parent) and produce the list of user DNs that union all those resulting sets.
 //Params: same as Returns
 //Returns:
 //  u - *UNode the current node that gets explored by the algorithm.
