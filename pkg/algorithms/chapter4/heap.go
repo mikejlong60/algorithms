@@ -130,9 +130,8 @@ func findFirstEmptySlotInHeap[A any](h []A, isZeroVal func(a A) bool) int {
 			return i
 		}
 	}
-	return -1
 	//No non-empty elements so return the index of the last element
-	//return len(h) - 1
+	return len(h) - 1
 }
 
 // Inserts the given element into the given heap and returns a new heap. This is a pure funciton. O(log n)
@@ -179,10 +178,14 @@ func HeapDelete[A any](heap []A, i int, lt func(l, r A) bool, isZeroVal func(a A
 	r := make([]A, len(heap))
 	copy(r, heap)
 
+	//Find first empty slot and then go back one to get the last non-empty slot and call it l.
+	//Then move element l to the hole and zero out the original l element.
+	l := findFirstEmptySlotInHeap(r, isZeroVal) - 1
 	//Zero out the given element
-	r[i] = zeroVal
+	r[i] = r[l]
+	r[l] = zeroVal
 	parent := ParentIdx(i)
-	if parent > 0 && (lt(r[i], r[parent]) || !isZeroVal(r[i])) {
+	if parent > 0 && lt(r[i], r[parent]) {
 		r = HeapifyUp(r, i, lt, zeroVal)
 	} else {
 		r = HeapifyDown(r, i, lt)
