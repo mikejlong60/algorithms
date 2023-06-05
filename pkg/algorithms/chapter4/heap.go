@@ -1,4 +1,9 @@
-package chapter2
+package chapter4
+
+type Cache struct {
+	ts   int
+	data string
+}
 
 // i int - the index in the given heap of the parent of element i. Array indices start with the number zero.
 // Performance - O(1)
@@ -23,11 +28,11 @@ func ParentIdx(i int) int {
 //
 // Returns - A new heap (as a slice) that has the i'th element in its proper position in the heap
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too small.
-func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool, zeroVal A) []A {
+func HeapifyUp(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 	if len(heap) == 0 {
-		return []A{}
+		return []*Cache{}
 	}
-	r := make([]A, len(heap))
+	r := make([]*Cache, len(heap))
 	copy(r, heap)
 
 	if i > 0 {
@@ -38,7 +43,7 @@ func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool, zeroVal A) []A {
 			temp2 := r[j]
 			r[j] = temp
 			r[i] = temp2
-			r = HeapifyUp(r, j, lt, zeroVal)
+			r = HeapifyUp(r, j, lt)
 		}
 	}
 	return r
@@ -53,12 +58,12 @@ func HeapifyUp[A any](heap []A, i int, lt func(l, r A) bool, zeroVal A) []A {
 //
 // Returns - A new heap (as a slice) that has the i'th element in its proper position in the heap
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too big.
-func HeapifyDown[A any](heap []A, zeroI int, lt func(l, r A) bool) []A {
+func HeapifyDown(heap []*Cache, zeroI int, lt func(l, r *Cache) bool) []*Cache {
 	n := len(heap)
 	if n == 0 {
-		return []A{}
+		return []*Cache{}
 	}
-	r := make([]A, len(heap))
+	r := make([]*Cache, len(heap))
 	copy(r, heap)
 
 	i := zeroI + 1
@@ -93,15 +98,11 @@ func HeapifyDown[A any](heap []A, zeroI int, lt func(l, r A) bool) []A {
 // Parameters:
 //
 //	n int - the size of the heap. This is fixed.
-//	zeroVal A - the  zero value for an element A in the heap.
 //
 // Returns - A new heap (as a slice) of size n that has every element initialized to the zero value
 // Performance - O(N)
-func StartHeap[A any](n int, zeroVal A) []A {
-	var x = make([]A, n)
-	for i := range x {
-		x[i] = zeroVal
-	}
+func StartHeap(n int) []*Cache {
+	var x = make([]*Cache, n)
 	return x
 }
 
@@ -112,7 +113,7 @@ func StartHeap[A any](n int, zeroVal A) []A {
 //
 // Returns -the minimum element in the given heap without removing it. O(1)
 // Performance - O(1)
-func FindMin[A any](heap []A) A {
+func FindMin(heap []*Cache) *Cache {
 	if len(heap) == 0 {
 		panic("heap is empty. FindMin is therefore irrelevant.")
 	}
@@ -120,18 +121,16 @@ func FindMin[A any](heap []A) A {
 }
 
 //	h []A - the slice that is holding the heap
-//	isZeroVal func(a A) bool - A predicate function that returns whether or not any A value in the heap is the zero value set in StartHeap
 //
-// Returns - The index of the first empty slot in the heap
+// Returns - The index of the first empty slot in the heap, or -1 if there are no empty slots
 // Performance - O(N)
-func findFirstEmptySlotInHeap[A any](h []A, isZeroVal func(a A) bool) int {
+func findFirstEmptySlotInHeap(h []*Cache) int {
 	for i, x := range h {
-		if isZeroVal(x) {
+		if x == nil {
 			return i
 		}
 	}
-	//No non-empty elements so return the index of the last element
-	return len(h) - 1
+	return -1
 }
 
 // Inserts the given element into the given heap and returns a new heap. This is a pure funciton. O(log n)
@@ -143,20 +142,23 @@ func findFirstEmptySlotInHeap[A any](h []A, isZeroVal func(a A) bool) int {
 //	heap []A - the slice that is holding the heap
 //	a  A - the element you want to insert into the heap
 //	lt func(l, r A) bool - A predicate function that determines whether or not the left A element is less than the right A element.
-//	isZeroVal func(a A) bool - A predicate function that returns whether or not any A value in the heap is the zero value set in StartHeap
 //
 // Returns - A new heap (as a slice) that has the given element in its proper position in the heap
 // Performance - O(log N)
-func HeapInsert[A any](heap []A, a A, lt func(l, r A) bool, isZeroVal func(a A) bool, zeroVal A) []A {
+func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
 	if len(heap) == 0 {
-		return []A{}
+		return []*Cache{}
 	}
-	r := make([]A, len(heap))
+	var r = make([]*Cache, len(heap))
 	copy(r, heap)
 
-	l := findFirstEmptySlotInHeap(r, isZeroVal)
+	l := findFirstEmptySlotInHeap(r)
+	if l == -1 { //No empty slot so add a new spot at the end and put the new element there
+		r = append(r, nil)
+		l = len(r) - 1
+	}
 	r[l] = a
-	return HeapifyUp(r, l, lt, zeroVal)
+	return HeapifyUp(r, l, lt)
 }
 
 // Deletes an element from the given heap and returns a new heap. This is a pure function.
@@ -165,30 +167,49 @@ func HeapInsert[A any](heap []A, a A, lt func(l, r A) bool, isZeroVal func(a A) 
 //	heap []A - the slice that is holding the heap
 //	i int - the index into the heap of the element you want to delete. Array indices start with the number zero.
 //	lt func(l, r A) bool - A predicate function that determines whether or not the left A element is less than the right A element.
-//	isZeroVal func(a A) bool - A predicate function that returns whether or not any A value in the heap is the zero value set in StartHeap
-//	zeroVal A - the  zero value for an element A in the heap. The operation sets the i'th element to the zeroVal
 //
 // Returns - A new heap that has the given element in its proper position in the heap
 // Performance - O(log N)
-func HeapDelete[A any](heap []A, i int, lt func(l, r A) bool, isZeroVal func(a A) bool, zeroVal A) []A {
+func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 	n := len(heap)
 	if n == 0 {
-		return []A{}
+		return []*Cache{}
 	}
-	r := make([]A, len(heap))
+	r := make([]*Cache, len(heap))
 	copy(r, heap)
 
 	//Find first empty slot and then go back one to get the last non-empty slot and call it l.
 	//Then move element l to the hole and zero out the original l element.
-	l := findFirstEmptySlotInHeap(r, isZeroVal) - 1
-	//Zero out the given element
-	r[i] = r[l]
-	r[l] = zeroVal
+	//var l = findFirstEmptySlotInHeap(r)
+	//if l == -1 {
+	//	r = append(r, nil) //Add an empty slot at the end of the heap if it is currently full
+	//	l = len(r) - 1     //Make that slot the new empty slot
+	//}
+	//Zero out i'th element
+	//	r[i] = r[l]
+	r[i] = r[len(r)-1]  //Move last element into slot you are deleting
+	r = r[0 : len(r)-1] //Rip the last empty element off heap
+
 	parent := ParentIdx(i)
 	if parent > 0 && lt(r[i], r[parent]) {
-		r = HeapifyUp(r, i, lt, zeroVal)
+		r = HeapifyUp(r, i, lt)
 	} else {
 		r = HeapifyDown(r, i, lt)
 	}
 	return r
 }
+
+//
+//////
+//
+////Find first empty slot and then go back one to get the last non-empty slot and call it l.
+////Then move element l to the hole and zero out the original l element.
+//l := findFirstEmptySlotInHeap(r, isZeroVal) - 1
+////Zero out the given element
+//r[i] = r[l]
+//r[l] = zeroVal
+//parent := ParentIdx(i)
+//if parent > 0 && lt(r[i], r[parent]) {
+//
+//}
+/////
