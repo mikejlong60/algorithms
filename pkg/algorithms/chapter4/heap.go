@@ -1,5 +1,7 @@
 package chapter4
 
+import log "github.com/sirupsen/logrus"
+
 type Cache struct {
 	ts   int
 	data string
@@ -170,14 +172,25 @@ func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 		return []*Cache{}
 	}
 
+	if i > len(heap)-1 {
+		log.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
+	}
+
 	heap[i] = heap[len(heap)-1]  //Move last element into slot you are deleting
 	heap = heap[0 : len(heap)-1] //Rip the last empty element off heap
 
+	//If index you are trying to delete is one of the last two in the heap, then just return the heap(its underlying array)
+	//with the last element missing because that cannot possibly violate the heap property that a child must be be greater
+	//or equal to its parent.
+	if i > len(heap)-2 {
+		return heap
+	}
 	parent := ParentIdx(i)
 	if parent > 0 && lt(heap[i], heap[parent]) {
 		heap = HeapifyUp(heap, i, lt)
 	} else {
 		heap = HeapifyDown(heap, i, lt)
 	}
+	//heap = heap[0 : len(heap)-1] //Rip the last (the one you wanted to delete) empty element off heap
 	return heap
 }
