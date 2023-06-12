@@ -1,10 +1,21 @@
 package chapter4
 
-import log "github.com/sirupsen/logrus"
+import (
+	"fmt"
+	log "github.com/sirupsen/logrus"
+)
 
 type Cache struct {
 	ts   int
 	data string
+}
+
+func lt(l, r *Cache) bool {
+	if l != nil && r != nil && l.ts < r.ts {
+		return true
+	} else {
+		return false
+	}
 }
 
 // i int - the index in the given heap of the parent of element i. Array indices start with the number zero.
@@ -52,42 +63,42 @@ func HeapifyUp(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 // Parameters:
 //
 //	heap []A - the slice that is holding the heap
-//	zeroI int - the index into the heap of the element you want to move down. Array indices start with the number zero.TODO change
+//	i int - the index into the heap of the element you want to move down. Array indices start with the number zero.TODO change
 //	lt func(l, r A) bool - A predicate function that determines whether or not the left A element is less than the right A element.
 //
 // Returns - The original heap (as a slice) that has the i'th element in its proper position
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too big.
-func HeapifyDown(heap []*Cache, zeroI int, lt func(l, r *Cache) bool) []*Cache {
-	n := len(heap)
+func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
+	n := len(heap) - 1
 	if n == 0 {
 		return []*Cache{}
 	}
 
-	i := zeroI + 1
+	j := i //maybe busted herei + 1
 
-	var j int
-	if 2*i > n {
+	var k int
+	if 2*j > n {
 		return heap
-	} else if 2*i < n {
-		leftIdx := 2 * i
-		rightIdx := (2 * i) + 1
+	} else if 2*j < n {
+		leftIdx := 2 * j
+		rightIdx := (2 * j) + 1
 		leftVal := heap[leftIdx]
 		rightVal := heap[rightIdx]
 		if lt(leftVal, rightVal) {
-			j = leftIdx
+			k = leftIdx
 		} else {
-			j = rightIdx
+			k = rightIdx
 		}
-	} else if 2*i == n {
-		j = 2 * i
+	} else if 2*j == n {
+		k = 2 * j
 	}
-	if lt(heap[j], heap[i]) {
+	if lt(heap[k], heap[j]) {
 		//Swap elements
-		temp := heap[i]
-		temp2 := heap[j]
-		heap[j] = temp
-		heap[i] = temp2
-		heap = HeapifyDown(heap, j, lt)
+		temp := heap[j]
+		temp2 := heap[k]
+		heap[k] = temp
+		heap[j] = temp2
+		heap = HeapifyDown(heap, k, lt)
 	}
 	return heap
 }
@@ -166,31 +177,40 @@ func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
 //
 // Returns - The original heap that has the given element in its proper position
 // Performance - O(log N)
-func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
+func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, error) {
+	sliceOffHole := func() []*Cache {
+		return heap[0 : len(heap)-1] //Rip the last (the one you wanted to delete) empty element off heap
+	}
+
 	n := len(heap)
 	if n == 0 {
-		return []*Cache{}
+		return []*Cache{}, nil
 	}
 
 	if i > len(heap)-1 {
 		log.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
+		return heap, fmt.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
 	}
 
-	heap[i] = heap[len(heap)-1]  //Move last element into slot you are deleting
-	heap = heap[0 : len(heap)-1] //Rip the last empty element off heap
+	heap[i] = heap[len(heap)-1] //Move last element into slot you are deleting
+	//heap = heap[0 : len(heap)-1] //Rip the last empty element off heap
+	heap[len(heap)-1] = nil //Make last element nil in preparation for removing it at the end of the delete operation
 
-	//If index you are trying to delete is one of the last two in the heap, then just return the heap(its underlying array)
-	//with the last element missing because that cannot possibly violate the heap property that a child must be be greater
-	//or equal to its parent.
-	if i > len(heap)-2 {
-		return heap
-	}
+	////If index you are trying to delete is one of the last two in the heap, then just return the heap(its underlying array)
+	////with the last element missing because that cannot possibly violate the heap property that a child must be greater
+	////or equal to its parent.
+	//if i > len(heap)-2 {
+	//	return heap, nil
+	//}
 	parent := ParentIdx(i)
+	if heap[i] == nil {
+		return sliceOffHole(), nil
+	}
 	if parent > 0 && lt(heap[i], heap[parent]) {
 		heap = HeapifyUp(heap, i, lt)
 	} else {
 		heap = HeapifyDown(heap, i, lt)
 	}
 	//heap = heap[0 : len(heap)-1] //Rip the last (the one you wanted to delete) empty element off heap
-	return heap
+	return sliceOffHole(), nil
 }
