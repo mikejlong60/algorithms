@@ -74,31 +74,29 @@ func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 		return []*Cache{}
 	}
 
-	j := i //maybe busted herei + 1
-
-	var k int
-	if 2*j > n {
+	var j int
+	if 2*i > n {
 		return heap
-	} else if 2*j < n {
-		leftIdx := 2 * j
-		rightIdx := (2 * j) + 1
-		leftVal := heap[leftIdx]
-		rightVal := heap[rightIdx]
+	} else if 2*i < n {
+		left := 2 * i
+		right := (2 * i) + 1
+		leftVal := heap[left]
+		rightVal := heap[right]
 		if lt(leftVal, rightVal) {
-			k = leftIdx
+			j = left
 		} else {
-			k = rightIdx
+			j = right
 		}
-	} else if 2*j == n {
-		k = 2 * j
+	} else if 2*i == n {
+		j = 2 * i
 	}
-	if lt(heap[k], heap[j]) {
+	if lt(heap[j], heap[i]) {
 		//Swap elements
-		temp := heap[j]
-		temp2 := heap[k]
-		heap[k] = temp
-		heap[j] = temp2
-		heap = HeapifyDown(heap, k, lt)
+		temp := heap[i]
+		temp2 := heap[j]
+		heap[j] = temp
+		heap[i] = temp2
+		heap = HeapifyDown(heap, j, lt)
 	}
 	return heap
 }
@@ -156,7 +154,7 @@ func findFirstEmptySlotInHeap(h []*Cache) int {
 // Performance - O(log N)
 func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
 	if len(heap) == 0 {
-		return []*Cache{}
+		heap = make([]*Cache, 1)
 	}
 
 	l := findFirstEmptySlotInHeap(heap)

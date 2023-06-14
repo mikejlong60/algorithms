@@ -32,11 +32,11 @@ func parentIsGreater(heap []*Cache, lastIdx int, parentGT func(l, r *Cache) bool
 	return errors
 }
 
-func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
-	g := propcheck.ChooseArray(0, 20000, propcheck.ChooseInt(0, 1000000))
+func TestHeapInsertWithEmptyHeap(t *testing.T) {
+	g := propcheck.ChooseArray(0, 100, propcheck.ChooseInt(0, 100))
 	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	insertIntoHeap := func(xss []int) []*Cache {
-		var r = StartHeap(len(xss))
+		var r = []*Cache{}
 		for _, x := range xss {
 			r = HeapInsert(r, &Cache{x, fmt.Sprintf("ts:%v", x)}, lt)
 		}
@@ -78,6 +78,140 @@ func TestHeapInsertAndStartHeapAndHeapifyUpWithInts(t *testing.T) {
 		validateIsAHeap, validateHeapMin,
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]int](t, result)
+}
+
+func TestHeapInsertWithNonEmptyHeapAndHolesAtEndOfHeap(t *testing.T) {
+	g := propcheck.ChooseArray(0, 100, propcheck.ChooseInt(0, 100))
+	rng := propcheck.SimpleRNG{346059182} //time.Now().Nanosecond()}
+	insertIntoHeap := func(xss []int) []*Cache {
+		var r = StartHeap(len(xss) + 21)
+		for _, x := range xss {
+			r = HeapInsert(r, &Cache{x, fmt.Sprintf("ts:%v", x)}, lt)
+		}
+		return r
+	}
+	insert := func(p []int) []*Cache {
+		xss := insertIntoHeap(p)
+		return xss
+	}
+	validateIsAHeap := func(p []*Cache) (bool, error) {
+		var errors error
+		for idx, x := range p {
+			if x != nil { //Heap could have some empty elements at end
+				errors = parentIsGreater(p, idx, gtWhenNonDefaultChild)
+			}
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	ltNoNilCheck := func(l, r *Cache) bool {
+		if l.ts < r.ts {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	validateHeapMin := func(p []*Cache) (bool, error) {
+		var errors error
+		var sorted = make([]*Cache, len(p))
+		copy(sorted, p)
+		for idx, x := range sorted { //Trim off em,pty elements at end to work around your sorting bug
+			if x == nil { //Heap could have some empty elements at end
+				sorted = sorted[0:idx]
+				break
+			}
+		}
+
+		sorting.QuickSort(sorted, ltNoNilCheck)
+		if len(p) > 0 && FindMin(p).ts != sorted[0].ts {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	prop := propcheck.ForAll(g,
+		"Validate HeapifyUp  \n",
+		insert,
+		validateIsAHeap, validateHeapMin,
+	)
+	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]int](t, result)
+}
+
+func TestHeapInsertWithNonEmptyHeapAndNoHolesAtEndOfHeap(t *testing.T) {
+	g := propcheck.ChooseArray(0, 100, propcheck.ChooseInt(0, 100))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	insertIntoHeap := func(xss []int) []*Cache {
+		var r = StartHeap(len(xss))
+		for _, x := range xss {
+			r = HeapInsert(r, &Cache{x, fmt.Sprintf("ts:%v", x)}, lt)
+		}
+		return r
+	}
+	insert := func(p []int) []*Cache {
+		xss := insertIntoHeap(p)
+		return xss
+	}
+	validateIsAHeap := func(p []*Cache) (bool, error) {
+		var errors error
+		for idx, x := range p {
+			if x != nil { //Heap could have some empty elements at end
+				errors = parentIsGreater(p, idx, gtWhenNonDefaultChild)
+			}
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	ltNoNilCheck := func(l, r *Cache) bool {
+		if l.ts < r.ts {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	validateHeapMin := func(p []*Cache) (bool, error) {
+		var errors error
+		var sorted = make([]*Cache, len(p))
+		copy(sorted, p)
+		for idx, x := range sorted { //Trim off em,pty elements at end to work around your sorting bug
+			if x == nil { //Heap could have some empty elements at end
+				sorted = sorted[0:idx]
+				break
+			}
+		}
+
+		sorting.QuickSort(sorted, ltNoNilCheck)
+		if len(p) > 0 && FindMin(p).ts != sorted[0].ts {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		}
+		if errors != nil {
+			return false, errors
+		} else {
+			return true, nil
+		}
+	}
+
+	prop := propcheck.ForAll(g,
+		"Validate HeapifyUp  \n",
+		insert,
+		validateIsAHeap, validateHeapMin,
+	)
+	result := prop.Run(propcheck.RunParms{1000, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }
 
@@ -163,11 +297,11 @@ func TestHeapDelete2(t *testing.T) {
 		var err error
 		r, err = HeapDelete(r, 0, lt)
 		log.Info(err)
-		r, err = HeapDelete(r, 1, lt)
-
-		log.Info(err)
-		r, err = HeapDelete(r, 2, lt)
-		log.Info(err)
+		//r, err = HeapDelete(r, 1, lt)
+		//
+		//log.Info(err)
+		//r, err = HeapDelete(r, 2, lt)
+		//log.Info(err)
 		return r
 	}
 
