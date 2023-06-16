@@ -119,11 +119,11 @@ func StartHeap(n int) []*Cache {
 //
 // Returns -the minimum element in the given heap without removing it. O(1)
 // Performance - O(1)
-func FindMin(heap []*Cache) *Cache {
-	if len(heap) == 0 {
-		panic("heap is empty. FindMin is therefore irrelevant.")
+func FindMin(heap []*Cache) (*Cache, error) {
+	if len(heap) == 0 || heap[0] == nil {
+		return nil, fmt.Errorf("heap is empty or filled with nil pointers. FindMin is therefore irrelevant.")
 	}
-	return heap[0]
+	return heap[0], nil
 }
 
 //	h []A - the slice that is holding the heap

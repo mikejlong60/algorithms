@@ -18,6 +18,18 @@ func gtWhenNonDefaultChild(l, r *Cache) bool {
 	}
 }
 
+// Find the mimimum and compares it to the actual min in the initial array.
+// If array is empty or filled with nil pointers that is OK and FindMin should not fail
+// but return a Golang error, not panic.
+func minimumCorrectValue(p, sorted []*Cache) bool {
+	min, err := FindMin(p)
+	if len(p) > 0 && err == nil {
+		return min.ts == sorted[0].ts
+	} else {
+		return true
+	}
+}
+
 func parentIsGreater(heap []*Cache, lastIdx int, parentGT func(l, r *Cache) bool) error {
 	var pIdx = ParentIdx(lastIdx)
 	var cIdx = lastIdx
@@ -62,8 +74,8 @@ func TestHeapInsertWithEmptyHeap(t *testing.T) {
 		var sorted = make([]*Cache, len(p))
 		copy(sorted, p)
 		sorting.QuickSort(sorted, lt)
-		if len(p) > 0 && FindMin(p).ts != sorted[0].ts {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		if !minimumCorrectValue(p, sorted) {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
 		}
 		if errors != nil {
 			return false, errors
@@ -82,8 +94,8 @@ func TestHeapInsertWithEmptyHeap(t *testing.T) {
 }
 
 func TestHeapInsertWithNonEmptyHeapAndHolesAtEndOfHeap(t *testing.T) {
-	g := propcheck.ChooseArray(0, 100, propcheck.ChooseInt(0, 100))
-	rng := propcheck.SimpleRNG{346059182} //time.Now().Nanosecond()}
+	g := propcheck.ChooseArray(0, 10000, propcheck.ChooseInt(0, 100))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	insertIntoHeap := func(xss []int) []*Cache {
 		var r = StartHeap(len(xss) + 21)
 		for _, x := range xss {
@@ -129,8 +141,8 @@ func TestHeapInsertWithNonEmptyHeapAndHolesAtEndOfHeap(t *testing.T) {
 		}
 
 		sorting.QuickSort(sorted, ltNoNilCheck)
-		if len(p) > 0 && FindMin(p).ts != sorted[0].ts {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		if !minimumCorrectValue(p, sorted) {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
 		}
 		if errors != nil {
 			return false, errors
@@ -140,7 +152,7 @@ func TestHeapInsertWithNonEmptyHeapAndHolesAtEndOfHeap(t *testing.T) {
 	}
 
 	prop := propcheck.ForAll(g,
-		"Validate HeapifyUp  \n",
+		"Validate HeapInsertWithNonEmptyHeapAndHolesAtEndOfHeap  \n",
 		insert,
 		validateIsAHeap, validateHeapMin,
 	)
@@ -196,8 +208,8 @@ func TestHeapInsertWithNonEmptyHeapAndNoHolesAtEndOfHeap(t *testing.T) {
 		}
 
 		sorting.QuickSort(sorted, ltNoNilCheck)
-		if len(p) > 0 && FindMin(p).ts != sorted[0].ts {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		if !minimumCorrectValue(p, sorted) {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
 		}
 		if errors != nil {
 			return false, errors
@@ -261,8 +273,8 @@ func TestHeapDelete1(t *testing.T) {
 		var sorted = make([]*Cache, len(p))
 		copy(sorted, p)
 		sorting.QuickSort(sorted, lt)
-		if len(p) > 0 && FindMin(p) != sorted[0] {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		if !minimumCorrectValue(p, sorted) {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
 		}
 		if errors != nil {
 			return false, errors
@@ -321,8 +333,8 @@ func TestHeapDelete2(t *testing.T) {
 		var sorted = make([]*Cache, len(p))
 		copy(sorted, p)
 		sorting.QuickSort(sorted, lt)
-		if len(p) > 0 && FindMin(p) != sorted[0] {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin returned:%v but should have returned:%v", FindMin(p), sorted[0]))
+		if !minimumCorrectValue(p, sorted) {
+			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
 		}
 		if errors != nil {
 			return false, errors
