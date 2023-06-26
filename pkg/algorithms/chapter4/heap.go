@@ -69,6 +69,37 @@ func HeapifyUp(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 // Returns - The original heap (as a slice) that has the i'th element in its proper position
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too big.
 func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
+	var j int
+	var n = len(heap) - 1
+	if 2*i > n {
+		return heap
+
+	} else if 2*i < n {
+		j = 0
+		left := 2 * i
+		var right = (2 * i) + 1
+		leftVal := heap[left]
+		rightVal := heap[right]
+		if lt(leftVal, rightVal) {
+			j = left
+		} else {
+			j = right
+		}
+	} else if 2*i == n {
+		j = 2 * i
+	}
+	if lt(heap[j], heap[i]) {
+		//Swap elements
+		temp := heap[i]
+		temp2 := heap[j]
+		heap[j] = temp
+		heap[i] = temp2
+		heap = HeapifyDown(heap, j, lt)
+	}
+	return heap
+}
+
+func HeapcfifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 	n := len(heap) - 1
 	if n == 0 {
 		return []*Cache{}
@@ -176,6 +207,33 @@ func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
 // Returns - The original heap that has the given element in its proper position
 // Performance - O(log N)
 func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, error) {
+
+	n := len(heap)
+	if n == 0 {
+		return []*Cache{}, nil
+	}
+
+	if i > len(heap)-1 {
+		log.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
+		return heap, fmt.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
+	}
+
+	//Delete last and only element from heap
+	if i == len(heap)-1 {
+		return []*Cache{}, nil
+	}
+	heap[i] = heap[len(heap)-1]
+	heap = heap[0:len(heap)]
+	//back := heap[i+1:]
+	//heap = append(front, back...) //Move last element into slot you are deleting
+	if len(heap) == 1 {
+		return heap, nil
+	} else {
+		return HeapifyDown(heap, i, lt), nil
+	}
+}
+
+func HeapsgsDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, error) {
 	sliceOffHole := func() []*Cache {
 		return heap[0 : len(heap)-1] //Rip the last (the one you wanted to delete) empty element off heap
 	}

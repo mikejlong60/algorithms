@@ -227,6 +227,8 @@ func TestHeapInsertWithNonEmptyHeapAndNoHolesAtEndOfHeap(t *testing.T) {
 	propcheck.ExpectSuccess[[]int](t, result)
 }
 
+var it = 0
+
 func TestHeapDelete1(t *testing.T) {
 
 	insertIntoHeap := func(xss []int) []*Cache {
@@ -238,6 +240,8 @@ func TestHeapDelete1(t *testing.T) {
 	}
 
 	var deleteFromHeap = func(xss []int) []*Cache {
+		it = it + 1
+		log.Debugf("Iyteration:%v", it)
 		r := insertIntoHeap(xss)
 		//var l = len(r)
 		var err error
@@ -283,8 +287,8 @@ func TestHeapDelete1(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseArray(0, 14, propcheck.ChooseInt(1, 2000))
-	rng := propcheck.SimpleRNG{30579879} //time.Now().Nanosecond()}
+	g0 := propcheck.ChooseArray(0, 400, propcheck.ChooseInt(1, 2000))
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g0,
 		"Validate HeapDelete  \n",
 		deleteFromHeap,
@@ -295,7 +299,7 @@ func TestHeapDelete1(t *testing.T) {
 }
 
 func TestHeapDelete2(t *testing.T) {
-
+	var errors error
 	insertIntoHeap := func(xss []int) []*Cache {
 		var r = StartHeap(1)
 		for _, x := range xss {
@@ -304,16 +308,25 @@ func TestHeapDelete2(t *testing.T) {
 		return r
 	}
 
-	var deleteFromHeap = func(xss []int) []*Cache {
-		r := insertIntoHeap(xss)
-		var err error
-		r, err = HeapDelete(r, 0, lt)
-		log.Info(err)
-		//r, err = HeapDelete(r, 1, lt)
-		//
-		//log.Info(err)
-		//r, err = HeapDelete(r, 2, lt)
-		//log.Info(err)
+	correctHeapMin := func(p []*Cache) bool {
+		var sorted = make([]*Cache, len(p))
+		copy(sorted, p)
+		sorting.QuickSort(sorted, lt)
+		if !minimumCorrectValue(p, sorted) {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	var deleteAllFromHeap = func(xss []int) []*Cache {
+		var r = insertIntoHeap(xss)
+		for range r {
+			r, _ = HeapDelete(r, 0, lt)
+			if !correctHeapMin(r) {
+				errors = multierror.Append(errors, fmt.Errorf("Heap property violated"))
+			}
+		}
 		return r
 	}
 
@@ -328,14 +341,8 @@ func TestHeapDelete2(t *testing.T) {
 			return true, nil
 		}
 	}
-	validateHeapMin := func(p []*Cache) (bool, error) {
-		var errors error
-		var sorted = make([]*Cache, len(p))
-		copy(sorted, p)
-		sorting.QuickSort(sorted, lt)
-		if !minimumCorrectValue(p, sorted) {
-			errors = multierror.Append(errors, fmt.Errorf("FindMin should have returned:%v", sorted[0]))
-		}
+
+	heapWrong := func(p []*Cache) (bool, error) {
 		if errors != nil {
 			return false, errors
 		} else {
@@ -343,13 +350,13 @@ func TestHeapDelete2(t *testing.T) {
 		}
 	}
 
-	g0 := propcheck.ChooseArray(0, 14, propcheck.ChooseInt(1, 2000))
-	rng := propcheck.SimpleRNG{30579879} //time.Now().Nanosecond()}
+	g0 := propcheck.ChooseArray(0, 9, propcheck.ChooseInt(1, 2000))
+	rng := propcheck.SimpleRNG{531874217} //time.Now().Nanosecond()}
 	prop := propcheck.ForAll(g0,
 		"Validate HeapDelete  \n",
-		deleteFromHeap,
-		validateIsAHeap, validateHeapMin,
+		deleteAllFromHeap,
+		validateIsAHeap, heapWrong,
 	)
-	result := prop.Run(propcheck.RunParms{100, rng}) //The 3rd iteration paniced with array out or bounds
+	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }
