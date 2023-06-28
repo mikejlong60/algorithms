@@ -5,22 +5,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Cache struct {
-	ts   int
-	data string
+type Frequency struct {
+	probability float32
+	letter      string
 }
 
-func lt(l, r *Cache) bool {
-	if l != nil && r != nil && l.ts < r.ts {
-		return true
-	} else {
-		return false
-	}
+func (w Frequency) String() string {
+	return fmt.Sprintf("Frequency{probability:%v, letter:%v}", w.probability, w.letter)
 }
 
 // i int - the index in the given heap of the parent of element i. Array indices start with the number zero.
 // Performance - O(1)
-func ParentIdx(i int) int {
+func FrequencyIdx(i int) int {
 	//Odd number
 	if i%2 > 0 {
 		return i / 2
@@ -41,19 +37,19 @@ func ParentIdx(i int) int {
 //
 // Returns - The modified heap (as a slice) that has the i'th element in its proper position in the heap
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too small.
-func HeapifyUp(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
+func HeapifyUpF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) []*Frequency {
 	if len(heap) == 0 {
-		return []*Cache{}
+		return []*Frequency{}
 	}
 	if i > 0 {
-		j := ParentIdx(i)
+		j := FrequencyIdx(i)
 		if lt(heap[i], heap[j]) {
 			//Swap elements
 			temp := heap[i]
 			temp2 := heap[j]
 			heap[j] = temp
 			heap[i] = temp2
-			heap = HeapifyUp(heap, j, lt)
+			heap = HeapifyUpF(heap, j, lt)
 		}
 	}
 	return heap
@@ -68,7 +64,7 @@ func HeapifyUp(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 //
 // Returns - The original heap (as a slice) that has the i'th element in its proper position
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too big.
-func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
+func HeapifyDownF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) []*Frequency {
 	var j int
 	var n = len(heap) - 1
 	if 2*i > n {
@@ -94,7 +90,7 @@ func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 		temp2 := heap[j]
 		heap[j] = temp
 		heap[i] = temp2
-		heap = HeapifyDown(heap, j, lt)
+		heap = HeapifyDownF(heap, j, lt)
 	}
 	return heap
 }
@@ -105,8 +101,8 @@ func HeapifyDown(heap []*Cache, i int, lt func(l, r *Cache) bool) []*Cache {
 //
 // Returns - A new heap (as a slice) of size n that has every element initialized to the zero value
 // Performance - O(N)
-func StartHeap(n int) []*Cache {
-	var x = make([]*Cache, n)
+func StartHeapF(n int) []*Frequency {
+	var x = make([]*Frequency, n)
 	return x
 }
 
@@ -117,7 +113,7 @@ func StartHeap(n int) []*Cache {
 //
 // Returns -the minimum element in the given heap without removing it. O(1)
 // Performance - O(1)
-func FindMin(heap []*Cache) (*Cache, error) {
+func FindMinF(heap []*Frequency) (*Frequency, error) {
 	if len(heap) == 0 || heap[0] == nil {
 		return nil, fmt.Errorf("heap is empty or filled with nil pointers. FindMin is therefore irrelevant.")
 	}
@@ -129,7 +125,7 @@ func FindMin(heap []*Cache) (*Cache, error) {
 // Returns - A pure function. The index of the first empty slot in the heap, or -1 if there are no empty slots
 // Performance - O(N)
 // TODO maybe you never have empty slots because you are using slices
-func findFirstEmptySlotInHeap(h []*Cache) int {
+func findFirstEmptySlotInHeapF(h []*Frequency) int {
 	for i, x := range h {
 		if x == nil {
 			return i
@@ -150,18 +146,18 @@ func findFirstEmptySlotInHeap(h []*Cache) int {
 //
 // Returns - The original heap (as a slice) that has the given element in its proper position
 // Performance - O(log N)
-func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
+func HeapInsertF(heap []*Frequency, a *Frequency, lt func(l, r *Frequency) bool) []*Frequency {
 	if len(heap) == 0 {
-		heap = make([]*Cache, 1)
+		heap = make([]*Frequency, 1)
 	}
 
-	l := findFirstEmptySlotInHeap(heap)
+	l := findFirstEmptySlotInHeapF(heap)
 	if l == -1 { //No empty slot so add a new spot at the end and put the new element there
 		heap = append(heap, nil)
 		l = len(heap) - 1
 	}
 	heap[l] = a
-	return HeapifyUp(heap, l, lt)
+	return HeapifyUpF(heap, l, lt)
 }
 
 // Deletes an element from the given heap. This is not a pure function.
@@ -173,11 +169,11 @@ func HeapInsert(heap []*Cache, a *Cache, lt func(l, r *Cache) bool) []*Cache {
 //
 // Returns - The original heap that has the given element in its proper position
 // Performance - O(log N)
-func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, error) {
+func HeapDeleteF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) ([]*Frequency, error) {
 
 	n := len(heap)
 	if n == 0 {
-		return []*Cache{}, nil
+		return []*Frequency{}, nil
 	}
 
 	if i > len(heap)-1 {
@@ -187,7 +183,7 @@ func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, erro
 
 	//Delete last and only element from heap
 	if i == len(heap)-1 {
-		return []*Cache{}, nil
+		return []*Frequency{}, nil
 	}
 	heap[i] = heap[len(heap)-1]
 	heap = heap[0 : len(heap)-1]
@@ -196,6 +192,6 @@ func HeapDelete(heap []*Cache, i int, lt func(l, r *Cache) bool) ([]*Cache, erro
 	if len(heap) == 1 {
 		return heap, nil
 	} else {
-		return HeapifyDown(heap, i, lt), nil
+		return HeapifyDownF(heap, i, lt), nil
 	}
 }
