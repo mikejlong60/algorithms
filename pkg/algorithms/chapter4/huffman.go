@@ -14,6 +14,54 @@ func (w Frequency) String() string {
 	return fmt.Sprintf("Frequency{probability:%v, letter:%v}", w.probability, w.letter)
 }
 
+// Gets and deletes first element. Modifies the passed heap by deleteing the first element and restoring the heap property
+// Returns - The heap with the top element deleted, the popped top element, and an error if the passed heap is empty
+func HeapPopF(heap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, *Frequency, error) {
+	fst, err := FindMinF(heap)
+	if err != nil {
+		return heap, nil, err
+	} else {
+		heap, err = HeapDeleteF(heap, 0, lt)
+		if err != nil {
+			return heap, nil, err
+		}
+		return heap, fst, nil
+	}
+}
+
+// freqHeap and encodingHeap are the same starting out
+// Returns - An error if the passed heap element index is greater than the length of the heap
+func Huffman(freqHeap, encodingHeap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, []*Frequency) {
+	if len(freqHeap) == 2 {
+		freqHeap, fst, err := HeapPopF(freqHeap, lt)
+		if err != nil {
+			log.Errorf("HeapPopF failed:%v", err)
+		}
+		freqHeap, snd, err := HeapPopF(freqHeap, lt)
+		if err != nil {
+			log.Errorf("HeapPopF failed:%v", err)
+		}
+		encodingHeap = HeapInsertF(encodingHeap, fst, lt)
+		encodingHeap = HeapInsertF(encodingHeap, snd, lt)
+	} else {
+		freqHeap, fst, err := HeapPopF(freqHeap, lt)
+		if err != nil {
+			log.Errorf("HeapPopF failed:%v", err)
+		}
+		freqHeap, snd, err := HeapPopF(freqHeap, lt)
+		if err != nil {
+			log.Errorf("HeapPopF failed:%v", err)
+		}
+		meta := Frequency{
+			probability: fst.probability + snd.probability,
+			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
+		}
+		encodingHeap = HeapInsertF(encodingHeap, &meta, lt)
+		freqHeap, encodingHeap = Huffman(freqHeap, encodingHeap, lt)
+	}
+	return freqHeap, encodingHeap
+}
+
 // i int - the index in the given heap of the parent of element i. Array indices start with the number zero.
 // Performance - O(1)
 func FrequencyIdx(i int) int {
@@ -39,7 +87,7 @@ func FrequencyIdx(i int) int {
 // Performance - O(log N) assuming that the array is almost-a-heap with the key: heap(i) too small.
 func HeapifyUpF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) []*Frequency {
 	if len(heap) == 0 {
-		return []*Frequency{}
+		return heap
 	}
 	if i > 0 {
 		j := FrequencyIdx(i)
@@ -187,8 +235,6 @@ func HeapDeleteF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) ([]*Fr
 	}
 	heap[i] = heap[len(heap)-1]
 	heap = heap[0 : len(heap)-1]
-	//back := heap[i+1:]
-	//heap = append(front, back...) //Move last element into slot you are deleting
 	if len(heap) == 1 {
 		return heap, nil
 	} else {
