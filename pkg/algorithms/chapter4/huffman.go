@@ -31,7 +31,7 @@ func HeapPopF(heap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, *
 
 // freqHeap and encodingHeap are the same starting out
 // Returns - An error if the passed heap element index is greater than the length of the heap
-func Huffman(freqHeap, encodingHeap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, []*Frequency) {
+func Huffman(freqHeap, encodingHeap []*Frequency, lt, gt func(l, r *Frequency) bool) ([]*Frequency, []*Frequency) {
 	if len(freqHeap) == 2 {
 		freqHeap, fst, err := HeapPopF(freqHeap, lt)
 		if err != nil {
@@ -41,14 +41,14 @@ func Huffman(freqHeap, encodingHeap []*Frequency, lt func(l, r *Frequency) bool)
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
-		encodingHeap = HeapInsertF(encodingHeap, fst, lt)
-		encodingHeap = HeapInsertF(encodingHeap, snd, lt)
+		encodingHeap = HeapInsertF(encodingHeap, fst, gt)
+		encodingHeap = HeapInsertF(encodingHeap, snd, gt)
 	} else {
 		freqHeap, fst, err := HeapPopF(freqHeap, lt)
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
-		freqHeap, snd, err := HeapPopF(freqHeap, lt)
+		snd, err := FindMinF(freqHeap)
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
@@ -56,8 +56,10 @@ func Huffman(freqHeap, encodingHeap []*Frequency, lt func(l, r *Frequency) bool)
 			probability: fst.probability + snd.probability,
 			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
 		}
-		encodingHeap = HeapInsertF(encodingHeap, &meta, lt)
-		freqHeap, encodingHeap = Huffman(freqHeap, encodingHeap, lt)
+		encodingHeap = HeapInsertF(encodingHeap, fst, gt)
+		encodingHeap = HeapInsertF(encodingHeap, snd, gt)
+		encodingHeap = HeapInsertF(encodingHeap, &meta, gt)
+		freqHeap, encodingHeap = Huffman(freqHeap, encodingHeap, lt, gt)
 	}
 	return freqHeap, encodingHeap
 }

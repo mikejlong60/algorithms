@@ -14,6 +14,14 @@ func frequencyLt(l, r *Frequency) bool {
 	}
 }
 
+func frequencyGt(l, r *Frequency) bool {
+	if l.probability > r.probability {
+		return true
+	} else {
+		return false
+	}
+}
+
 func frequencyEq(l, r *Frequency) bool {
 	if l.probability == r.probability {
 		return true
@@ -49,6 +57,7 @@ func TestHuffmanHeapFromBook(t *testing.T) {
 	//var actual *[]*Frequency
 	var actual = insertIntoHeap(f)
 	var expected = []*Frequency{&e, &d, &b, &a, &c}
+	fmt.Println(expected)
 	if !arrays.ArrayEquality(actual, expected, frequencyEq) {
 		t.Errorf("Actual:%v, \nexpected:%v", actual, expected)
 	}
@@ -106,7 +115,7 @@ func TestHuffmanHeapFromBook2(t *testing.T) {
 	var freq = insertIntoHeap(f)
 	//var expected = []*Frequency{&e, &d, &b, &a, &c}
 
-	freq, enc := Huffman(freq, []*Frequency{}, frequencyLt)
+	freq, enc := Huffman(freq, []*Frequency{}, frequencyLt, frequencyLt)
 	if len(freq) != 0 {
 		t.Errorf("Expected freq to be len 0 but was:%v", len(freq))
 	}
