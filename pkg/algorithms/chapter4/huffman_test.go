@@ -32,19 +32,19 @@ func frequencyEq(l, r *Frequency) bool {
 
 func TestHuffmanHeapFromBook(t *testing.T) {
 	a := Frequency{
-		.32, "a",
+		.32, "a", nil, nil,
 	}
 	b := Frequency{
-		.25, "b",
+		.25, "b", nil, nil,
 	}
 	c := Frequency{
-		.20, "c",
+		.20, "c", nil, nil,
 	}
 	d := Frequency{
-		.18, "d",
+		.18, "d", nil, nil,
 	}
 	e := Frequency{
-		.05, "e",
+		.05, "e", nil, nil,
 	}
 	f := []*Frequency{&a, &b, &c, &d, &e}
 	insertIntoHeap := func(xss []*Frequency) []*Frequency {
@@ -90,19 +90,19 @@ func TestHuffmanHeapFromBook(t *testing.T) {
 
 func TestHuffmanHeapFromBook2(t *testing.T) {
 	a := Frequency{
-		.32, "a",
+		.32, "a", nil, nil,
 	}
 	b := Frequency{
-		.25, "b",
+		.25, "b", nil, nil,
 	}
 	c := Frequency{
-		.20, "c",
+		.20, "c", nil, nil,
 	}
 	d := Frequency{
-		.18, "d",
+		.18, "d", nil, nil,
 	}
 	e := Frequency{
-		.05, "e",
+		.05, "e", nil, nil,
 	}
 	f := []*Frequency{&a, &b, &c, &d, &e}
 	insertIntoHeap := func(xss []*Frequency) []*Frequency {
@@ -115,9 +115,11 @@ func TestHuffmanHeapFromBook2(t *testing.T) {
 	var freq = insertIntoHeap(f)
 	//var expected = []*Frequency{&e, &d, &b, &a, &c}
 
-	freq, enc := Huffman(freq, []*Frequency{}, frequencyLt, frequencyLt)
-	if len(freq) != 0 {
-		t.Errorf("Expected freq to be len 0 but was:%v", len(freq))
+	freq = Huffman(freq, frequencyLt)
+	if len(freq) != 1 {
+		t.Errorf("Expected freq to be len 1 but was:%v", len(freq))
 	}
-	fmt.Println(enc)
+
+	//TODO add better test. But algorithm is correct!!!
+	fmt.Println(freq)
 }

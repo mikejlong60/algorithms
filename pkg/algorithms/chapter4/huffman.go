@@ -8,10 +8,12 @@ import (
 type Frequency struct {
 	probability float32
 	letter      string
+	l           *Frequency
+	r           *Frequency
 }
 
 func (w Frequency) String() string {
-	return fmt.Sprintf("Frequency{probability:%v, letter:%v}", w.probability, w.letter)
+	return fmt.Sprintf("Frequency{probability:%v, letter:%v, l:%v, r:%v}", w.probability, w.letter, w.l, w.r)
 }
 
 // Gets and deletes first element. Modifies the passed heap by deleteing the first element and restoring the heap property
@@ -31,7 +33,7 @@ func HeapPopF(heap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, *
 
 // freqHeap and encodingHeap are the same starting out
 // Returns - An error if the passed heap element index is greater than the length of the heap
-func Huffman(freqHeap, encodingHeap []*Frequency, lt, gt func(l, r *Frequency) bool) ([]*Frequency, []*Frequency) {
+func Huffman(freqHeap []*Frequency, lt func(l, r *Frequency) bool) []*Frequency {
 	if len(freqHeap) == 2 {
 		freqHeap, fst, err := HeapPopF(freqHeap, lt)
 		if err != nil {
@@ -41,27 +43,33 @@ func Huffman(freqHeap, encodingHeap []*Frequency, lt, gt func(l, r *Frequency) b
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
-		encodingHeap = HeapInsertF(encodingHeap, fst, gt)
-		encodingHeap = HeapInsertF(encodingHeap, snd, gt)
+
+		meta := Frequency{
+			probability: fst.probability + snd.probability,
+			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
+			l:           fst,
+			r:           snd,
+		}
+		return HeapInsertF(freqHeap, &meta, lt)
 	} else {
 		freqHeap, fst, err := HeapPopF(freqHeap, lt)
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
-		snd, err := FindMinF(freqHeap)
+		freqHeap, snd, err := HeapPopF(freqHeap, lt)
 		if err != nil {
 			log.Errorf("HeapPopF failed:%v", err)
 		}
 		meta := Frequency{
 			probability: fst.probability + snd.probability,
 			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
+			l:           fst,
+			r:           snd,
 		}
-		encodingHeap = HeapInsertF(encodingHeap, fst, gt)
-		encodingHeap = HeapInsertF(encodingHeap, snd, gt)
-		encodingHeap = HeapInsertF(encodingHeap, &meta, gt)
-		freqHeap, encodingHeap = Huffman(freqHeap, encodingHeap, lt, gt)
+		freqHeap = HeapInsertF(freqHeap, &meta, lt)
+		return Huffman(freqHeap, lt)
 	}
-	return freqHeap, encodingHeap
+	//return freqHeap
 }
 
 // i int - the index in the given heap of the parent of element i. Array indices start with the number zero.
