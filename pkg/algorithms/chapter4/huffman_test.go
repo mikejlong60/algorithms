@@ -120,6 +120,9 @@ func TestHuffmanHeapFromBook2(t *testing.T) {
 		t.Errorf("Expected freq to be len 1 but was:%v", len(freq))
 	}
 
-	//TODO add better test. But algorithm is correct!!!
-	fmt.Println(freq)
+	expected := Frequency{probability: 1, letter: "((c:(e:d)):(b:a))"}
+	if !(freq[0].letter == expected.letter && freq[0].probability == 1) {
+		t.Errorf("Expected freq to be a tree with the combined letters c,e,d,b,a at the top but was:%v", freq)
+	}
+
 }

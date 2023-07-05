@@ -46,7 +46,7 @@ func Huffman(freqHeap []*Frequency, lt func(l, r *Frequency) bool) []*Frequency 
 
 		meta := Frequency{
 			probability: fst.probability + snd.probability,
-			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
+			letter:      fmt.Sprintf("(%v:%v)", fst.letter, snd.letter),
 			l:           fst,
 			r:           snd,
 		}
@@ -62,7 +62,7 @@ func Huffman(freqHeap []*Frequency, lt func(l, r *Frequency) bool) []*Frequency 
 		}
 		meta := Frequency{
 			probability: fst.probability + snd.probability,
-			letter:      fmt.Sprintf("%v:%v", fst.letter, snd.letter),
+			letter:      fmt.Sprintf("(%v:%v)", fst.letter, snd.letter),
 			l:           fst,
 			r:           snd,
 		}
