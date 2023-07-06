@@ -1,21 +1,12 @@
 package chapter4
 
 import (
-	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
 	"testing"
 )
 
 func frequencyLt(l, r *Frequency) bool {
 	if l.probability < r.probability {
-		return true
-	} else {
-		return false
-	}
-}
-
-func frequencyGt(l, r *Frequency) bool {
-	if l.probability > r.probability {
 		return true
 	} else {
 		return false
@@ -54,10 +45,8 @@ func TestHuffmanHeapFromBook(t *testing.T) {
 		}
 		return r
 	}
-	//var actual *[]*Frequency
 	var actual = insertIntoHeap(f)
 	var expected = []*Frequency{&e, &d, &b, &a, &c}
-	fmt.Println(expected)
 	if !arrays.ArrayEquality(actual, expected, frequencyEq) {
 		t.Errorf("Actual:%v, \nexpected:%v", actual, expected)
 	}
@@ -113,7 +102,6 @@ func TestHuffmanHeapFromBook2(t *testing.T) {
 		return r
 	}
 	var freq = insertIntoHeap(f)
-	//var expected = []*Frequency{&e, &d, &b, &a, &c}
 
 	freq = Huffman(freq, frequencyLt)
 	if len(freq) != 1 {
@@ -122,7 +110,7 @@ func TestHuffmanHeapFromBook2(t *testing.T) {
 
 	expected := Frequency{probability: 1, letter: "((c:(e:d)):(b:a))"}
 	if !(freq[0].letter == expected.letter && freq[0].probability == 1) {
-		t.Errorf("Expected freq to be a tree with the combined letters c,e,d,b,a at the top but was:%v", freq)
+		t.Errorf("Expected freq to be a tree with the combined letters ((c:(e:d)):(b:a)) but was:%v", freq)
 	}
 
 }
