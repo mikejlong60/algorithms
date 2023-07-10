@@ -1,4 +1,4 @@
-package chapter4
+package chapter5
 
 func MergeSortWithInversionChecking[T any](xs []T, inversions int, isInversion func(l, r T) bool, lt func(l, r T) bool) ([]T, int) {
 	merge := func(lxs, rxs []T, inversions int, lt func(l, r T) bool) ([]T, int) {

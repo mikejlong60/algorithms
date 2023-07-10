@@ -26,15 +26,15 @@ func TestEqualityOfNodesInDfAndBfSearch(t *testing.T) {
 			bf := func(e []Edge) []int {
 				var r []int
 				for _, b := range e {
-					r = append(r, b.u)
-					r = append(r, b.v)
+					r = append(r, b.U)
+					r = append(r, b.V)
 				}
 				return r
 			}
 			df := func(e Edge) []int {
 				var r []int
-				r = append(r, e.u)
-				r = append(r, e.v)
+				r = append(r, e.U)
+				r = append(r, e.V)
 				return r
 			}
 			lt := func(l, r int) bool {

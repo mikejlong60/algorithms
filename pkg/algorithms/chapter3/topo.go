@@ -45,12 +45,12 @@ func MakeConnectedComponentsAsNodeForTopoOrdering(a propcheck.Pair[map[int]*Node
 	for _, xs := range cc.A {
 		if len(xs) > 1 && len(xs) < 4 { //Transform first connected component graph that is larger than one node into its equivalent NodeForTopoOrdering map for computing Topo ordering
 			for _, ys := range xs {
-				n := graph[ys.u]
-				oe := graph[ys.v]
+				n := graph[ys.U]
+				oe := graph[ys.V]
 				oe.IncomingConnections[n.Id] = &n
-				n.OutgoingConnections[ys.v] = &oe
-				if ys.u != ys.v { //Don't add top-level edge that points to itself
-					n.IncomingConnections[ys.u] = &n
+				n.OutgoingConnections[ys.V] = &oe
+				if ys.U != ys.V { //Don't add top-level edge that points to itself
+					n.IncomingConnections[ys.U] = &n
 				}
 				nodes[n.Id] = &n
 			}

@@ -31,8 +31,8 @@ func TestAllConnectedComponents(t *testing.T) {
 		g := func(connectedComponent []Edge) []int {
 			var r = []int{}
 			for _, i := range connectedComponent {
-				r = append(r, i.u)
-				r = append(r, i.v)
+				r = append(r, i.U)
+				r = append(r, i.V)
 			}
 			return sets.ToSet(r, lt, eq)
 		}

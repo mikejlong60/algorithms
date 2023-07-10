@@ -236,6 +236,6 @@ func TestHeapDelete(t *testing.T) {
 		deleteFromHeap,
 		validateIsAHeap, validateHeapMin,
 	)
-	result := prop.Run(propcheck.RunParms{6, rng})
+	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 }
