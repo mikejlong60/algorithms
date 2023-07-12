@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// This is solved exercise 1
 func FastestATTraverse(maxDistancePerDay, lastStopIdx int, campSites, route []int) (int, int, []int, []int) {
 	if len(route) == 0 {
 		route = append(route, campSites[0])
