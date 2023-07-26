@@ -15,7 +15,7 @@ type Pq struct {
 	Id       string
 }
 
-func DikjstraSearch(graph map[string]Node4, start string) map[string]*Pq {
+func DijkstraSearch(graph map[string]Node4, start string) map[string]*Pq {
 	var distances = make(map[string]*Pq)
 	for i, _ := range graph {
 		distances[i] = &Pq{Distance: math.MaxInt64, Id: i}
@@ -26,7 +26,7 @@ func DikjstraSearch(graph map[string]Node4, start string) map[string]*Pq {
 	for len(pq) > 0 {
 		current := pq[0]
 		pq = pq[1:]                                               //slice array at second element
-		if !(current.Distance > distances[current.Id].Distance) { //If current distance is LE previous distance to this node then replace node path and distance sum with the shorte4r path distance
+		if !(current.Distance > distances[current.Id].Distance) { //If current distance is LE previous distance to this node then replace node path and distance sum with the shorter path distance
 			for _, neighbor := range graph[current.Id].Connections {
 				distance := current.Distance + neighbor.Distance
 				if distance < distances[neighbor.Id].Distance {
