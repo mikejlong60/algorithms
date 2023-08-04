@@ -5,37 +5,42 @@ import (
 	"testing"
 )
 
-func TestBookExample(t *testing.T) {
+func TestExampleFromVideoWithNoCycles(t *testing.T) {
 
-	eq := func(l, r *ArbNodeEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+	eq := func(l, r Edge) bool {
+		if l.u == r.u && l.v == r.v {
 			return true
 		} else {
 			return false
 		}
 	}
 
-	a := ArbNode{id: "a"}
-	b := ArbNode{id: "b"}
-	c := ArbNode{id: "c"}
-	d := ArbNode{id: "d"}
-	e := ArbNode{id: "e"}
-	f := ArbNode{id: "f"}
+	a := Node{id: "a"}
+	b := Node{id: "b"}
+	c := Node{id: "c"}
+	d := Node{id: "d"}
+	e := Node{id: "e"}
+	f := Node{id: "f"}
 
-	ab := ArbNodeEdge{&a, &b, 2}
-	ac := ArbNodeEdge{&a, &c, 3}
-	ad := ArbNodeEdge{&a, &d, 3}
-	bd := ArbNodeEdge{&b, &d, 1}
-	be := ArbNodeEdge{&b, &e, 2}
-	cb := ArbNodeEdge{&c, &b, 1}
-	cf := ArbNodeEdge{&c, &f, 3}
-	de := ArbNodeEdge{&d, &e, 1}
-	df := ArbNodeEdge{&d, &f, 3}
-	ec := ArbNodeEdge{&e, &c, 1}
+	ab := Edge{&a, &b, 2}
+	ac := Edge{&a, &c, 10}
+	ad := Edge{&a, &d, 2}
+	be := Edge{&b, &e, 2}
+	bf := Edge{&b, &f, 8}
+	cf := Edge{&c, &f, 8}
+	cd := Edge{&c, &d, 2}
+	db := Edge{&d, &b, 4}
+	ec := Edge{&e, &c, 2}
 
-	s := []*ArbNodeEdge{&ab, &ac, &ad, &bd, &be, &cb, &cf, &de, &df, &ec}
+	b.nodesEntering = []Edge{db, ab}
+	c.nodesEntering = []Edge{ac, ec}
+	d.nodesEntering = []Edge{cd, ad}
+	e.nodesEntering = []Edge{be}
+	f.nodesEntering = []Edge{cf, bf}
+
+	s := []*Node{&a, &b, &c, &d, &e, &f}
 	actual := MinCost(s, &a)
-	expected := []*ArbNodeEdge{&ab, &bd, &de, &df, &ec}
+	expected := []Edge{ab, be, cd, ec, cf}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
