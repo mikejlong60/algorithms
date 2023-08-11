@@ -22,7 +22,7 @@ func (w Node) String() string {
 }
 
 func (w Edge) String() string {
-	return fmt.Sprintf("Edge{u:%v, v:%v, weight:%v}", w.u, w.v, w.weight)
+	return fmt.Sprintf("Edge{u:%v, v:%v, weight:%v}", w.u.id, w.v.id, w.weight)
 }
 
 // g is a Set with id as the key
@@ -72,16 +72,72 @@ func MinCost(g []*Node, r *Node) []Edge {
 		return rxs
 	}
 
+	//isArborescence := func(g []*Node, xs []Edge) bool {
+	//	if len(xs) == len(g)-1 {
+	//		return true
+	//	} else {
+	//		return false
+	//	}
+	//
+	//}
 	//Assign new weights to each Nodes entering node.
 	for _, b := range gs {
 		b.nodesEntering = relativeCost(b.nodesEntering)
 	}
 
-	//Choose 1 Edge for each Node that has the weight
-	result := []Edge{}
-	for _, b := range gs {
-		result = append(result, b.nodesEntering[0])
+	isCycle := func(xs []Edge) bool {
+		var seen = make(map[string]struct{})
+		for _, x := range xs {
+			_, uthere := seen[x.u.id]
+			if !uthere {
+				seen[x.u.id] = struct{}{}
+				_, vthere := seen[x.v.id]
+				if vthere {
+					return true
+				}
+				//} else {
+				//	return true
+			}
+		}
+		return false
 	}
 
+	buildCycleEdges := func(xs []Edge, end Edge) []Edge {
+		cycle := []Edge{}
+		for i := len(xs) - 1; i >= 0; i-- {
+			if xs[i].v == end.u {
+				break
+			} else {
+				cycle = append(cycle, xs[i])
+			}
+		}
+		return cycle
+	}
+	//Choose 1 Edge for each Node that has the least weight(it's zero) as long as it's not a cycle
+	var result = []Edge{}
+	for _, b := range gs {
+		leastEdge := b.nodesEntering[0]
+		result = append(result, leastEdge)
+		if isCycle(result) {
+
+			//TODO RESULT is  cycle!!! ow fix it
+			//Here is where you start to deal with the cycle:
+			//The Steps:
+			//    1. The beginning of the cycle is the node leastEdge.v you are pointing to.  The end of the cycle is the node leastEdge.u.
+			//    2. Trace backwards from the current node until you reach the node that you were pointing to here(leastEdge.u), recording
+			//       each Edge and that is the complete cycle.
+			cycle := buildCycleEdges(result, leastEdge)
+			fmt.Println(cycle)
+			//    3. Given that set of Edges, grab all the edges that point to any node in the cycle. And then choose the minimum weight
+			//       of all those. That edge is the one that enters the cycle. Call it A.
+			//    4. Then remove the edge from the cycle that points to A. That's where the cycle gets broken.
+			fmt.Println("Detected cycle")
+		}
+	}
+
+	//	if isArborescence(g, result) {
 	return result
+	//	} else {
+	//		return MinCost(g, r)
+	//	}
 }
