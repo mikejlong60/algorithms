@@ -2,6 +2,7 @@ package chapter4
 
 import (
 	"fmt"
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/sets"
 	"github.com/greymatter-io/golangz/sorting"
 )
@@ -26,6 +27,7 @@ func (w Edge) String() string {
 }
 
 // g is a Set with id as the key
+// r is the starting node
 //TODO this works for a graph with no cycles as per the example here: https://www.youtube.com/watch?v=B5H1qlv9hrg.
 //But you still need to detect a cycle and complete the algorithm as shown here: https://www.youtube.com/watch?v=mZBcslesf-o
 
@@ -85,18 +87,26 @@ func MinCost(g []*Node, r *Node) []Edge {
 		b.nodesEntering = relativeCost(b.nodesEntering)
 	}
 
-	isCycle := func(xs []Edge) bool {
+	isCycle := func(xs []Edge, startingNode *Node) bool {
 		var seen = make(map[string]struct{})
-		for _, x := range xs {
+		//remove starting edge from xs
+
+		//Remove starting node from candidate for cycle detection
+		rm := func(x Edge) bool {
+			if x.u.id == startingNode.id {
+				return false
+			} else {
+				return true
+			}
+		}
+		noStartingNode := arrays.Filter(xs, rm)
+
+		for _, x := range noStartingNode {
 			_, uthere := seen[x.u.id]
-			if !uthere {
+			if uthere {
+				return true
+			} else {
 				seen[x.u.id] = struct{}{}
-				_, vthere := seen[x.v.id]
-				if vthere {
-					return true
-				}
-				//} else {
-				//	return true
 			}
 		}
 		return false
@@ -118,7 +128,7 @@ func MinCost(g []*Node, r *Node) []Edge {
 	for _, b := range gs {
 		leastEdge := b.nodesEntering[0]
 		result = append(result, leastEdge)
-		if isCycle(result) {
+		if isCycle(result, r) {
 
 			//TODO RESULT is  cycle!!! ow fix it
 			//Here is where you start to deal with the cycle:
