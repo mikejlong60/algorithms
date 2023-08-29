@@ -18,6 +18,11 @@ type Edge struct {
 	weight int
 }
 
+func SetUnion[T any](a []T, b []T, lt, eq func(l, r T) bool) []T {
+	xs := arrays.Append(a, b)
+	return sets.ToSet(xs, lt, eq)
+}
+
 func (w Node) String() string {
 	return fmt.Sprintf("Edge{id:%v, nodesEntering:%v}", w.id, w.nodesEntering)
 }
@@ -87,29 +92,21 @@ func MinCost(g []*Node, r *Node) []Edge {
 		b.nodesEntering = relativeCost(b.nodesEntering)
 	}
 
-	isCycle := func(xs []Edge, startingNode *Node) bool {
-		var seen = make(map[string]struct{})
-		//remove starting edge from xs
+	isCycle := func(xs []Edge) (bool, string) {
+		var a = map[string]int{}
 
-		//Remove starting node from candidate for cycle detection
-		rm := func(x Edge) bool {
-			if x.u.id == startingNode.id {
-				return false
+		for i, x := range xs {
+			if i == 0 {
+				a[x.u.id] = a[x.u.id] + 1
+				a[x.v.id] = a[x.v.id] + 1
 			} else {
-				return true
+				a[x.v.id] = a[x.v.id] + 1
+			}
+			if a[x.v.id] > 1 {
+				return true, fmt.Sprintf("%v:%v", x.u.id, x.v.id)
 			}
 		}
-		noStartingNode := arrays.Filter(xs, rm)
-
-		for _, x := range noStartingNode {
-			_, uthere := seen[x.u.id]
-			if uthere {
-				return true
-			} else {
-				seen[x.u.id] = struct{}{}
-			}
-		}
-		return false
+		return false, ""
 	}
 
 	buildCycleEdges := func(xs []Edge, end Edge) []Edge {
@@ -128,9 +125,9 @@ func MinCost(g []*Node, r *Node) []Edge {
 	for _, b := range gs {
 		leastEdge := b.nodesEntering[0]
 		result = append(result, leastEdge)
-		if isCycle(result, r) {
-
-			//TODO RESULT is  cycle!!! ow fix it
+		isCycle, breakCycleAt := isCycle(result)
+		if isCycle {
+			fmt.Printf("breakCycleAt:%v\n", breakCycleAt)
 			//Here is where you start to deal with the cycle:
 			//The Steps:
 			//    1. The beginning of the cycle is the node leastEdge.v you are pointing to.  The end of the cycle is the node leastEdge.u.
