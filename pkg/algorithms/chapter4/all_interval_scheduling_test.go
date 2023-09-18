@@ -1,8 +1,8 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
-	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
@@ -73,5 +73,5 @@ func TestAllIntervalScheduling(t *testing.T) {
 			t.Errorf("Actual:%v Expected:%v", actual, expected)
 		}
 	}
-	log.Infof("total steps:%v", totalSteps1)
+	fmt.Printf("total steps:%v", totalSteps1)
 }

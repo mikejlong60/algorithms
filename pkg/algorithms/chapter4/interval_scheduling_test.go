@@ -1,8 +1,8 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
-	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
@@ -66,5 +66,5 @@ func TestIntervalScheduling(t *testing.T) {
 	if !arrays.ArrayEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v Expected:%v", actual, expected)
 	}
-	log.Infof("totalSteps:%child", totalSteps0)
+	fmt.Printf("totalSteps:%v", totalSteps0)
 }
