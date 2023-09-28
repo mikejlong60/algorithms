@@ -76,19 +76,19 @@ func TestMinSpanningTree(t *testing.T) {
 		length: 9,
 	}
 
-	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ab, primsLt)
-	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ac, primsLt)
-	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ad, primsLt)
-	b.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](b.connectionsTo, bc, primsLt)
-	b.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](b.connectionsTo, be, primsLt)
-	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, cd, primsLt)
-	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, ce, primsLt)
-	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, cf, primsLt)
-	d.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](d.connectionsTo, df, primsLt)
-	e.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](e.connectionsTo, ef, primsLt)
-	f.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](f.connectionsTo, fg, primsLt)
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ab, primsEdgeLt)
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ac, primsEdgeLt)
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](a.connectionsTo, ad, primsEdgeLt)
+	b.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](b.connectionsTo, bc, primsEdgeLt)
+	b.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](b.connectionsTo, be, primsEdgeLt)
+	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, cd, primsEdgeLt)
+	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, ce, primsEdgeLt)
+	c.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](c.connectionsTo, cf, primsEdgeLt)
+	d.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](d.connectionsTo, df, primsEdgeLt)
+	e.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](e.connectionsTo, ef, primsEdgeLt)
+	f.connectionsTo = heap.HeapInsert[PrimsEdge, *PrimsNode](f.connectionsTo, fg, primsEdgeLt)
 	fmt.Println(heap.FindMin(f.connectionsTo))
-	actual := minSpanningTree([]*PrimsNode{a, b, c, d, e, f, g})
+	actual := MinSpanningTree([]*PrimsNode{a, b, c, d, e, f, g})
 	fmt.Println(actual)
 
 }
