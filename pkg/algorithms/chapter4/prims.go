@@ -43,9 +43,9 @@ func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsE
 	//4. Add that minEdge to PrimsEdge result (xxs) array
 	//4. call minSpanningTree again with updated xs and xxs
 
-	deleteVEdge := func(xs []*PrimsNode, edge *PrimsEdge) []*PrimsNode {
+	deleteAllEdgesPointingToV := func(xs []*PrimsNode, v *PrimsEdge) []*PrimsNode {
 		for _, y := range xs {
-			p := heap.FindPosition(y.connectionsTo, edge.v)
+			p := heap.FindPosition(y.connectionsTo, v.v)
 			if p > -1 {
 				y.connectionsTo, _ = heap.HeapDelete(y.connectionsTo, p, primsEdgeLt)
 			}
@@ -65,7 +65,6 @@ func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsE
 				lowestEdge = a
 			}
 		}
-
 		if lowestEdge.length == math.MaxInt {
 			return nil
 		} else {
@@ -77,7 +76,7 @@ func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsE
 	if e == nil {
 		return xs, xxs
 	}
-	xs = deleteVEdge(xs, e)
+	xs = deleteAllEdgesPointingToV(xs, e)
 	xxs = append(xxs, e)
 	return minSpanningTree(xs, xxs)
 }
