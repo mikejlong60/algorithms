@@ -2,11 +2,19 @@ package chapter4
 
 import (
 	"github.com/greymatter-io/golangz/heap"
+	"github.com/greymatter-io/golangz/sets"
 	"testing"
 )
 
-func TestMinSpanningTree(t *testing.T) {
+var edgeEq = func(l, r *PrimsEdge) bool {
+	if l.length == r.length && l.u == r.u && l.v == r.v {
+		return true
+	} else {
+		return false
+	}
+}
 
+func TestMinSpanningTree(t *testing.T) {
 	a := &PrimsNode{id: "a", connectionsTo: heap.New[PrimsEdge, string](extractor)}
 	b := &PrimsNode{id: "b", connectionsTo: heap.New[PrimsEdge, string](extractor)}
 	c := &PrimsNode{id: "c", connectionsTo: heap.New[PrimsEdge, string](extractor)}
@@ -86,10 +94,75 @@ func TestMinSpanningTree(t *testing.T) {
 	d.connectionsTo = heap.HeapInsert[PrimsEdge, string](d.connectionsTo, df, primsEdgeLt)
 	e.connectionsTo = heap.HeapInsert[PrimsEdge, string](e.connectionsTo, ef, primsEdgeLt)
 	f.connectionsTo = heap.HeapInsert[PrimsEdge, string](f.connectionsTo, fg, primsEdgeLt)
-	_, totalCost := MinSpanningTree([]*PrimsNode{a, b, c, d, e, f, g}) //Total cost should be 24
+	actual, totalCost := MinSpanningTree([]*PrimsNode{a, b, c, d, e, f, g}) //Total cost should be 24
 
 	if totalCost != 24 {
 		t.Errorf("Actual total cost:%v, expected total cost:%v", totalCost, 24)
+	}
+	if len(actual) != 6 {
+		t.Errorf("Actual # Edges:%v, Expected # Edges:%v", len(actual), 6)
+	}
+
+	expected := []*PrimsEdge{ab, ad, ac, ce, cf, fg}
+	if !sets.SetEquality(actual, expected, edgeEq) {
+		t.Errorf("Actual Edges:%v, Expected Edges:%v", actual, expected)
+
+	}
+
+}
+
+func TestMinBottleneckSpanningTree(t *testing.T) {
+
+	a := &PrimsNode{id: "a", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	b := &PrimsNode{id: "b", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	c := &PrimsNode{id: "c", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	d := &PrimsNode{id: "d", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	ab := &PrimsEdge{
+		u:      a.id,
+		v:      b.id,
+		length: 4,
+	}
+	ac := &PrimsEdge{
+		u:      a.id,
+		v:      c.id,
+		length: 2,
+	}
+
+	bd := &PrimsEdge{
+		u:      b.id,
+		v:      d.id,
+		length: 30,
+	}
+
+	cd := &PrimsEdge{
+		u:      c.id,
+		v:      d.id,
+		length: 31,
+	}
+	cb := &PrimsEdge{
+		u:      c.id,
+		v:      b.id,
+		length: 3,
+	}
+
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, string](a.connectionsTo, ab, primsEdgeLt)
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, string](a.connectionsTo, ac, primsEdgeLt)
+	b.connectionsTo = heap.HeapInsert[PrimsEdge, string](b.connectionsTo, bd, primsEdgeLt)
+	c.connectionsTo = heap.HeapInsert[PrimsEdge, string](c.connectionsTo, cd, primsEdgeLt)
+	c.connectionsTo = heap.HeapInsert[PrimsEdge, string](c.connectionsTo, cb, primsEdgeLt)
+	actual, totalCost := MinSpanningTree([]*PrimsNode{a, b, c, d}) //Total cost should be 24
+
+	if totalCost != 35 {
+		t.Errorf("Actual total cost:%v, expected total cost:%v", totalCost, 35)
+	}
+	if len(actual) != 3 {
+		t.Errorf("Actual # Edges:%v, Expected # Edges:%v", len(actual), 3)
+	}
+
+	expected := []*PrimsEdge{ac, bd, cb}
+	if !sets.SetEquality(actual, expected, edgeEq) {
+		t.Errorf("Actual Edges:%v, Expected Edges:%v", actual, expected)
+
 	}
 
 }
