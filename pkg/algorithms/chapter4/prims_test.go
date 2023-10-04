@@ -1,6 +1,7 @@
 package chapter4
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/heap"
 	"github.com/greymatter-io/golangz/sets"
 	"testing"
@@ -164,5 +165,60 @@ func TestMinBottleneckSpanningTree(t *testing.T) {
 		t.Errorf("Actual Edges:%v, Expected Edges:%v", actual, expected)
 
 	}
+}
 
+func TestAddSmallerEdge(t *testing.T) {
+
+	a := &PrimsNode{id: "a", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	b := &PrimsNode{id: "b", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	c := &PrimsNode{id: "c", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	d := &PrimsNode{id: "d", connectionsTo: heap.New[PrimsEdge, string](extractor)}
+	ab := &PrimsEdge{
+		u:      a.id,
+		v:      b.id,
+		length: 2,
+	}
+	ad := &PrimsEdge{
+		u:      a.id,
+		v:      d.id,
+		length: 3,
+	}
+
+	bc := &PrimsEdge{
+		u:      b.id,
+		v:      c.id,
+		length: 4,
+	}
+
+	dc := &PrimsEdge{
+		u:      d.id,
+		v:      c.id,
+		length: 2,
+	}
+
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, string](a.connectionsTo, ab, primsEdgeLt)
+	a.connectionsTo = heap.HeapInsert[PrimsEdge, string](a.connectionsTo, ad, primsEdgeLt)
+	b.connectionsTo = heap.HeapInsert[PrimsEdge, string](b.connectionsTo, bc, primsEdgeLt)
+	d.connectionsTo = heap.HeapInsert[PrimsEdge, string](d.connectionsTo, dc, primsEdgeLt)
+
+	//Changing the algorithm to return a map instead of an array allows me to O(1) lookup whether
+	//or not the new edge ending in v would be in the minimum spanning tree. See the test below and
+	//remove the commented-out section and comment out the additional edge db below. Then verify
+	//this manually.  This is part (a) of question 10.
+	//g := []*PrimsNode{a, b, c, d}
+	//	actual := MinSpanningTreeReturningMap(g)
+	//	fmt.Println(actual)
+	db := &PrimsEdge{
+		u:      d.id,
+		v:      b.id,
+		length: 1,
+	}
+	d.connectionsTo = heap.HeapInsert[PrimsEdge, string](d.connectionsTo, db, primsEdgeLt)
+	g := []*PrimsNode{a, b, c, d}
+
+	actual := MinSpanningTreeReturningMap(g)
+	fmt.Println(actual)
+	if actual[db.v].length < db.length {
+		fmt.Println("new edge would not be in tree")
+	}
 }
