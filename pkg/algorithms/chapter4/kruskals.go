@@ -1,6 +1,8 @@
 package chapter4
 
-import "github.com/greymatter-io/golangz/heap"
+import (
+	"github.com/greymatter-io/golangz/heap"
+)
 
 func kruskals(h heap.Heap[PrimsEdge, string], r map[string]*PrimsEdge, lt func(l, r *PrimsEdge) bool, expectedSize int) (heap.Heap[PrimsEdge, string], map[string]*PrimsEdge, func(l, r *PrimsEdge) bool, int) {
 	if len(r) == expectedSize {
@@ -17,7 +19,7 @@ func kruskals(h heap.Heap[PrimsEdge, string], r map[string]*PrimsEdge, lt func(l
 	}
 }
 
-func Kruskals(g []*PrimsEdge, expectedSize int) []*PrimsEdge {
+func Kruskals(g []*PrimsEdge) []*PrimsEdge {
 
 	// NOTE - this would have been less code if I had just used a sorted array instead of my heap.  But
 	// maintaining familiarity with my heap is important because AAC uses it.
@@ -49,7 +51,25 @@ func Kruskals(g []*PrimsEdge, expectedSize int) []*PrimsEdge {
 		return z
 	}
 
-	_, r, _, _ := kruskals(toHeap(g, lt), map[string]*PrimsEdge{}, lt, expectedSize)
+	numberOfNodesMinus1 := func(xs []*PrimsEdge) int {
+		var r = map[string]interface{}{}
+		var c = 0
+		for _, j := range xs {
+			var there bool
+			_, there = r[j.u]
+			if !there {
+				r[j.u] = nil
+				c = c + 1
+			}
+			_, there = r[j.v]
+			if !there {
+				r[j.v] = nil
+				c = c + 1
+			}
+		}
+		return c - 1
+	}
+	_, r, _, _ := kruskals(toHeap(g, lt), map[string]*PrimsEdge{}, lt, numberOfNodesMinus1(g))
 
 	return toArray(r)
 }

@@ -41,7 +41,7 @@ func TestKruskals(t *testing.T) {
 			return false
 		}
 	}
-	actual := Kruskals([]*PrimsEdge{ab, ac, bd, cd, cb}, 3)
+	actual := Kruskals([]*PrimsEdge{ab, ac, bd, cd, cb})
 	expected := []*PrimsEdge{ac, cb, bd}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
