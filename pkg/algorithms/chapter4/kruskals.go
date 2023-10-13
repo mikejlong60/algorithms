@@ -2,6 +2,8 @@ package chapter4
 
 import (
 	"github.com/greymatter-io/golangz/heap"
+	"github.com/greymatter-io/golangz/sets"
+	"github.com/greymatter-io/golangz/sorting"
 )
 
 func kruskals(h heap.Heap[PrimsEdge, string], r map[string]*PrimsEdge, lt func(l, r *PrimsEdge) bool, expectedSize int) (heap.Heap[PrimsEdge, string], map[string]*PrimsEdge, func(l, r *PrimsEdge) bool, int) {
@@ -72,4 +74,61 @@ func Kruskals(g []*PrimsEdge) []*PrimsEdge {
 	_, r, _, _ := kruskals(toHeap(g, lt), map[string]*PrimsEdge{}, lt, numberOfNodesMinus1(g))
 
 	return toArray(r)
+}
+
+func KruskalUsingUnionFind(g []*PrimsEdge) []*PrimsEdge {
+	ltpe := func(l, r *PrimsEdge) bool {
+		if l.length < r.length {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	sorting.QuickSort(g, ltpe)
+
+	lt := func(l, r string) bool {
+		if l < r {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	eq := func(l, r string) bool {
+		if l == r {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	makeSetOfNodeIds := func(g []*PrimsEdge) []string {
+		r := []string{}
+		for _, b := range g {
+			r = append(r, b.u)
+			r = append(r, b.v)
+		}
+		return sets.ToSet(r, lt, eq)
+	}
+
+	uf := MakeUnionFind(makeSetOfNodeIds(g))
+
+	//Put UNodes into a map so you can look them up
+	ufm := map[string]*UNode{}
+	for _, b := range uf {
+		ufm[b.Id] = b
+	}
+
+	//Iterate over g and decide whether or not to use the edge in the minimum spanning tree.
+	r := []*PrimsEdge{}
+	for _, b := range g { //g is sorted-by-length array of edges
+		vId := Find(ufm[b.v])
+		if vId == b.v { //If b is not yet in a set, add it to a set and include it in the MST.
+			r = append(r, b)
+			Union(ufm[b.u], ufm[b.v])
+		}
+	}
+
+	return r
 }
