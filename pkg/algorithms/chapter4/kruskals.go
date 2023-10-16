@@ -76,7 +76,7 @@ func Kruskals(g []*PrimsEdge) []*PrimsEdge {
 	return toArray(r)
 }
 
-func KruskalUsingUnionFind(g []*PrimsEdge) []*PrimsEdge {
+func KruskalsUsingUnionFind(g []*PrimsEdge) []*PrimsEdge {
 	ltpe := func(l, r *PrimsEdge) bool {
 		if l.length < r.length {
 			return true

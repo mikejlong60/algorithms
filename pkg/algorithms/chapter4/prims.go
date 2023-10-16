@@ -9,7 +9,7 @@ import (
 type PrimsEdge struct {
 	u      string
 	v      string
-	length int
+	length float32
 }
 
 type PrimsNode struct {
@@ -81,9 +81,9 @@ func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsE
 	return minSpanningTree(xs, xxs)
 }
 
-func MinSpanningTree(xs []*PrimsNode) ([]*PrimsEdge, int) {
-	totalCost := func(xs []*PrimsEdge) int {
-		var r int
+func MinSpanningTree(xs []*PrimsNode) ([]*PrimsEdge, float32) {
+	totalCost := func(xs []*PrimsEdge) float32 {
+		var r float32
 		for _, b := range xs {
 			r = b.length + r
 		}

@@ -84,7 +84,7 @@ func TestKruskalsUsingUnionFind(t *testing.T) {
 			return false
 		}
 	}
-	actual := KruskalUsingUnionFind([]*PrimsEdge{ab, ac, bd, cd, cb})
+	actual := KruskalsUsingUnionFind([]*PrimsEdge{ab, ac, bd, cd, cb})
 	expected := []*PrimsEdge{ac, cb, bd}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
@@ -95,35 +95,35 @@ func TestKruskals1(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		length: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		length: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 4,
+		length: 4.3,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		length: 4.4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		length: 4.5,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		length: 4.6,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
@@ -134,7 +134,7 @@ func TestKruskals1(t *testing.T) {
 		}
 	}
 	actual := Kruskals([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
-	expected := []*PrimsEdge{ac, cd, ab}
+	expected := []*PrimsEdge{ac, ad, ab}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
@@ -144,35 +144,35 @@ func TestKruskals1UsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		length: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		length: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 4,
+		length: 4.3,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		length: 4.4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		length: 4.5,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		length: 4.6,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
@@ -182,8 +182,8 @@ func TestKruskals1UsingUnionFind(t *testing.T) {
 			return false
 		}
 	}
-	actual := KruskalUsingUnionFind([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
-	expected := []*PrimsEdge{ac, cd, ab}
+	actual := KruskalsUsingUnionFind([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
+	expected := []*PrimsEdge{ac, ad, ab}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
@@ -193,12 +193,12 @@ func TestKruskals2(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		length: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		length: 4.2,
 	}
 
 	ad := &PrimsEdge{
@@ -210,18 +210,18 @@ func TestKruskals2(t *testing.T) {
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		length: 4.3,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		length: 4.4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		length: 4.5,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
@@ -232,22 +232,22 @@ func TestKruskals2(t *testing.T) {
 		}
 	}
 	actual := Kruskals([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
-	expected := []*PrimsEdge{ac, cb, ad}
+	expected := []*PrimsEdge{ac, ab, ad}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
 }
 
-func TestKruskals2UgingUnionFind(t *testing.T) {
+func TestKruskals2UsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		length: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		length: 4.2,
 	}
 
 	ad := &PrimsEdge{
@@ -259,18 +259,18 @@ func TestKruskals2UgingUnionFind(t *testing.T) {
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		length: 4.3,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		length: 4.4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		length: 4.5,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
@@ -280,8 +280,8 @@ func TestKruskals2UgingUnionFind(t *testing.T) {
 			return false
 		}
 	}
-	actual := KruskalUsingUnionFind([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
-	expected := []*PrimsEdge{ac, cb, ad}
+	actual := KruskalsUsingUnionFind([]*PrimsEdge{ab, ac, ad, bd, cd, cb})
+	expected := []*PrimsEdge{ac, ab, ad}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
@@ -308,7 +308,7 @@ func TestKruskals3(t *testing.T) {
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 8,
+		length: 8.1,
 	}
 
 	cf := &PrimsEdge{
@@ -320,7 +320,7 @@ func TestKruskals3(t *testing.T) {
 	ce := &PrimsEdge{
 		u:      "c",
 		v:      "e",
-		length: 7,
+		length: 7.1,
 	}
 	de := &PrimsEdge{
 		u:      "d",
@@ -330,12 +330,12 @@ func TestKruskals3(t *testing.T) {
 	dh := &PrimsEdge{
 		u:      "d",
 		v:      "h",
-		length: 4,
+		length: 4.1,
 	}
 	dg := &PrimsEdge{
 		u:      "d",
 		v:      "g",
-		length: 7,
+		length: 7.2,
 	}
 
 	ef := &PrimsEdge{
@@ -346,7 +346,7 @@ func TestKruskals3(t *testing.T) {
 	fh := &PrimsEdge{
 		u:      "f",
 		v:      "h",
-		length: 2,
+		length: 2.1,
 	}
 
 	hi := &PrimsEdge{
@@ -399,7 +399,7 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 8,
+		length: 8.1,
 	}
 
 	cf := &PrimsEdge{
@@ -411,7 +411,7 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 	ce := &PrimsEdge{
 		u:      "c",
 		v:      "e",
-		length: 7,
+		length: 7.1,
 	}
 	de := &PrimsEdge{
 		u:      "d",
@@ -421,12 +421,12 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 	dh := &PrimsEdge{
 		u:      "d",
 		v:      "h",
-		length: 4,
+		length: 4.1,
 	}
 	dg := &PrimsEdge{
 		u:      "d",
 		v:      "g",
-		length: 7,
+		length: 7.2,
 	}
 
 	ef := &PrimsEdge{
@@ -437,7 +437,7 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 	fh := &PrimsEdge{
 		u:      "f",
 		v:      "h",
-		length: 2,
+		length: 2.1,
 	}
 
 	hi := &PrimsEdge{
@@ -462,8 +462,8 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 			return false
 		}
 	}
-	actual := KruskalUsingUnionFind([]*PrimsEdge{ab, ac, bc, bd, cf, ce, de, dh, dg, ef, fh, hi, gi, gh})
-	expected := []*PrimsEdge{ab, ac, cf, de, dh, dg, gi, fh}
+	actual := KruskalsUsingUnionFind([]*PrimsEdge{ab, ac, bc, bd, cf, ce, de, dh, dg, ef, fh, hi, gi, gh})
+	expected := []*PrimsEdge{ab, ac, bc, cf, fh, dh, dg, gi}
 	if !sets.SetEquality(actual, expected, eq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
