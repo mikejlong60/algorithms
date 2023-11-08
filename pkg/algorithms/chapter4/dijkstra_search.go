@@ -15,6 +15,8 @@ type Pq struct {
 	Id       string
 }
 
+//O( )
+
 func DijkstraSearch(graph map[string]Node4, start string) map[string]*Pq {
 	var distances = make(map[string]*Pq)
 	for i, _ := range graph {
