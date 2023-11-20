@@ -1,7 +1,7 @@
 package chapter4
 
-func MinSpanningTreeReturningMap(xs []*PrimsNode) map[string]*PrimsEdge {
-	_, r := minSpanningTree(xs, []*PrimsEdge{})
+func PrimsMinSpanningTreeReturningMap(xs []*PrimsNode) map[string]*PrimsEdge {
+	_, r := primsMinSpanningTree(xs, []*PrimsEdge{})
 
 	rr := make(map[string]*PrimsEdge)
 	for _, b := range r {

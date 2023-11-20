@@ -36,12 +36,12 @@ func extractor(edge *PrimsEdge) string {
 	return edge.v
 }
 
-func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsEdge) {
+func primsMinSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsEdge) {
 	//1. Is minEdge == nil return
 	//2. Find minimum-cost connected edge(minEdge) among all edges in array of PrimsNodes.
 	//3. Delete all edges that point to minEdge.v in original xs array.
 	//4. Add that minEdge to PrimsEdge result (xxs) array
-	//4. call minSpanningTree again with updated xs and xxs
+	//4. call primsMinSpanningTree again with updated xs and xxs
 
 	deleteAllEdgesPointingToV := func(xs []*PrimsNode, v *PrimsEdge) []*PrimsNode {
 		for _, y := range xs {
@@ -78,10 +78,10 @@ func minSpanningTree(xs []*PrimsNode, xxs []*PrimsEdge) ([]*PrimsNode, []*PrimsE
 	}
 	xs = deleteAllEdgesPointingToV(xs, e)
 	xxs = append(xxs, e)
-	return minSpanningTree(xs, xxs)
+	return primsMinSpanningTree(xs, xxs)
 }
 
-func MinSpanningTree(xs []*PrimsNode) ([]*PrimsEdge, float32) {
+func PrimsMinSpanningTree(xs []*PrimsNode) ([]*PrimsEdge, float32) {
 	totalCost := func(xs []*PrimsEdge) float32 {
 		var r float32
 		for _, b := range xs {
@@ -89,6 +89,6 @@ func MinSpanningTree(xs []*PrimsNode) ([]*PrimsEdge, float32) {
 		}
 		return r
 	}
-	_, r := minSpanningTree(xs, []*PrimsEdge{})
+	_, r := primsMinSpanningTree(xs, []*PrimsEdge{})
 	return r, totalCost(r)
 }

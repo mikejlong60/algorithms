@@ -95,7 +95,7 @@ func TestMinSpanningTree(t *testing.T) {
 	d.connectionsTo = heap.HeapInsert[PrimsEdge, string](d.connectionsTo, df, primsEdgeLt)
 	e.connectionsTo = heap.HeapInsert[PrimsEdge, string](e.connectionsTo, ef, primsEdgeLt)
 	f.connectionsTo = heap.HeapInsert[PrimsEdge, string](f.connectionsTo, fg, primsEdgeLt)
-	actual, totalCost := MinSpanningTree([]*PrimsNode{a, b, c, d, e, f, g}) //Total cost should be 24
+	actual, totalCost := PrimsMinSpanningTree([]*PrimsNode{a, b, c, d, e, f, g}) //Total cost should be 24
 
 	if totalCost != 24 {
 		t.Errorf("Actual total cost:%v, expected total cost:%v", totalCost, 24)
@@ -151,7 +151,7 @@ func TestMinBottleneckSpanningTree(t *testing.T) {
 	b.connectionsTo = heap.HeapInsert[PrimsEdge, string](b.connectionsTo, bd, primsEdgeLt)
 	c.connectionsTo = heap.HeapInsert[PrimsEdge, string](c.connectionsTo, cd, primsEdgeLt)
 	c.connectionsTo = heap.HeapInsert[PrimsEdge, string](c.connectionsTo, cb, primsEdgeLt)
-	actual, totalCost := MinSpanningTree([]*PrimsNode{a, b, c, d}) //Total cost should be 24
+	actual, totalCost := PrimsMinSpanningTree([]*PrimsNode{a, b, c, d}) //Total cost should be 24
 
 	if totalCost != 35 {
 		t.Errorf("Actual total cost:%v, expected total cost:%v", totalCost, 35)
@@ -206,7 +206,7 @@ func TestAddSmallerEdge(t *testing.T) {
 	//remove the commented-out section and comment out the additional edge db below. Then verify
 	//this manually.  This is part (a) of question 10.
 	//g := []*PrimsNode{a, b, c, d}
-	//	actual := MinSpanningTreeReturningMap(g)
+	//	actual := PrimsMinSpanningTreeReturningMap(g)
 	//	fmt.Println(actual)
 	db := &PrimsEdge{
 		u:      d.id,
@@ -216,7 +216,7 @@ func TestAddSmallerEdge(t *testing.T) {
 	d.connectionsTo = heap.HeapInsert[PrimsEdge, string](d.connectionsTo, db, primsEdgeLt)
 	g := []*PrimsNode{a, b, c, d}
 
-	actual := MinSpanningTreeReturningMap(g)
+	actual := PrimsMinSpanningTreeReturningMap(g)
 	fmt.Println(actual)
 	if actual[db.v].length < db.length {
 		fmt.Println("new edge would not be in tree")

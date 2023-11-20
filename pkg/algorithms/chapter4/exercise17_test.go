@@ -6,7 +6,7 @@ import (
 )
 
 func TestExercise17(t *testing.T) {
-	//This is the example from the book.  Ghe book gives an answer of j1 and j3
+	//This is the example from the book.  The book gives an answer of j1 and j3
 	//being the optimal solution. But there are others as well. This example
 	//shows another valid schedule: j2 and j1. The algorithm I used was based upon
 	//the greedy rule that chooses the earliest finisher and eliminates the
