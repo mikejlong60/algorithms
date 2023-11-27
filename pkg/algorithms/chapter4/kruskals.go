@@ -38,7 +38,7 @@ func Kruskals(g []*PrimsEdge) []*PrimsEdge {
 	}
 
 	lt := func(l, r *PrimsEdge) bool {
-		if l.length < r.length {
+		if l.weight < r.weight {
 			return true
 		} else {
 			return false
@@ -78,7 +78,7 @@ func Kruskals(g []*PrimsEdge) []*PrimsEdge {
 
 func KruskalsUsingUnionFind(g []*PrimsEdge) []*PrimsEdge {
 	ltpe := func(l, r *PrimsEdge) bool {
-		if l.length < r.length {
+		if l.weight < r.weight {
 			return true
 		} else {
 			return false
@@ -122,7 +122,7 @@ func KruskalsUsingUnionFind(g []*PrimsEdge) []*PrimsEdge {
 
 	//Iterate over g and decide whether or not to use the edge in the minimum spanning tree.
 	r := []*PrimsEdge{}
-	for _, b := range g { //g is sorted-by-length array of edges
+	for _, b := range g { //g is sorted-by-weight array of edges
 		vId := Find(ufm[b.v])
 		if vId == b.v { //If b is not yet in a set, add it to a set and include it in the MST.
 			r = append(r, b)

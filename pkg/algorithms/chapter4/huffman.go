@@ -32,7 +32,7 @@ func HeapPopF(heap []*Frequency, lt func(l, r *Frequency) bool) ([]*Frequency, *
 }
 
 // freqHeap and encodingHeap are the same starting out
-// Returns - An error if the passed heap element index is greater than the length of the heap
+// Returns - An error if the passed heap element index is greater than the weight of the heap
 func Huffman(freqHeap []*Frequency, lt func(l, r *Frequency) bool) []*Frequency {
 	if len(freqHeap) == 2 {
 		freqHeap, fst, err := HeapPopF(freqHeap, lt)
@@ -235,8 +235,8 @@ func HeapDeleteF(heap []*Frequency, i int, lt func(l, r *Frequency) bool) ([]*Fr
 	}
 
 	if i > len(heap)-1 {
-		log.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
-		return heap, fmt.Errorf("The element:%v you are trying to delete is longer than heap length: %v", i, len(heap)-1)
+		log.Errorf("The element:%v you are trying to delete is longer than heap weight: %v", i, len(heap)-1)
+		return heap, fmt.Errorf("The element:%v you are trying to delete is longer than heap weight: %v", i, len(heap)-1)
 	}
 
 	//Delete last and only element from heap

@@ -9,33 +9,33 @@ func TestKruskals(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 2,
+		weight: 2,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 30,
+		weight: 30,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 31,
+		weight: 31,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 3,
+		weight: 3,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -52,33 +52,33 @@ func TestKruskalsUsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 2,
+		weight: 2,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 30,
+		weight: 30,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 31,
+		weight: 31,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 3,
+		weight: 3,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -95,39 +95,39 @@ func TestKruskals1(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4.1,
+		weight: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4.2,
+		weight: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 4.3,
+		weight: 4.3,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4.4,
+		weight: 4.4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4.5,
+		weight: 4.5,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4.6,
+		weight: 4.6,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -144,39 +144,39 @@ func TestKruskals1UsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4.1,
+		weight: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4.2,
+		weight: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 4.3,
+		weight: 4.3,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4.4,
+		weight: 4.4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4.5,
+		weight: 4.5,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4.6,
+		weight: 4.6,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -193,39 +193,39 @@ func TestKruskals2(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4.1,
+		weight: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4.2,
+		weight: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 1,
+		weight: 1,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4.3,
+		weight: 4.3,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4.4,
+		weight: 4.4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4.5,
+		weight: 4.5,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -242,39 +242,39 @@ func TestKruskals2UsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4.1,
+		weight: 4.1,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4.2,
+		weight: 4.2,
 	}
 
 	ad := &PrimsEdge{
 		u:      "a",
 		v:      "d",
-		length: 1,
+		weight: 1,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4.3,
+		weight: 4.3,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4.4,
+		weight: 4.4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4.5,
+		weight: 4.5,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -291,81 +291,81 @@ func TestKruskals3(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 8,
+		weight: 8,
 	}
 
 	bc := &PrimsEdge{
 		u:      "b",
 		v:      "c",
-		length: 11,
+		weight: 11,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 8.1,
+		weight: 8.1,
 	}
 
 	cf := &PrimsEdge{
 		u:      "c",
 		v:      "f",
-		length: 1,
+		weight: 1,
 	}
 
 	ce := &PrimsEdge{
 		u:      "c",
 		v:      "e",
-		length: 7.1,
+		weight: 7.1,
 	}
 	de := &PrimsEdge{
 		u:      "d",
 		v:      "e",
-		length: 2,
+		weight: 2,
 	}
 	dh := &PrimsEdge{
 		u:      "d",
 		v:      "h",
-		length: 4.1,
+		weight: 4.1,
 	}
 	dg := &PrimsEdge{
 		u:      "d",
 		v:      "g",
-		length: 7.2,
+		weight: 7.2,
 	}
 
 	ef := &PrimsEdge{
 		u:      "e",
 		v:      "f",
-		length: 6,
+		weight: 6,
 	}
 	fh := &PrimsEdge{
 		u:      "f",
 		v:      "h",
-		length: 2.1,
+		weight: 2.1,
 	}
 
 	hi := &PrimsEdge{
 		u:      "h",
 		v:      "i",
-		length: 10,
+		weight: 10,
 	}
 	gh := &PrimsEdge{
 		u:      "g",
 		v:      "h",
-		length: 14,
+		weight: 14,
 	}
 	gi := &PrimsEdge{
 		u:      "g",
 		v:      "i",
-		length: 9,
+		weight: 9,
 	}
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -382,81 +382,81 @@ func TestKruskals3UsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 8,
+		weight: 8,
 	}
 
 	bc := &PrimsEdge{
 		u:      "b",
 		v:      "c",
-		length: 11,
+		weight: 11,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 8.1,
+		weight: 8.1,
 	}
 
 	cf := &PrimsEdge{
 		u:      "c",
 		v:      "f",
-		length: 1,
+		weight: 1,
 	}
 
 	ce := &PrimsEdge{
 		u:      "c",
 		v:      "e",
-		length: 7.1,
+		weight: 7.1,
 	}
 	de := &PrimsEdge{
 		u:      "d",
 		v:      "e",
-		length: 2,
+		weight: 2,
 	}
 	dh := &PrimsEdge{
 		u:      "d",
 		v:      "h",
-		length: 4.1,
+		weight: 4.1,
 	}
 	dg := &PrimsEdge{
 		u:      "d",
 		v:      "g",
-		length: 7.2,
+		weight: 7.2,
 	}
 
 	ef := &PrimsEdge{
 		u:      "e",
 		v:      "f",
-		length: 6,
+		weight: 6,
 	}
 	fh := &PrimsEdge{
 		u:      "f",
 		v:      "h",
-		length: 2.1,
+		weight: 2.1,
 	}
 
 	hi := &PrimsEdge{
 		u:      "h",
 		v:      "i",
-		length: 10,
+		weight: 10,
 	}
 	gh := &PrimsEdge{
 		u:      "g",
 		v:      "h",
-		length: 14,
+		weight: 14,
 	}
 	gi := &PrimsEdge{
 		u:      "g",
 		v:      "i",
-		length: 9,
+		weight: 9,
 	}
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false

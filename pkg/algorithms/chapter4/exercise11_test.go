@@ -11,33 +11,33 @@ func TestDupEdgeWeightProducesValidTreeKruskals(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		weight: 4,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		weight: 4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		weight: 4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
@@ -62,33 +62,33 @@ func TestDupEdgeWeightProducesValidTreeKruskalsUsingUnionFind(t *testing.T) {
 	ab := &PrimsEdge{
 		u:      "a",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 	ac := &PrimsEdge{
 		u:      "a",
 		v:      "c",
-		length: 4,
+		weight: 4,
 	}
 
 	bd := &PrimsEdge{
 		u:      "b",
 		v:      "d",
-		length: 4,
+		weight: 4,
 	}
 
 	cd := &PrimsEdge{
 		u:      "c",
 		v:      "d",
-		length: 4,
+		weight: 4,
 	}
 	cb := &PrimsEdge{
 		u:      "c",
 		v:      "b",
-		length: 4,
+		weight: 4,
 	}
 
 	eq := func(l, r *PrimsEdge) bool {
-		if l.u == r.u && l.v == r.v && l.length == r.length {
+		if l.u == r.u && l.v == r.v && l.weight == r.weight {
 			return true
 		} else {
 			return false
