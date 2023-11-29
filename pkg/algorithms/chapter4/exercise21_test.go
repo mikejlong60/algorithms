@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// The algorithm starts at the first edge in the array.  But order  does not matter. Algorithm always produces correct MST.
+// Cost is O(n) just like exercise required.
+// g must be a connected graph of n edges where n <= number of Nodes + 8.  I don't understand why that matters yet.
 func NearTreeMinSpanningTree(g []PrimsEdge) []PrimsEdge {
 	type vCost struct {
 		u      string
@@ -26,6 +29,7 @@ func NearTreeMinSpanningTree(g []PrimsEdge) []PrimsEdge {
 	}
 
 	var r = []PrimsEdge{}
+	//Turn the map of edges into our more convenient array of edges.
 	for v, j := range seen {
 		r = append(r, PrimsEdge{
 			u:      j.u,
@@ -128,6 +132,17 @@ func TestNearTreeBigOn3(t *testing.T) {
 	}
 	var actual = NearTreeMinSpanningTree([]PrimsEdge{ab, ac, bc, ad, bd, cd})
 	var expected = []PrimsEdge{ab, bc, bd}
+	if !sets.SetEquality(actual, expected, undirectedEq) {
+		t.Errorf("Actual:%v, Expected:%v", actual, expected)
+	}
+
+	//Try several different orders.
+	actual = NearTreeMinSpanningTree([]PrimsEdge{bd, cd, ab, ac, bc, ad})
+	if !sets.SetEquality(actual, expected, undirectedEq) {
+		t.Errorf("Actual:%v, Expected:%v", actual, expected)
+	}
+
+	actual = NearTreeMinSpanningTree([]PrimsEdge{bd, cd, bc, ad, ab, ac})
 	if !sets.SetEquality(actual, expected, undirectedEq) {
 		t.Errorf("Actual:%v, Expected:%v", actual, expected)
 	}
