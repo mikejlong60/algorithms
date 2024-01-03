@@ -43,3 +43,13 @@
         the algorithm might choose any of S1, S2 or S3 which all tie in covering 1 element in the remaining set. If S2 is chosen
         instead of S1 the answer would be S2, S3, and S4 instead of S1, S3, and S4.  The inclusion of an additional rule
         which chooses the set with the smallest number of covering elements in the event of a tie would correct this error.
+  7. Maximum clique problem - Find the largest subset of vertices such that there is an edge between them all.
+     Find a counter example for the following algorithm:
+        Sort the vertices by degree descending. Iterate over those vertices and add the vertex to the clique if it is a
+        neighbor of all other vertices in the clique.
+
+        a --- b     e --- f
+         |   |       |   |
+           c --------- d
+
+           That algorithm would produce an answer of c --- d being the maximum clique when the correct answer would be a --- b --- c or e --- f --- d.
