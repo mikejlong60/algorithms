@@ -6,25 +6,25 @@ import (
 	"time"
 )
 
-var c int
+func TestHorner(t *testing.T) {
 
-func mult(y, z int) int {
-	if z == 0 {
-		return 0
-	} else {
-		a := mult(c*y, z/c) + y*(z%c)
-		return a
+	var n int
+	horner := func(a, x int) int {
+		p := a
+		for i := n; i >= 0; i-- {
+			p = p*x + i
+		}
+		return p
 	}
-}
-func TestWeirdMult(t *testing.T) {
-	g0 := propcheck.ArrayOfN(3, propcheck.ChooseInt(3, 300000))
+
+	g0 := propcheck.ArrayOfN(2, propcheck.ChooseInt(0, 30))
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
 	prop := propcheck.ForAll(g0,
-		"Validate weird multiplication algorithm  \n",
+		"Validate polynomial evaluation  \n",
 		func(xs []int) []int {
-			c = xs[2]
-			r := mult(xs[0], xs[1])
+			n = xs[1]
+			r := horner(xs[0], xs[1])
 			return append(xs, r)
 		},
 		func(xs []int) (bool, error) {
