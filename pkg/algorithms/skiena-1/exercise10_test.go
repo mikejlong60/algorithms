@@ -10,7 +10,7 @@ import (
 
 func TestBubbleSort(t *testing.T) {
 	//mutates input array
-	//Big O n squared -- not very effecient
+	//Big O n squared -- not very efficient
 	bubbleSort := func(xs []int) []int {
 		for i := len(xs); i > 0; i-- {
 			for j := 0; j < len(xs)-1; j++ {
