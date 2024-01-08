@@ -1,39 +1,53 @@
 package chapter5
 
 import (
+	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
 	"time"
 )
 
 func TestHorner(t *testing.T) {
-
-	horner := func(poly []int, n, x int) int {
-		result := poly[0]
-		for i := 1; i < n; i++ {
-			result = result*x + poly[i]
+	hornerWithFoldLeft := func(poly []int, x int) int {
+		y := func(b, a int) int {
+			return a + b*x
 		}
-		return result
+		return arrays.FoldLeft(poly, 0, y)
+	}
+	horner := func(poly []int, x int) int {
+		n := len(poly)
+		p := poly[0]
+		for i := 1; i < n; i++ {
+			p = p*x + poly[i]
+		}
+		return p
 	}
 
-	//TODO implement Horner iterating backward from book. Then use property testing to compare it with 1st horner here.
-	g0 := propcheck.Id([]int{2, -6, 2, -1, 3}) //2x^3 - 6x^2 - 2x - 1//.ArrayOfN(3, propcheck.ChooseInt(1, 3))
-	now := time.Now().Nanosecond()
-	rng := propcheck.SimpleRNG{now}
-	prop := propcheck.ForAll(g0,
+	ff := func(a, b, c int) []int {
+		return []int{a, b, c}
+	}
+	fg := func(fx []int) func(rng propcheck.SimpleRNG) ([]int, propcheck.SimpleRNG) {
+		r := propcheck.ArrayOfN(fx[0], propcheck.ChooseInt(fx[1], fx[2]))
+		return r
+	}
+	g0 := propcheck.ChooseInt(0, 5000)
+	g1 := propcheck.ChooseInt(1, 500)
+	g2 := propcheck.ChooseInt(699, 5000)
+	g4 := propcheck.Map3(g0, g1, g2, ff)
+	g5 := propcheck.FlatMap(g4, fg)
+	rng := propcheck.SimpleRNG{time.Now().Nanosecond()}
+	prop := propcheck.ForAll(g5,
 		"Validate polynomial evaluation  \n",
-		func(poly []int) int {
-			x := poly[len(poly)-1]
-			n := len(poly) - 1
-			r := horner(poly[0:len(poly)-1], n, x)
-			return r
+		func(poly []int) propcheck.Pair[int, int] {
+			x := poly[len(poly)-1] //x value is last element in the input array
+			p1 := horner(poly[0:len(poly)-1], x)
+			p2 := hornerWithFoldLeft(poly[0:len(poly)-1], x)
+			return propcheck.Pair[int, int]{p1, p2}
 		},
-		func(x int) (bool, error) {
+		func(p propcheck.Pair[int, int]) (bool, error) {
 			var errors error
-			expected := 5
-			actual := 5
-			if actual != expected {
-				t.Errorf("Actual:%v Expected:%v", actual, expected)
+			if p.A != p.B {
+				t.Errorf("Actual:%v Expected:%v", p.A, p.B)
 			}
 			if errors != nil {
 				return false, errors
