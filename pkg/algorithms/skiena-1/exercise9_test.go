@@ -8,6 +8,7 @@ import (
 )
 
 func TestHorner(t *testing.T) {
+
 	hornerWithFoldLeft := func(poly []int, x int) int {
 		y := func(b, a int) int {
 			return a + b*x
