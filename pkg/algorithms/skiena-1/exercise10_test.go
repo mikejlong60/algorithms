@@ -1,4 +1,4 @@
-package chapter5
+package skiena_1
 
 import (
 	"github.com/greymatter-io/golangz/arrays"

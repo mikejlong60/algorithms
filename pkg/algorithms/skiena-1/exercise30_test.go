@@ -1,6 +1,7 @@
-package chapter5
+package skiena_1
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
 	"math"
 	"testing"
@@ -8,25 +9,29 @@ import (
 )
 
 type point struct {
-	x int
-	y int
+	x float64
+	y float64
 }
 
-// Finds the closest point (p1) to p and the points that remain after removing p1. p is not in the passed array of points
+// Finds the closest point (p1) to p and return that point and the original array with the closest point removed.
 func findAndRemoveClosestPoint(p point, points []point) (point, []point) {
-	var closestDistance = math.Abs(float64((p.x + p.y) - (points[0].x + points[0].y)))
+	distance := func(p1, p2 point) float64 {
+		return math.Sqrt((p2.x-p1.x)*(p2.x-p1.x)) + ((p2.y - p1.y) * (p2.y - p1.y))
+	}
+	var closestDistance = distance(p, points[0])
 	var currentDistance float64
 	var closestPointIdx int = 0
 	for l, m := range points {
-		currentDistance = math.Abs(float64((p.x + p.y) - (m.x + m.y)))
+		currentDistance = distance(p, m)
 		if currentDistance < closestDistance {
 			closestDistance = currentDistance
 			closestPointIdx = l
 		}
 	}
-
-	//returns original points array minus the closest point.
-	return points[closestPointIdx], append(points[0:closestPointIdx], points[closestPointIdx+1])
+	closestPointToP := points[closestPointIdx]
+	points = append(points[:closestPointIdx], points[closestPointIdx+1:]...)
+	//returns closest point to p and original points array minus the closest point.
+	return closestPointToP, points
 }
 
 // points is starting array, closestPoints is result array with last element being the next point from which you find the closest point c.
@@ -35,33 +40,43 @@ func nearestNeighbor(points, closestPoints []point) ([]point, []point) {
 	if len(points) == 0 {
 		return points, closestPoints
 	} else {
-		p := points[0]
-		closestPointToP, yyy := findAndRemoveClosestPoint(p, points)
+		p := points[len(points)-1] //Last element is the one we use to derive next closest point
+		closestPointToP, points := findAndRemoveClosestPoint(p, points)
 		closestPoints = append(closestPoints, closestPointToP)
-		points = yyy
 		return nearestNeighbor(points, closestPoints)
 	}
 }
 
-// TODO Fix this to work with above
 func TestNearestNeighbor(t *testing.T) {
-	g0 := propcheck.ArrayOfN(3, propcheck.ChooseInt(3, 300000))
+	g0 := propcheck.ArrayOfN(10, propcheck.ChooseInt(-50, 51))
+	g1 := propcheck.ArrayOfN(10, propcheck.ChooseInt(-50, 51))
+	g2 := propcheck.Map2(g0, g1, func(xs, ys []int) []point {
+		r := []point{}
+		for i := range xs {
+			p := point{float64(xs[i]), float64(ys[i])}
+			r = append(r, p)
+		}
+		return r
+	})
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
-	prop := propcheck.ForAll(g0,
-		"Validate weird multiplication algorithm  \n",
-		func(xs []int) []int {
-			c = xs[2]
-			r := mult(xs[0], xs[1])
-			return append(xs, r)
+	prop := propcheck.ForAll(g2,
+		"Validate traveling salesman algo  \n",
+		func(xs []point) []point {
+
+			return xs
 		},
-		func(xs []int) (bool, error) {
+		func(xs []point) (bool, error) {
 			var errors error
-			expected := xs[0] * xs[1]
-			actual := xs[3]
-			if actual != expected {
-				t.Errorf("Actual:%v Expected:%v", actual, expected)
-			}
+			//expected := xs[0] * xs[1]
+			//actual := xs[3]
+			//if actual != expected {
+			//	t.Errorf("Actual:%v Expected:%v", actual, expected)
+			//}
+			_, actual := nearestNeighbor(xs, []point{})
+			fmt.Printf("Origin:%v\n", xs)
+			fmt.Printf("Actual%v\n", actual)
+
 			if errors != nil {
 				return false, errors
 			} else {
@@ -70,5 +85,5 @@ func TestNearestNeighbor(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[[]int](t, result)
+	propcheck.ExpectSuccess[[]point](t, result)
 }
