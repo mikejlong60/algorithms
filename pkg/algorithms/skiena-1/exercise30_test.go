@@ -45,8 +45,8 @@ func nearestNeighbor(p point, points, closestPoints []point) []point {
 }
 
 func TestNearestNeighbor(t *testing.T) {
-	g0 := propcheck.ArrayOfN(3, propcheck.ChooseInt(-3, 4))
-	g1 := propcheck.ArrayOfN(3, propcheck.ChooseInt(-3, 4))
+	g0 := propcheck.ArrayOfN(300, propcheck.ChooseInt(-300, 301))
+	g1 := propcheck.ArrayOfN(300, propcheck.ChooseInt(-300, 301))
 	g2 := propcheck.Map2(g0, g1, func(xs, ys []int) []point {
 		r := []point{}
 		for i := range xs {
