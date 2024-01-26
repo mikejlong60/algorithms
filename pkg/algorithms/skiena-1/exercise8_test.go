@@ -1,6 +1,7 @@
 package skiena_1
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
 	"time"
@@ -32,7 +33,8 @@ func TestWeirdMult(t *testing.T) {
 			expected := xs[0] * xs[1]
 			actual := xs[3]
 			if actual != expected {
-				t.Errorf("Actual:%v Expected:%v", actual, expected)
+				errors = fmt.Errorf("Actual:%v Expected:%v", actual, expected)
+
 			}
 			if errors != nil {
 				return false, errors

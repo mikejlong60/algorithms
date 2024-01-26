@@ -1,6 +1,7 @@
 package skiena_1
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"sort"
@@ -50,7 +51,7 @@ func TestBubbleSort(t *testing.T) {
 			actual := xss.A
 			sort.Ints(xss.B)
 			if !arrays.ArrayEquality(xss.A, xss.B, eq) {
-				t.Errorf("Actual:%v Expected:", actual)
+				errors = fmt.Errorf("Actual:%v Expected:%v", actual, xss.B)
 			}
 			if errors != nil {
 				return false, errors

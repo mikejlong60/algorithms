@@ -71,7 +71,7 @@ func TestNearestNeighbor(t *testing.T) {
 			//	t.Errorf("Actual:%v Expected:%v", actual, expected)
 			//}
 			fmt.Printf("Origin:%v\n", xs)
-			actual := nearestNeighbor(xs[0], xs[1:], []point{})
+			actual := nearestNeighbor(xs[0], xs[1:], []point{xs[0]}) //Starting point is first element in array.
 			fmt.Printf("Actual:%v\n", actual)
 
 			if errors != nil {

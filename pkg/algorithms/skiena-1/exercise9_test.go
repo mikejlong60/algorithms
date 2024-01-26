@@ -1,6 +1,7 @@
 package skiena_1
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/arrays"
 	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
@@ -48,7 +49,7 @@ func TestHorner(t *testing.T) {
 		func(p propcheck.Pair[int, int]) (bool, error) {
 			var errors error
 			if p.A != p.B {
-				t.Errorf("Actual:%v Expected:%v", p.A, p.B)
+				errors = fmt.Errorf("Actual:%v Expected:%v", p.A, p.B)
 			}
 			if errors != nil {
 				return false, errors

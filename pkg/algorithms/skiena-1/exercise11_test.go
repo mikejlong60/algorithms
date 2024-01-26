@@ -1,6 +1,7 @@
 package skiena_1
 
 import (
+	"fmt"
 	"github.com/greymatter-io/golangz/propcheck"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ func TestEuclidGCD(t *testing.T) {
 			expected := iterativeGcdEuclidean(xs[0], xs[1]) //aa := big.randInt(r, aSize)
 			actual := xs[2]
 			if actual != expected {
-				t.Errorf("Actual:%v Expected:", actual)
+				errors = fmt.Errorf("Actual:%v Expected:%v", actual, expected)
 			}
 			if errors != nil {
 				return false, errors
