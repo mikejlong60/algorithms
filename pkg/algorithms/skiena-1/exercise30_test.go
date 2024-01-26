@@ -13,8 +13,8 @@ type point struct {
 	y float64
 }
 
-// Finds the closest point (p1) to p and return that point and the original array with the closest point removed.
-func findAndRemoveClosestPoint(p point, points []point) (point, []point) {
+// Finds the closest point (p1) to p and return that point and its index in the points input array
+func findClosestPoint(p point, points []point) (point, int) {
 	distance := func(p1, p2 point) float64 {
 		return math.Sqrt((p2.x-p1.x)*(p2.x-p1.x)) + ((p2.y - p1.y) * (p2.y - p1.y))
 	}
@@ -29,27 +29,24 @@ func findAndRemoveClosestPoint(p point, points []point) (point, []point) {
 		}
 	}
 	closestPointToP := points[closestPointIdx]
-	points = append(points[:closestPointIdx], points[closestPointIdx+1:]...)
-	//returns closest point to p and original points array minus the closest point.
-	return closestPointToP, points
+	return closestPointToP, closestPointIdx
 }
 
-// points is starting array, closestPoints is result array with last element being the next point from which you find the closest point c.
-// starting array is missing the last element on every recursion.
-func nearestNeighbor(points, closestPoints []point) ([]point, []point) {
+// points is starting array, closestPoints is result array.
+func nearestNeighbor(p point, points, closestPoints []point) []point {
 	if len(points) == 0 {
-		return points, closestPoints
+		return closestPoints
 	} else {
-		p := points[len(points)-1] //Last element is the one we use to derive next closest point
-		closestPointToP, points := findAndRemoveClosestPoint(p, points)
+		closestPointToP, closestPointIdx := findClosestPoint(p, points)
+		points = append(points[:closestPointIdx], points[closestPointIdx+1:]...)
 		closestPoints = append(closestPoints, closestPointToP)
-		return nearestNeighbor(points, closestPoints)
+		return nearestNeighbor(closestPointToP, points, closestPoints)
 	}
 }
 
 func TestNearestNeighbor(t *testing.T) {
-	g0 := propcheck.ArrayOfN(10, propcheck.ChooseInt(-50, 51))
-	g1 := propcheck.ArrayOfN(10, propcheck.ChooseInt(-50, 51))
+	g0 := propcheck.ArrayOfN(3, propcheck.ChooseInt(-3, 4))
+	g1 := propcheck.ArrayOfN(3, propcheck.ChooseInt(-3, 4))
 	g2 := propcheck.Map2(g0, g1, func(xs, ys []int) []point {
 		r := []point{}
 		for i := range xs {
@@ -73,9 +70,9 @@ func TestNearestNeighbor(t *testing.T) {
 			//if actual != expected {
 			//	t.Errorf("Actual:%v Expected:%v", actual, expected)
 			//}
-			_, actual := nearestNeighbor(xs, []point{})
 			fmt.Printf("Origin:%v\n", xs)
-			fmt.Printf("Actual%v\n", actual)
+			actual := nearestNeighbor(xs[0], xs[1:], []point{})
+			fmt.Printf("Actual:%v\n", actual)
 
 			if errors != nil {
 				return false, errors
