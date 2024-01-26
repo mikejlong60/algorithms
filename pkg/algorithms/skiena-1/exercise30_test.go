@@ -65,6 +65,7 @@ func TestNearestNeighbor(t *testing.T) {
 		},
 		func(xs []point) (bool, error) {
 			var errors error
+			expectedLen := len(xs)
 			//expected := xs[0] * xs[1]
 			//actual := xs[3]
 			//if actual != expected {
@@ -72,7 +73,11 @@ func TestNearestNeighbor(t *testing.T) {
 			//}
 			fmt.Printf("Origin:%v\n", xs)
 			actual := nearestNeighbor(xs[0], xs[1:], []point{xs[0]}) //Starting point is first element in array.
+			actualLen := len(actual)
 			fmt.Printf("Actual:%v\n", actual)
+			if actualLen != expectedLen {
+				errors = fmt.Errorf("Actual length:%v Expected length:%v", actualLen, expectedLen)
+			}
 
 			if errors != nil {
 				return false, errors
