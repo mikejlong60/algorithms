@@ -19,9 +19,9 @@ func divide(dividend, divisor, sumSoFar, howManyTimes int) int {
 	}
 }
 
-func TestDivisionNotUsingNeighbor(t *testing.T) {
-	dividend := propcheck.ChooseInt(200, 300)
-	divisor := propcheck.ChooseInt(1, 199)
+func TestDivision(t *testing.T) {
+	dividend := propcheck.ChooseInt(20000, 30000)
+	divisor := propcheck.ChooseInt(1, 19999)
 	g2 := propcheck.Map2(dividend, divisor, func(x, y int) []int {
 		return []int{x, y}
 	})
