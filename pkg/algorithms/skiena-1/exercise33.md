@@ -8,4 +8,4 @@
   1. Race them in groups of 5. That takes 5 races.  And from those races you have five winners. 5 races so far.
   2. Race the 5 winners together.  6 races so far.  That horse is fastest
   3. Remove the winner from that race and race the four remaining horses.  7 races so far. That winner is second fastest.
-  4. Remove the winner from that rae and race the three remaining horses.  8 races so far. That winner is third fastest.
+  4. Remove the winner from that race and race the three remaining horses.  8 races so far. That winner is third fastest.
