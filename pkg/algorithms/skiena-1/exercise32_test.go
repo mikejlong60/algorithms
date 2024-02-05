@@ -8,14 +8,14 @@ import (
 )
 
 // Problem - perform integer division without using either the * or / operations.
-func divide(dividend, divisor, sumSoFar, howManyTimes int) int {
+func divide(dividend, divisor, sumSoFar, quotient int) int {
 	if sumSoFar == dividend {
-		return howManyTimes
+		return quotient
 	} else if sumSoFar > dividend {
-		return howManyTimes - 1
+		return quotient - 1
 	} else {
 		sumSoFar = sumSoFar + divisor
-		return divide(dividend, divisor, sumSoFar, howManyTimes+1)
+		return divide(dividend, divisor, sumSoFar, quotient+1)
 	}
 }
 
