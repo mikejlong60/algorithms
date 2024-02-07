@@ -30,12 +30,32 @@ func wiggleSort(xs []int) {
 }
 
 func TestWiggleSort(t *testing.T) {
-	//g0 := propcheck.ArrayOfN(3, propcheck.Id(1))
-	//g1 := propcheck.ArrayOfN(3, propcheck.Id(2))
-	//g3 := propcheck.Map2(g0, g1, func(a, b []int) []int {
-	//	return append(a, b...)
-	//})
-	g4 := propcheck.Id([]int{1, 2, 1, 2, 1, 2})
+	g0 := propcheck.ArrayOfN(300, propcheck.ChooseInt(0, 500))
+	g1 := propcheck.ArrayOfN(300, propcheck.ChooseInt(501, 1000))
+	g3 := propcheck.Map2(g0, g1, func(a, b []int) []int {
+		return append(a, b...)
+	})
+
+	g4 := func(xs []int) func(propcheck.SimpleRNG) ([]int, propcheck.SimpleRNG) {
+		a := propcheck.ArrayOfN(len(xs), propcheck.ChooseInt(0, len(xs)-1))
+		b := propcheck.ArrayOfN(len(xs), propcheck.ChooseInt(0, len(xs)-1))
+		r := propcheck.Map2(a, b, func(ab, cd []int) []int {
+			for i, _ := range xs { //shuffle array xs
+				idx1 := ab[i]
+				idx2 := cd[i]
+				//swap elements in xs array
+				s1 := xs[idx1]
+				s2 := xs[idx2]
+				xs[idx2] = s1
+				xs[idx1] = s2
+			}
+			return xs
+		})
+		return r
+	}
+
+	g5 := propcheck.FlatMap(g3, g4)
+
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
 
@@ -77,7 +97,7 @@ func TestWiggleSort(t *testing.T) {
 		}
 		return r
 	}
-	prop := propcheck.ForAll(g4,
+	prop := propcheck.ForAll(g5,
 		"Verify wiggle sort  \n",
 		func(xs []int) []int {
 			wiggleSort(xs)
@@ -98,7 +118,7 @@ func TestWiggleSort(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{100, rng})
+	result := prop.Run(propcheck.RunParms{1000, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 
 }
