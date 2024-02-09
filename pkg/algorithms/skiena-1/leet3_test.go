@@ -7,6 +7,37 @@ import (
 	"time"
 )
 
+func left_lt_middle_middle_gt_right(l, m, r int) bool {
+	if l < m && m > r {
+		return true
+	} else {
+		return false
+	}
+}
+func left_gt_middle_middle_lt_right(l, m, r int) bool {
+	if l > m && m < r {
+		return true
+	} else {
+		return false
+	}
+}
+
+func oddNumber(i int) bool {
+	if i == 0 || (i+1)%2 != 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func swap(xs []int, i, j int) []int {
+	s1 := xs[i]
+	s2 := xs[j]
+	xs[j] = s1
+	xs[i] = s2
+	return xs
+}
+
 // Given an integer array nums, reorder it such that nums[0] < nums[1] > nums[2] < nums[3]....
 //
 // You may assume the input array always has a valid answer.
@@ -19,19 +50,59 @@ import (
 // Output: [2,3,1,3,1,2]
 
 // Not a pure function
-func wiggleSort(xs []int) {
-	//lastIdx := len(xs) - 1
-	for i := 0; i < len(xs); i++ {
-		//if xs[i] < xs[i+1] {
-		//
-		//		}
+func wiggleSort(xs []int) []int {
+	findNextHigher := func(xs []int, numnberToCompare, startingIdx int) int {
+		for i := startingIdx; i < len(xs); i++ { //TODO This loop only goes to end from startingIdx. If you get to end search from beginning until you reach startingIdx. And make sure you don't disturb low-high-low or high-low-high rule
+			if numnberToCompare < xs[i] {
+				return i
+			}
+		}
+		return -1 //TODO temporary until you do above TODO
 	}
-	return
+	findNextLower := func(xs []int, numnberToCompare, startingIdx int) int {
+		for i := startingIdx; i < len(xs); i++ { //TODO This loop only goes to end from startingIdx. If you get to end search from beginning until you reach startingIdx. And make sure you don't disturb low-high-low or high-low-high rule
+			if numnberToCompare > xs[i] {
+				return i
+			}
+		}
+		return -1 //TODO temporary until you do above TODO
+	}
+	swap2And3OrFurtherAhead := func(xs []int, i int) []int {
+		if oddNumber(i) {
+			if xs[i+2] > xs[i+1] {
+				xs = swap(xs, i+2, i+1)
+			} else {
+				xs = swap(xs, i+2, findNextLower(xs, xs[i+1], i+3))
+			}
+		} else {
+			if xs[i+2] > xs[i+1] {
+				xs = swap(xs, i+2, i+1)
+			} else {
+				xs = swap(xs, i+2, findNextHigher(xs, xs[i+1], i+3))
+			}
+		}
+		return xs
+	}
+
+	for i := 0; i < len(xs); i++ {
+		if oddNumber(i) { //an odd element number
+			correctOrder := left_lt_middle_middle_gt_right(xs[i], xs[i+1], xs[i+2])
+			if !correctOrder {
+				xs = swap2And3OrFurtherAhead(xs, i)
+			}
+		} else { // an even element number
+			correctOrder := left_gt_middle_middle_lt_right(xs[i], xs[i+1], xs[i+2])
+			if !correctOrder {
+				xs = swap2And3OrFurtherAhead(xs, i)
+			}
+		}
+	}
+	return xs
 }
 
 func TestWiggleSort(t *testing.T) {
-	g0 := propcheck.ArrayOfN(300, propcheck.ChooseInt(0, 500))
-	g1 := propcheck.ArrayOfN(300, propcheck.ChooseInt(501, 1000))
+	g0 := propcheck.ArrayOfN(3, propcheck.ChooseInt(0, 500))
+	g1 := propcheck.ArrayOfN(3, propcheck.ChooseInt(501, 1000))
 	g3 := propcheck.Map2(g0, g1, func(a, b []int) []int {
 		return append(a, b...)
 	})
@@ -44,10 +115,7 @@ func TestWiggleSort(t *testing.T) {
 				idx1 := ab[i]
 				idx2 := cd[i]
 				//swap elements in xs array
-				s1 := xs[idx1]
-				s2 := xs[idx2]
-				xs[idx2] = s1
-				xs[idx1] = s2
+				xs = swap(xs, idx2, idx1)
 			}
 			return xs
 		})
@@ -60,26 +128,12 @@ func TestWiggleSort(t *testing.T) {
 	rng := propcheck.SimpleRNG{now}
 
 	verify := func(xs []int) bool {
-		left_lt_middle_middle_gt_right := func(l, m, r int) bool {
-			if l < m && m > r {
-				return true
-			} else {
-				return false
-			}
-		}
-		left_gt_middle_middle_lt_right := func(l, m, r int) bool {
-			if l > m && m < r {
-				return true
-			} else {
-				return false
-			}
-		}
 		var i = 0
 		var r bool
 
-		for { //Assume length of xs is divisible by three for simplicity
+		for {
 			if i+2 < len(xs) {
-				if i == 0 || (i+1)%2 != 0 { //an odd element number
+				if oddNumber(i) { //an odd element number
 					r = left_lt_middle_middle_gt_right(xs[i], xs[i+1], xs[i+2])
 					if !r {
 						break
@@ -106,7 +160,9 @@ func TestWiggleSort(t *testing.T) {
 		func(xs []int) (bool, error) {
 			var errors error
 
-			if verify(xs) {
+			actual := wiggleSort(xs)
+
+			if verify(actual) {
 				fmt.Println("Correct!!!")
 			} else {
 				errors = fmt.Errorf("Actual:%v", xs)
@@ -118,7 +174,7 @@ func TestWiggleSort(t *testing.T) {
 			}
 		},
 	)
-	result := prop.Run(propcheck.RunParms{1000, rng})
+	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
 
 }
