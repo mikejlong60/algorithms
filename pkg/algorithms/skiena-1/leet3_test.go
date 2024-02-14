@@ -23,7 +23,7 @@ func left_gt_middle_middle_lt_right(l, m, r int) bool {
 }
 
 func oddNumber(i int) bool {
-	if i == 0 || (i+1)%2 != 0 {
+	if (i+1)%2 != 0 {
 		return true
 	} else {
 		return false
@@ -51,17 +51,17 @@ func swap(xs []int, i, j int) []int {
 
 // Not a pure function
 func wiggleSort(xs []int) []int {
-	findNextHigher := func(xs []int, numnberToCompare, startingIdx int) int {
+	findNextHigher := func(xs []int, numberToCompare, startingIdx int) int {
 		for i := startingIdx; i < len(xs); i++ { //TODO This loop only goes to end from startingIdx. If you get to end search from beginning until you reach startingIdx. And make sure you don't disturb low-high-low or high-low-high rule
-			if numnberToCompare < xs[i] {
+			if numberToCompare < xs[i] {
 				return i
 			}
 		}
 		return -1 //TODO temporary until you do above TODO
 	}
-	findNextLower := func(xs []int, numnberToCompare, startingIdx int) int {
+	findNextLower := func(xs []int, numberToCompare, startingIdx int) int {
 		for i := startingIdx; i < len(xs); i++ { //TODO This loop only goes to end from startingIdx. If you get to end search from beginning until you reach startingIdx. And make sure you don't disturb low-high-low or high-low-high rule
-			if numnberToCompare > xs[i] {
+			if numberToCompare > xs[i] {
 				return i
 			}
 		}
@@ -72,19 +72,19 @@ func wiggleSort(xs []int) []int {
 			if xs[i+2] > xs[i+1] {
 				xs = swap(xs, i+2, i+1)
 			} else {
-				xs = swap(xs, i+2, findNextLower(xs, xs[i+1], i+3))
+				xs = swap(xs, i+1, findNextLower(xs, xs[i+1], i+3))
 			}
 		} else {
 			if xs[i+2] > xs[i+1] {
 				xs = swap(xs, i+2, i+1)
 			} else {
-				xs = swap(xs, i+2, findNextHigher(xs, xs[i+1], i+3))
+				xs = swap(xs, i+1, findNextHigher(xs, xs[i+1], i+3))
 			}
 		}
 		return xs
 	}
 
-	for i := 0; i < len(xs); i++ {
+	for i := 0; i < len(xs)-2; i++ {
 		if oddNumber(i) { //an odd element number
 			correctOrder := left_lt_middle_middle_gt_right(xs[i], xs[i+1], xs[i+2])
 			if !correctOrder {
@@ -124,6 +124,7 @@ func TestWiggleSort(t *testing.T) {
 
 	g5 := propcheck.FlatMap(g3, g4)
 
+	//g55 := propcheck.Id([]int{1, 1, 1, 2, 2, 2})
 	now := time.Now().Nanosecond()
 	rng := propcheck.SimpleRNG{now}
 
