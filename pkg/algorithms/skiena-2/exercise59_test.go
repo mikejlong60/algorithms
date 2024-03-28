@@ -6,32 +6,6 @@ import (
 	"testing"
 )
 
-/**
-Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:
-
-0 <= a, b, c, d < n
-a, b, c, and d are distinct.
-nums[a] + nums[b] + nums[c] + nums[d] == target
-You may return the answer in any order.
-
-Example 1:
-
-Input: nums = [1,0,-1,0,-2,2], target = 0
-Output: [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
-
-Example 2:
-
-Input: nums = [2,2,2,2,2], target = 8
-Output: [[2,2,2,2]]
-
-
-Constraints:
-
-1 <= nums.length <= 200
--109 <= nums[i] <= 109
--109 <= target <= 109
-*/
-
 func pangrams(s string) string {
 	xs := []byte(strings.ToLower(s))
 	alphabet := []byte("abcdefghijklmnopqrstuvwxyz")
@@ -45,18 +19,24 @@ func pangrams(s string) string {
 	if len(alphabetm) == 0 {
 		return "pangram"
 	} else {
+		fmt.Println(len(alphabetm))
 		return "not pangram"
 	}
 }
 
 func TestPangram(t *testing.T) {
 	actual := pangrams("We promptly judged antique ivory buckles for the next prize")
-	fmt.Println(actual)
+	if actual != "pangram" {
+		t.Errorf("Actual:%v, Expected:%v", actual, "pangram")
+	}
 
 	actual = pangrams("We pror the next prize")
-	fmt.Println(actual)
+	if actual == "pangram" {
+		t.Errorf("Actual:%v, Expected:%v", actual, "not pangram")
+	}
 
 	actual = pangrams("We promptly judged antique ivory buckles for the prize")
-	fmt.Println(actual)
-
+	if actual != "not pangram" {
+		t.Errorf("Actual:%v, Expected:%v", actual, "pangram")
+	}
 }
