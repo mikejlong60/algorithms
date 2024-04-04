@@ -1,12 +1,23 @@
 package skiena_3
 
 import (
+	"fmt"
+	"github.com/greymatter-io/golangz/either"
 	"testing"
 )
 
 type parenPos struct {
 	paren string
 	pos   int
+}
+
+func balancedParenthesesEither(ss string) either.Either[error, int] {
+	balanced, errorStarts, maxDistance := balancedParentheses(ss)
+	if balanced {
+		return either.Right[int]{maxDistance}
+	} else {
+		return either.Left[error]{fmt.Errorf("Parsing error starts:%v", errorStarts)}
+	}
 }
 
 // Assumes string is only right and left parentheses
@@ -49,33 +60,75 @@ func balancedParentheses(ss string) (bool, int, int) {
 	}
 }
 
-func TestBalancedParentheses(t *testing.T) {
+func TestBalancedParenthesesEither(t *testing.T) {
+	currentMax := 3
+	success := func(maxDistance int) int {
+		if maxDistance != currentMax {
+			t.Errorf("Actual:%v, Expected:%v", maxDistance, currentMax)
+		}
+		return maxDistance
+	}
+	either.Map[error, int](balancedParenthesesEither("(())"), success)
+	currentMax = 5
+	either.Map[error, int](balancedParenthesesEither("((()))"), success)
+	currentMax = 7
+	either.Map[error, int](balancedParenthesesEither("((()()))"), success)
+	currentMax = 0
+	either.Map[error, int](balancedParenthesesEither(""), success)
 
+	//Expected expression parsing failure cases
+	actual := either.Map[error, int](balancedParenthesesEither("((())))"), success)
+	expectedFailureString := "Parsing error starts:6"
+	expectError := func(e either.Either[error, int]) either.Either[error, int] {
+		switch v := actual.(type) {
+		case either.Left[error]:
+			if v.Value.Error() != expectedFailureString {
+				t.Errorf("Actual:%v, Expected:%v", v.Value, expectedFailureString)
+			}
+			return v
+		default:
+			t.Errorf("Expected Left[error]")
+			return v
+		}
+	}
+	expectError(actual)
+	expectedFailureString = "Parsing error starts:0"
+	actual = either.Map[int, int](balancedParenthesesEither("(((()))"), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither(")())))("), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither("))((()))("), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither(")((()))("), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither(")"), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither(")("), success)
+	expectError(actual)
+	actual = either.Map[int, int](balancedParenthesesEither("("), success)
+	expectError(actual)
+}
+func TestBalancedParentheses(t *testing.T) {
 	actual, startOfError, maxDistance := balancedParentheses("(())")
 	if !actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, true)
 	}
-
 	if startOfError != -1 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, -1)
 	}
-
 	if maxDistance != 3 {
 		t.Errorf("Actual:%v, Expected:%v", maxDistance, 3)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses("((()))")
 	if !actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, true)
 	}
-
 	if startOfError != -1 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, -1)
 	}
 	if maxDistance != 5 {
 		t.Errorf("Actual:%v, Expected:%v", maxDistance, 5)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses("((()()))")
 	if !actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, true)
@@ -83,7 +136,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != -1 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, -1)
 	}
-
 	if maxDistance != 7 {
 		t.Errorf("Actual:%v, Expected:%v", maxDistance, 7)
 	}
@@ -94,7 +146,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 6 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 6)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses("(((()))")
 	if actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, false)
@@ -102,7 +153,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 0 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 0)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses(")())))(")
 	if actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, false)
@@ -124,7 +174,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 0 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 0)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses(")")
 	if actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, false)
@@ -132,7 +181,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 0 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 0)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses(")(")
 	if actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, false)
@@ -140,7 +188,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 0 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 0)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses("(")
 	if actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, false)
@@ -148,7 +195,6 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != 0 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, 0)
 	}
-
 	actual, startOfError, maxDistance = balancedParentheses("")
 	if !actual {
 		t.Errorf("Actual:%v, Expected:%v", actual, true)
@@ -156,5 +202,4 @@ func TestBalancedParentheses(t *testing.T) {
 	if startOfError != -1 {
 		t.Errorf("Actual:%v, Expected:%v", startOfError, -1)
 	}
-
 }
