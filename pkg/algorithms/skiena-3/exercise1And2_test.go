@@ -60,6 +60,53 @@ func balancedParentheses(ss string) (bool, int, int) {
 	}
 }
 
+func TestEitherChainingWithBind_AKA_FlatMap(t *testing.T) {
+	// This example demonstrates the power of monadic(flatmap) chaining.  As soon as you hit an error the computation stops
+	// and reports the error without any error handling.  The expression works from the inside out.  I will make it
+	// a method on an interface called Either. Then you can write the expression from left to right.
+
+	next := func(maxDistance int) either.Either[error, int] {
+		return either.Right[int]{maxDistance}
+	}
+	next2 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("(())")
+	}
+	next3 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("((())")
+	}
+	next4 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("(())")
+	}
+	start := either.FlatMap(balancedParenthesesEither("((()))"), next)
+
+	cc := either.FlatMap(either.FlatMap(either.FlatMap(either.FlatMap(start, next), next2), next3), next4) //, balancedParenthesesEither("(())"))
+	fmt.Println(cc)
+}
+
+func TestEitherChainingWithMap(t *testing.T) {
+	// This example demonstrates the power of monadic(flatmap) chaining.  As soon as you hit an error the computation stops
+	// and reports the error without any error handling.  The expression works from the inside out.  I will make it
+	// a method on an interface called Either. Then you can write the expression from left to right.
+
+	next := func(maxDistance int) int {
+		return maxDistance + 12
+	}
+	next2 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("(())")
+	}
+	next3 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("((())")
+	}
+	next4 := func(maxDistance int) either.Either[error, int] {
+		return balancedParenthesesEither("(())")
+	}
+
+	start := either.Map[error, int](balancedParenthesesEither("((()))"), next)
+
+	cc := either.FlatMap(either.FlatMap(either.FlatMap(either.Map[error, int](start, next), next2), next3), next4)
+	fmt.Println(cc)
+}
+
 func TestBalancedParenthesesEither(t *testing.T) {
 	currentMax := 3
 	success := func(maxDistance int) int {
