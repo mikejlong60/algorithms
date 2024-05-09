@@ -1,10 +1,14 @@
 package skiena_3
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/greymatter-io/golangz/option"
 	"github.com/greymatter-io/golangz/propcheck"
+	"github.com/greymatter-io/golangz/sets"
 	"github.com/hashicorp/go-multierror"
+	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -115,4 +119,68 @@ func TestBalancedBinaryTreeNotFound(t *testing.T) {
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
 	propcheck.ExpectSuccess[[]int](t, result)
+}
+
+func readLinesFromFile(filename string) ([]string, error) {
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	lines := []string{}
+
+	// Create a scanner to read the file line by line
+	scanner := bufio.NewScanner(file)
+
+	// Read each line of the file
+	for scanner.Scan() {
+		// Append the line to the lines slice
+		word := scanner.Text()
+		if len(word) == 3 {
+			lines = append(lines, strings.ToLower(word))
+		}
+	}
+
+	// Check for any errors during scanning
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Length of dict:%v\n", len(lines))
+	return lines, nil
+}
+
+func loadTreeWithWords(filename string) (*Node[string], error) {
+
+	lt := func(l, r string) bool {
+		if l < r {
+			return true
+		} else {
+			return false
+		}
+	}
+	eq := func(l, r string) bool {
+		if l == r {
+			return true
+		} else {
+			return false
+		}
+	}
+	a, err := readLinesFromFile(filename)
+	fmt.Printf("Case sensitive len:%v", len(a))
+	r := sets.ToSet(a, lt, eq)
+	fmt.Printf("Case insensitive len:%v", len(r))
+	fmt.Println(a)
+	btree := BinaryTree(r, lt)
+	return btree, err
+}
+func TestPhonePad(t *testing.T) {
+	dictTree, err := loadTreeWithWords("words.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(dictTree)
 }
