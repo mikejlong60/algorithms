@@ -11,6 +11,11 @@ type Node[T any] struct {
 	right *Node[T]
 }
 
+type KeyPad struct {
+	number  int
+	letters []string
+}
+
 func Find[T any](btree *Node[T], val T, lt func(l, r T) bool, eq func(l, r T) bool) option.Option[T] {
 	if btree == nil {
 		return option.None[T]{}

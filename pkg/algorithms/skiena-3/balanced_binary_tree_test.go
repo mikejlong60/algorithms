@@ -30,7 +30,7 @@ func TestBalancedBinaryTreeFound(t *testing.T) {
 			return false
 		}
 	}
-	g0 := propcheck.ChooseArray(0, 62, propcheck.ChooseInt(-1000000, 1000000))
+	g0 := propcheck.ChooseArray(100000, 100000, propcheck.ChooseInt(-1000000, 1000000))
 
 	fg := func(fx []int) func(rng propcheck.SimpleRNG) (propcheck.Pair[int, []int], propcheck.SimpleRNG) {
 		a := propcheck.ChooseInt(0, len(fx))
@@ -121,39 +121,7 @@ func TestBalancedBinaryTreeNotFound(t *testing.T) {
 	propcheck.ExpectSuccess[[]int](t, result)
 }
 
-func readLinesFromFile(filename string) ([]string, error) {
-	// Open the file
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	lines := []string{}
-
-	// Create a scanner to read the file line by line
-	scanner := bufio.NewScanner(file)
-
-	// Read each line of the file
-	for scanner.Scan() {
-		// Append the line to the lines slice
-		word := scanner.Text()
-		if len(word) == 3 {
-			lines = append(lines, strings.ToLower(word))
-		}
-	}
-
-	// Check for any errors during scanning
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("Length of dict:%v\n", len(lines))
-	return lines, nil
-}
-
-func loadTreeWithWords(filename string) (*Node[string], error) {
-
+func TestPhonePad(t *testing.T) {
 	lt := func(l, r string) bool {
 		if l < r {
 			return true
@@ -168,19 +136,102 @@ func loadTreeWithWords(filename string) (*Node[string], error) {
 			return false
 		}
 	}
-	a, err := readLinesFromFile(filename)
-	fmt.Printf("Case sensitive len:%v", len(a))
-	r := sets.ToSet(a, lt, eq)
-	fmt.Printf("Case insensitive len:%v", len(r))
-	fmt.Println(a)
-	btree := BinaryTree(r, lt)
-	return btree, err
-}
-func TestPhonePad(t *testing.T) {
-	dictTree, err := loadTreeWithWords("words.txt")
-	if err != nil {
-		t.Error(err)
+
+	readLinesFromFile := func(filename string) ([]string, error) {
+		file, err := os.Open(filename)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		lines := []string{}
+		scanner := bufio.NewScanner(file)
+
+		for scanner.Scan() {
+			word := scanner.Text()
+			if len(word) == 3 {
+				lines = append(lines, strings.ToLower(word))
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			return nil, err
+		}
+		return lines, nil
 	}
 
-	fmt.Println(dictTree)
+	loadTreeWithWords := func(filename string) (*Node[string], error) {
+		a, err := readLinesFromFile(filename)
+		r := sets.ToSet(a, lt, eq)
+		btree := BinaryTree(r, lt)
+		return btree, err
+	}
+
+	getAllWordsFromThreeNumbers := func(numbers []int, keyPadDict map[int][]string, wordDict *Node[string]) []string {
+		wordCandidates := []string{}
+		firstLetters := keyPadDict[numbers[0]]
+		secondLetters := keyPadDict[numbers[1]]
+		thirdLetters := keyPadDict[numbers[2]]
+		for _, first := range firstLetters {
+			for _, second := range secondLetters {
+				for _, third := range thirdLetters {
+					threeLetterWord := fmt.Sprintf("%v%v%v", first, second, third)
+					wordCandidates = append(wordCandidates, strings.ToLower(threeLetterWord))
+				}
+			}
+		}
+
+		foundWords := []string{}
+		f := func(w string) string {
+			foundWords = append(foundWords, w)
+			return w
+		}
+		for _, word := range wordCandidates {
+			option.Map(Find(wordDict, word, lt, eq), f)
+		}
+		return foundWords
+	}
+
+	wordDict, _ := loadTreeWithWords("words.txt")
+
+	keyPadDict := map[int][]string{
+		1: {"A", "B", "C"},
+		2: {"D", "E", "F"},
+		3: {"G", "H", "I"},
+		4: {"J", "K", "L"},
+		5: {"M", "N", "O"},
+		6: {"P", "Q", "R"},
+		7: {"S", "T", "U"},
+		8: {"V", "W", "X"},
+		0: {"Y", "Z"},
+	}
+
+	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
+	ge := propcheck.ChooseArray(3, 3, propcheck.ChooseInt(0, 9))
+
+	prop := propcheck.ForAll(ge,
+		"Validate phone pad word  \n",
+		func(xs []int) []int {
+			return xs
+		},
+		func(xss []int) (bool, error) {
+			var errors error
+
+			l := getAllWordsFromThreeNumbers(xss, keyPadDict, wordDict)
+			for _, word := range l {
+				err := option.GetOrElse(Find(wordDict, word, lt, eq), fmt.Sprintf("Word:%v not in dictionary", word))
+				if err == fmt.Sprintf("Word:%v not in dictionary", word) {
+					errors = multierror.Append(errors, fmt.Errorf(err))
+				}
+			}
+
+			if errors != nil {
+				return false, errors
+			} else {
+				return true, nil
+			}
+		},
+	)
+	result := prop.Run(propcheck.RunParms{100, rng})
+	propcheck.ExpectSuccess[[]int](t, result)
 }
