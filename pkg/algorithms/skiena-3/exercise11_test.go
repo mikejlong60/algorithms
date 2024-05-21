@@ -3,6 +3,7 @@ package skiena_3
 import (
 	"bitbucket.org/pcastools/hash"
 	"fmt"
+	"github.com/greymatter-io/golangz/option"
 	"math"
 	"testing"
 )
@@ -12,7 +13,7 @@ type KeyValuePair[K, V any] struct {
 	value V
 }
 type HashMap[K, V any] struct {
-	underlying []KeyValuePair[K, V]
+	underlying [51]KeyValuePair[K, V]
 	zero       KeyValuePair[K, V]
 	eq         func(k1, k2 K) bool
 	emptyCells int
@@ -20,8 +21,8 @@ type HashMap[K, V any] struct {
 }
 
 func New[K, V any](zero KeyValuePair[K, V], eq func(k1, k2 K) bool, hash func(k K) uint32) HashMap[K, V] {
-	zeroHashMap := func() []KeyValuePair[K, V] {
-		a := make([]KeyValuePair[K, V], 10)
+	zeroHashMap := func() [51]KeyValuePair[K, V] {
+		a := [51]KeyValuePair[K, V]{}
 		for i := 0; i < len(a); i++ {
 			a[i] = zero
 		}
@@ -36,9 +37,21 @@ func New[K, V any](zero KeyValuePair[K, V], eq func(k1, k2 K) bool, hash func(k 
 	}
 }
 
+func Get[K, V any](m HashMap[K, V], k K) option.Option[V] {
+	a := m.hash(k)
+	idx := int32(math.Mod(float64(a), float64(len(m.underlying))))
+
+	b := m.underlying[idx]
+	if !m.eq(b.key, m.zero.key) {
+		return option.Some[V]{b.value}
+	} else {
+		return option.None[V]{}
+	}
+}
+
 func Set[K, V any](m HashMap[K, V], kv KeyValuePair[K, V]) HashMap[K, V] {
 	a := m.hash(kv.key)
-	idx := int32(math.Mod(float64(a), float64(len(m.underlying)-1)))
+	idx := int32(math.Mod(float64(a), float64(len(m.underlying))))
 
 	b := m.underlying[idx]
 	assignToHashOrClosestEmpty := func() bool { //Assigns kv pair to either the hashed array index or the closest available spot in the underlying array,
@@ -100,6 +113,14 @@ func TestYourOwnHashMap(t *testing.T) {
 		}
 	}
 	m := New[int32, string](KeyValuePair[int32, string]{-1, ""}, eq, fFNV32a)
-	m = Set(m, KeyValuePair[int32, string]{1234234, "fred"})
-	fmt.Println(m)
+	k := int32(1234234)
+	m = Set(m, KeyValuePair[int32, string]{k, "fred"})
+	f := func(x string) string {
+		return x
+	}
+	option.Map(Get(m, k), f)
+	err := option.GetOrElse(Get(m, int32(188)), fmt.Sprintf("Should not have found:%v in HashMap", 188))
+	if err != fmt.Sprintf("Should not have found:%v in HashMap", 188) {
+		t.Errorf(err)
+	}
 }
