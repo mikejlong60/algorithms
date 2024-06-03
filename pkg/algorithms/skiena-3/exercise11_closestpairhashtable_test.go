@@ -21,6 +21,7 @@ type HashMap[K, V any] struct {
 }
 
 func New[K, V any](zero KeyValuePair[K, V], eq func(k1, k2 K) bool, hash func(k K) uint32) HashMap[K, V] {
+
 	zeroHashMap := func() [51]KeyValuePair[K, V] {
 		a := [51]KeyValuePair[K, V]{}
 		for i := 0; i < len(a); i++ {
@@ -115,10 +116,10 @@ func TestYourOwnHashMap(t *testing.T) {
 	m := New[int32, string](KeyValuePair[int32, string]{-1, ""}, eq, fFNV32a)
 	k := int32(1234234)
 	m = Set(m, KeyValuePair[int32, string]{k, "fred"})
-	f := func(x string) string {
-		return x
-	}
-	option.Map(Get(m, k), f)
+	//f := func(x string) string {
+	//	return x
+	//}
+	//option.Map(Get(m, k), f)
 	err := option.GetOrElse(Get(m, int32(188)), fmt.Sprintf("Should not have found:%v in HashMap", 188))
 	if err != fmt.Sprintf("Should not have found:%v in HashMap", 188) {
 		t.Errorf(err)
