@@ -10,26 +10,28 @@ import (
 	"time"
 )
 
-func TestGetAndSetForProbablyNoHashCollisions(t *testing.T) {
+func TestGetAndSet(t *testing.T) {
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	f := func(a []int, b []string) []KeyValuePair[int32, string] {
+	f := func(a []int, b []string, c int) propcheck.Pair[[]KeyValuePair[int32, string], int32] {
 		var r = make([]KeyValuePair[int32, string], len(a))
 		for c, d := range a {
 			r[c] = KeyValuePair[int32, string]{int32(d), b[c]}
 		}
-		return r
+		s := propcheck.Pair[[]KeyValuePair[int32, string], int32]{r, int32(c)}
+		return s
 	}
 
 	ge := propcheck.ChooseArray(500, 500, propcheck.ChooseInt(-100000, 100000))
 	gf := propcheck.ChooseArray(500, 500, propcheck.String(40))
-	gg := propcheck.Map2(ge, gf, f)
+	gh := propcheck.ChooseInt(1, 500)
+	gg := propcheck.Map3(ge, gf, gh, f)
 
 	prop := propcheck.ForAll(gg,
 		"Test get and set when you have few hash collisions  \n",
-		func(xs []KeyValuePair[int32, string]) []KeyValuePair[int32, string] {
+		func(xs propcheck.Pair[[]KeyValuePair[int32, string], int32]) propcheck.Pair[[]KeyValuePair[int32, string], int32] {
 			return xs
 		},
-		func(xss []KeyValuePair[int32, string]) (bool, error) {
+		func(xss propcheck.Pair[[]KeyValuePair[int32, string], int32]) (bool, error) {
 			fFNV32a := func(x int32) uint32 {
 				return hash.Int32(x)
 			}
@@ -40,9 +42,9 @@ func TestGetAndSetForProbablyNoHashCollisions(t *testing.T) {
 					return false
 				}
 			}
-			m := New2[int32, string](eq, fFNV32a, 51)
+			m := New2[int32, string](eq, fFNV32a, xss.B)
 			start := time.Now()
-			for _, b := range xss {
+			for _, b := range xss.A {
 				p := func(s KeyValuePair[int32, string]) bool {
 					if s.key == b.key { //Close around the variable in the loop
 						return true
@@ -52,13 +54,13 @@ func TestGetAndSetForProbablyNoHashCollisions(t *testing.T) {
 				}
 				m = Set2(m, b, p)
 			}
-			fmt.Printf("Inserting %v values into hashmap took:%v\n", len(xss), time.Since(start))
+			fmt.Printf("Inserting %v values into hashmap with %v buckets took:%v\n", len(xss.A), xss.B, time.Since(start))
 
 			var errors error
 
 			//The value should be in the map
 			start = time.Now()
-			for _, b := range xss {
+			for _, b := range xss.A {
 				p := func(s KeyValuePair[int32, string]) bool {
 					if s.key == b.key { //Close around the variable in the loop
 						return true
@@ -71,7 +73,25 @@ func TestGetAndSetForProbablyNoHashCollisions(t *testing.T) {
 					errors = multierror.Append(errors, fmt.Errorf("Should have found:%v in HashMap", b.key))
 				}
 			}
-			fmt.Printf("Getting %v values from hashmap took:%v\n", len(xss), time.Since(start))
+			fmt.Printf("Getting %v values from hashmap with %v buckets took:%v\n", len(xss.A), xss.B, time.Since(start))
+
+			//////////  Now use Golang's hashmap to compare performance
+			mg := make(map[int32]KeyValuePair[int32, string])
+			start = time.Now()
+			for _, b := range xss.A {
+				mg[b.key] = b
+			}
+			fmt.Printf("Inserting %v values into Golang hashmap took:%v\n", len(xss.A), time.Since(start))
+			//The value should be in the map
+			var ss KeyValuePair[int32, string]
+			start = time.Now()
+			for _, b := range xss.A {
+				ss = mg[b.key]
+			}
+			fmt.Printf("Getting %v values from Golang hashmap %v took:%v\n", len(xss.A), ss, time.Since(start))
+
+			/////////////
+
 			if errors != nil {
 				return false, errors
 			} else {
@@ -80,29 +100,31 @@ func TestGetAndSetForProbablyNoHashCollisions(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[[]KeyValuePair[int32, string]](t, result)
+	propcheck.ExpectSuccess[propcheck.Pair[[]KeyValuePair[int32, string], int32]](t, result)
 }
 
-func TestGetAndSetForManyHashCollisions(t *testing.T) {
+func TestDeleteForProbablyNoHashCollisions(t *testing.T) {
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
-	f := func(a []int, b []string) []KeyValuePair[int32, string] {
+	f := func(a []int, b []string, c int) propcheck.Pair[[]KeyValuePair[int32, string], int32] {
 		var r = make([]KeyValuePair[int32, string], len(a))
 		for c, d := range a {
 			r[c] = KeyValuePair[int32, string]{int32(d), b[c]}
 		}
-		return r
+		s := propcheck.Pair[[]KeyValuePair[int32, string], int32]{r, int32(c)}
+		return s
 	}
 
-	ge := propcheck.ChooseArray(10, 10, propcheck.ChooseInt(0, 3))
-	gf := propcheck.ChooseArray(10, 10, propcheck.String(40))
-	gg := propcheck.Map2(ge, gf, f)
+	ge := propcheck.ChooseArray(500, 500, propcheck.ChooseInt(-100000, 100000))
+	gf := propcheck.ChooseArray(500, 500, propcheck.String(40))
+	gh := propcheck.ChooseInt(1, 500)
+	gg := propcheck.Map3(ge, gf, gh, f)
 
 	prop := propcheck.ForAll(gg,
-		"Test get and set when you have many hash collisions  \n",
-		func(xs []KeyValuePair[int32, string]) []KeyValuePair[int32, string] {
+		"Test delete with random number of buckets that may cause hash collisions  \n",
+		func(xs propcheck.Pair[[]KeyValuePair[int32, string], int32]) propcheck.Pair[[]KeyValuePair[int32, string], int32] {
 			return xs
 		},
-		func(xss []KeyValuePair[int32, string]) (bool, error) {
+		func(xss propcheck.Pair[[]KeyValuePair[int32, string], int32]) (bool, error) {
 			fFNV32a := func(x int32) uint32 {
 				return hash.Int32(x)
 			}
@@ -113,9 +135,9 @@ func TestGetAndSetForManyHashCollisions(t *testing.T) {
 					return false
 				}
 			}
-			m := New2[int32, string](eq, fFNV32a, 3)
+			m := New2[int32, string](eq, fFNV32a, xss.B)
 			start := time.Now()
-			for _, b := range xss {
+			for _, b := range xss.A {
 				p := func(s KeyValuePair[int32, string]) bool {
 					if s.key == b.key { //Close around the variable in the loop
 						return true
@@ -125,13 +147,13 @@ func TestGetAndSetForManyHashCollisions(t *testing.T) {
 				}
 				m = Set2(m, b, p)
 			}
-			fmt.Printf("Inserting %v values into hashmap took:%v\n", len(xss), time.Since(start))
+			fmt.Printf("Inserting %v values into hashmap with %v buckets took:%v\n", len(xss.A), xss.B, time.Since(start))
 
 			var errors error
 
 			//The value should be in the map
 			start = time.Now()
-			for _, b := range xss {
+			for _, b := range xss.A {
 				p := func(s KeyValuePair[int32, string]) bool {
 					if s.key == b.key { //Close around the variable in the loop
 						return true
@@ -139,12 +161,30 @@ func TestGetAndSetForManyHashCollisions(t *testing.T) {
 						return false
 					}
 				}
-				err := option.GetOrElse(Get2(m, b.key, p), KeyValuePair[int32, string]{b.key, fmt.Sprintf("Should have found:%v in HashMap", 188)}) //fmt.Sprintf("Should not have found:%v in HashMap", 188))
-				if err.key != b.key {
-					errors = multierror.Append(errors, fmt.Errorf("Should have found:%v in HashMap", b.key))
+				newHashmap := Delete2(m, b.key, p)
+				err := option.GetOrElse(Get2(newHashmap, b.key, p), KeyValuePair[int32, string]{-10000000, fmt.Sprintf("Should not have found key:%v in HashMap", b.key)})
+				if err.key == b.key {
+					errors = multierror.Append(errors, fmt.Errorf("Should not have found:%v in HashMap", b.key))
 				}
 			}
-			fmt.Printf("Getting %v values from hashmap took:%v\n", len(xss), time.Since(start))
+			fmt.Printf("Deleting %v values from hashmap that had %v buckets took:%v\n", len(xss.A), xss.B, time.Since(start))
+
+			//////////  Now use Golang's hashmap to compare performance
+			mg := make(map[int32]KeyValuePair[int32, string])
+			start = time.Now()
+			for _, b := range xss.A {
+				mg[b.key] = b
+			}
+			fmt.Printf("Inserting %v values into Golang hashmap took:%v\n", len(xss.A), time.Since(start))
+			//The value should be in the map
+			start = time.Now()
+			for _, b := range xss.A {
+				delete(mg, b.key)
+			}
+			fmt.Printf("Deleting %v values from Golang hashmap  took:%v\n", len(xss.A), time.Since(start))
+
+			/////////////
+
 			if errors != nil {
 				return false, errors
 			} else {
@@ -153,5 +193,5 @@ func TestGetAndSetForManyHashCollisions(t *testing.T) {
 		},
 	)
 	result := prop.Run(propcheck.RunParms{100, rng})
-	propcheck.ExpectSuccess[[]KeyValuePair[int32, string]](t, result)
+	propcheck.ExpectSuccess[propcheck.Pair[[]KeyValuePair[int32, string], int32]](t, result)
 }

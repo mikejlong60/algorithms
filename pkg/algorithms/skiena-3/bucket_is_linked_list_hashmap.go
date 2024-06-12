@@ -34,6 +34,18 @@ func Get2[K, V any](m HashMap2[K, V], k K, p func(xs KeyValuePair[K, V]) bool) o
 	}
 }
 
+func Delete2[K, V any](m HashMap2[K, V], k K, p func(xs KeyValuePair[K, V]) bool) HashMap2[K, V] {
+	a := m.hash(k)
+	idx := int32(math.Mod(float64(a), float64(len(m.underlying))))
+	b := m.underlying[idx]
+	notP := func(xs KeyValuePair[K, V]) bool {
+		return !p(xs)
+	}
+	c := linked_list.Filter[KeyValuePair[K, V]](b, notP)
+	m.underlying[idx] = c
+	return m
+}
+
 func replace[K, V any](m HashMap2[K, V], kv KeyValuePair[K, V], p func(xs KeyValuePair[K, V]) bool, idx int32) *linked_list.LinkedList[KeyValuePair[K, V]] {
 	b := m.underlying[idx]
 	c := linked_list.Filter[KeyValuePair[K, V]](b, p)
