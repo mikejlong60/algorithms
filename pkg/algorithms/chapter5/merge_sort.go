@@ -1,34 +1,36 @@
 package chapter5
 
+import "github.com/greymatter-io/golangz/stack"
+
 func MergeSortWithInversionChecking[T any](xs []T, inversions int, isInversion func(l, r T) bool, lt func(l, r T) bool) ([]T, int) {
 	merge := func(lxs, rxs []T, inversions int, lt func(l, r T) bool) ([]T, int) {
 		//TODO Make ToList in Golangz iterate backwards for efficiency
 		//TODO Make a stack in Golangz with push pop and peek.
-		var rs = FromArray(lxs)
-		var ls = FromArray(rxs)
+		var rs = stack.FromArray(lxs)
+		var ls = stack.FromArray(rxs)
 		var r, l T
 		result := make([]T, len(lxs)+len(rxs))
-		var lerr error
-		var rerr error
+		var lok bool
+		var rok bool
 		for i := range result {
-			lerr, l = Peek(ls)
-			rerr, r = Peek(rs)
-			if lerr == nil && rerr == nil {
+			l, lok = stack.Peek(ls)
+			r, rok = stack.Peek(rs)
+			if lok && rok {
 				if lt(r, l) {
-					_, r, rs = Pop(rs)
+					rs = stack.Pop(rs)
 					result[i] = r
 					if isInversion(l, r) {
 						inversions = inversions + 1 //If right is less than left that's an inversion
 					}
 				} else {
-					_, l, ls = Pop(ls)
+					ls = stack.Pop(ls)
 					result[i] = l
 				}
-			} else if lerr == nil {
-				_, l, ls = Pop(ls)
+			} else if lok {
+				ls = stack.Pop(ls)
 				result[i] = l
-			} else if rerr == nil {
-				_, r, rs = Pop(rs)
+			} else if rok {
+				rs = stack.Pop(rs)
 				result[i] = r
 			}
 		}
@@ -80,30 +82,28 @@ func NumberOfEquivalences[T any](xs []T, eq func(l, r T) bool, lt func(l, r T) b
 
 func MergeSort[T any](xs []T, lt func(l, r T) bool) []T {
 	merge := func(lxs, rxs []T, lt func(l, r T) bool) []T {
-		//TODO Make ToList for linked list in Golangz iterate backwards for efficiency
-		//TODO Make a stack in Golangz with push pop and peek.
-		var rs = FromArray(lxs)
-		var ls = FromArray(rxs)
+		var rs = stack.FromArray(lxs)
+		var ls = stack.FromArray(rxs)
 		var r, l T
 		result := make([]T, len(lxs)+len(rxs))
-		var lerr error
-		var rerr error
+		var lok bool
+		var rok bool
 		for i := range result {
-			lerr, l = Peek(ls)
-			rerr, r = Peek(rs)
-			if lerr == nil && rerr == nil {
+			l, lok = stack.Peek[T](ls)
+			r, rok = stack.Peek(rs)
+			if lok && rok {
 				if lt(r, l) {
-					_, r, rs = Pop(rs)
+					rs = stack.Pop(rs)
 					result[i] = r
 				} else {
-					_, l, ls = Pop(ls)
+					ls = stack.Pop(ls)
 					result[i] = l
 				}
-			} else if lerr == nil {
-				_, l, ls = Pop(ls)
+			} else if lok {
+				ls = stack.Pop(ls)
 				result[i] = l
-			} else if rerr == nil {
-				_, r, rs = Pop(rs)
+			} else if rok {
+				rs = stack.Pop(rs)
 				result[i] = r
 			}
 		}

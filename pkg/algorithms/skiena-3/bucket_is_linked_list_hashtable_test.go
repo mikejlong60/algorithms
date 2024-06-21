@@ -21,9 +21,9 @@ func TestGetAndSet(t *testing.T) {
 		return s
 	}
 
-	ge := propcheck.ChooseArray(500, 500, propcheck.ChooseInt(-100000, 100000))
-	gf := propcheck.ChooseArray(500, 500, propcheck.String(40))
-	gh := propcheck.ChooseInt(1, 500)
+	ge := propcheck.ChooseArray(50000, 50000, propcheck.ChooseInt(-100000, 100000))
+	gf := propcheck.ChooseArray(50000, 50000, propcheck.String(40))
+	gh := propcheck.ChooseInt(1, 500000)
 	gg := propcheck.Map3(ge, gf, gh, f)
 
 	prop := propcheck.ForAll(gg,
@@ -76,7 +76,7 @@ func TestGetAndSet(t *testing.T) {
 			fmt.Printf("Getting %v values from hashmap with %v buckets took:%v\n", len(xss.A), xss.B, time.Since(start))
 
 			//////////  Now use Golang's hashmap to compare performance
-			mg := make(map[int32]KeyValuePair[int32, string])
+			mg := make(map[int32]KeyValuePair[int32, string], xss.B)
 			start = time.Now()
 			for _, b := range xss.A {
 				mg[b.key] = b
@@ -103,7 +103,7 @@ func TestGetAndSet(t *testing.T) {
 	propcheck.ExpectSuccess[propcheck.Pair[[]KeyValuePair[int32, string], int32]](t, result)
 }
 
-func TestDeleteForProbablyNoHashCollisions(t *testing.T) {
+func TestDelete(t *testing.T) {
 	rng := propcheck.SimpleRNG{Seed: time.Now().Nanosecond()}
 	f := func(a []int, b []string, c int) propcheck.Pair[[]KeyValuePair[int32, string], int32] {
 		var r = make([]KeyValuePair[int32, string], len(a))
@@ -114,9 +114,9 @@ func TestDeleteForProbablyNoHashCollisions(t *testing.T) {
 		return s
 	}
 
-	ge := propcheck.ChooseArray(500, 500, propcheck.ChooseInt(-100000, 100000))
-	gf := propcheck.ChooseArray(500, 500, propcheck.String(40))
-	gh := propcheck.ChooseInt(1, 500)
+	ge := propcheck.ChooseArray(50000, 50000, propcheck.ChooseInt(-100000, 100000))
+	gf := propcheck.ChooseArray(50000, 50000, propcheck.String(40))
+	gh := propcheck.ChooseInt(1, 500000)
 	gg := propcheck.Map3(ge, gf, gh, f)
 
 	prop := propcheck.ForAll(gg,
