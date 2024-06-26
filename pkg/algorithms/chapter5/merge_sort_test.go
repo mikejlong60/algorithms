@@ -13,7 +13,7 @@ import (
 
 // Interesting fact about my quicksort versus golang one versus my non-parallel merge sort.  My Quicksort implementation is faster than Golang's
 // as the number of duplicate elements decreases. Golang's sort gets faster the more duplication exists.
-// Merge sort is always about 7x slower that either.
+// Merge sort is always about 7x slower than either.
 func TestMergeSortPerformanceVersusYourQuicksortAndGolangQuicksort(t *testing.T) {
 
 	lt := func(l, r int) bool {
