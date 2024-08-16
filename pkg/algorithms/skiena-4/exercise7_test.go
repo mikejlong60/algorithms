@@ -19,7 +19,7 @@ type Citations struct { //Map of authors and Citations with a notation of the pa
 	citations map[string]int //Each paper with its number of citations
 }
 
-// Determine in Big O(N) the maximum number of Citations for authors.  It must be how grpup-by is implemented in a database.
+// Determine in Big O(N) the maximum number of Citations for authors.  It must be how group-by is implemented in a database.
 func TestCountCitations(t *testing.T) {
 
 	f := func(mostCitations MostCitations, citation AuthorPaper) MostCitations {
