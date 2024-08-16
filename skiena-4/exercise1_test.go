@@ -2,7 +2,7 @@ package skiena_4
 
 import (
 	"github.com/greymatter-io/golangz/arrays"
-	"github.com/mikejlong60/algorithms/pkg/algorithms/chapter5"
+	"github.com/mikejlong60/algorithms/chapter5"
 	"testing"
 )
 
