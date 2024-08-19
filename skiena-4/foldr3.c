@@ -94,15 +94,15 @@ int main() {
     printf("Product: %d\n", productResult); // Output: Product: 120
 
 //////////////
-    int arr2[] = {1, 2, 3, 4, 5, 6,7,8,9,0};
-    int size2 = sizeof(arr) / sizeof(arr[0]);
+    int arr2[] = {1, 2, 3, 4, 5, 6,7,8,9,100};
+    int size2 = sizeof(arr2) / sizeof(arr2[0]);
 
     // Folding with sum operation
     int lsumResult = foldLeft(arr2, size2, 0, 0, lsumOperation);
-    printf("Sum: %d\n", lsumResult); // Output: Sum: 15
+    printf("lSum: %d\n", lsumResult); // Output: Sum: 15
 
     // Folding with product operation
     int lproductResult = foldLeft(arr2, size2, 0, 1, lproductOperation);
-    printf("Product: %d\n", lproductResult); // Output: Product: 120
+    printf("lProduct: %d\n", lproductResult); // Output: Product: 120
 
 }
