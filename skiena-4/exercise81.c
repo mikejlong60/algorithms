@@ -1,68 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hashmap.h"
 
 //Question: You are given a pile of thousands of telephone bills and thousands of checks sent in to pay the bills. Find out who did not pay.
 //Answer:
-//    Steps:  Big O(n log n) due to the sorting
+//    Steps:  Big O(n)  -- you iterate over each array once, first is to put cheques into map, second is to see if there is cheque for bill in hahmap.
 //       1. //Question: You are given a pile of thousands of telephone bills and thousands of checks sent in to pay the bills. Find out who did not pay.
 //Answer:
-//    Steps:  Big O(n log n) due to the sorting
-//       1. Sort both arrays by name a - checks, b - bills.
+//    Steps:  you have two arrays bills and cheques
+//       1. Add cheques array to hashmap.
 //       2. unpaidBills = []UnpaidBills
-//       3. for i := 0; i < len(a); i++ {
-//            if array a[i] is > b[i] {// There is not a matching check so add it to if a[i].firstName < b[i].firstName && a[i].lastName == b[i].lastName {
-//               unpaidBills = append(unpaidBills, b[i])
+//       3. for i := 0; i < len(bills); i++ {
+//            lookup person from bills in checks hashmap.
+//            if person is not in checks map {
+//               unpaidBills = append(unpaidBills, bills[i])
 //            }
 //       }
-
-
-// Comparison function for qsort
-int compareStrings(const void *a, const void *b) {
-    // Convert the pointers to the correct type
-    const char **strA = (const char **)a;
-    const char **strB = (const char **)b;
-    // Use strcmp to compare the strings
-    return strcmp(*strA, *strB);
-}
+//       return unpaidbills
 
 int main() {
     // array of bills
-    char *a[] = {"fred2", "fred3", "fred", "fred4", "fred5"};
+    char *bills[] = {"dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2", "dang", "mike","fred2","fred2", "dang", "mike","fred2","dang", "mike","fred2", "otis", "fred3", "fred3", "fred", "fred4", "fred5","fred0","fred2"};
 
     // array of checks
-    const char *b[] = {"fred2", "fred2","fred5", "fred3", "fred4"};
+    char *cheques[] = {"fred2", "otis", "fred2","fred5", "fred3", "fred4"};
+
+    // Calculate the number of elements in the array
+    int na = sizeof(bills) / sizeof(bills[0]);
+    int nb = sizeof(cheques) / sizeof(cheques[0]);
+    printf("number of bills:%d\n", na);
+    printf("number of cheques:%d\n", nb);
 
     // Dynamically allocate memory for the array of unpaid bills as pointers
-    char **unpaidbills = calloc(7, sizeof(char *));
+    // It will not be larger than array of unpaid bills.
+    char **unpaidbills = calloc(na, sizeof(char *));
 
     if (unpaidbills == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return 1;
     }
 
-    // Calculate the number of elements in the array
-    int na = sizeof(a) / sizeof(a[0]);
-    int nb = sizeof(b) / sizeof(b[0]);
+   // Add cheques to hashmap
+    for (int i = 0; i < nb; i++) {
+        install(cheques[i], cheques[i]);
+        printf("cheques[%d]:%s\n", i, cheques[i]);
+    }
 
-    // Sort the array using qsort
-    qsort(a, na, sizeof(char *), compareStrings);
-    qsort(b, nb, sizeof(char *), compareStrings);
-
-    // Print the sorted array
-    for (int i, j = 0; i < na; i++) {
-        int result = strcmp(a[i], b[i]);
-        printf("result:a[%d] --- b[%d] --- result:%d\n", a[i], b[i], result);
-        if (result != 0) { // There is not a matching check so add it to list of unpaid bills
-            unpaidbills[j] = a[i];
+    //add unpaid bills to array
+    for (int i = 0, j = 0; i < na; i++) {
+        printf("bills[%d]:%s\n", i, bills[i]);
+        struct Nlist *np;
+        if ((np = lookup(bills[i])) == NULL) {
+            unpaidbills[j] = bills[i];
             j++;
         }
     }
 
    // Print the unpaid bills array
-    for (int i = 0; i < 7; i++) {
-        printf("unpaidbills[%d]:%s\n", i, unpaidbills[i]);
+    printf("number of unpaid bills, some are NULL and we won't print those:%d\n", na);
+    for (int j = 0; j < na; j++) {
+        if (unpaidbills[j] != NULL)
+            printf("unaidbills[%d]:%s\n", j, unpaidbills[j]);
     }
     free(unpaidbills);
+
     return 0;
 }
