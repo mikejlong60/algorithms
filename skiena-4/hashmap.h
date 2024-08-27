@@ -3,16 +3,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct Nlist { //table entry
-    struct Nlist *next; //nest entry in liked list chain
+struct PublisherNlist { //table entry
+    struct PublisherNlist *next; //nest entry in liked list chain
     char *name; //defined name
     char *defn; //replacement text
 };
 
-void Nlistprint(struct Nlist *);
-void Nlistprint(struct Nlist *p) {
+void PublisherNlistprint(struct PublisherNlist *);
+void PublisherNlistprint(struct PublisherNlist *p) {
     if (p != NULL) {
-        Nlistprint(p->next);
+        PublisherNlistprint(p->next);
         //printf("Next guy in linked list - %s:%s\n", p->name, p->defn);
     }
     //printf("leaving Nlistprint\n");
@@ -22,7 +22,7 @@ void Nlistprint(struct Nlist *p) {
 #define NUMELMTS 200000
 
 
-static struct Nlist *hashtab[HASHSIZE]; //pointer table
+static struct PublisherNlist *hashtab[HASHSIZE]; //pointer table
 
 // hash - form hash value for string s
 unsigned hash(char *s) {
@@ -35,8 +35,8 @@ unsigned hash(char *s) {
 }
 
 //lookup
-struct Nlist *lookup(char *s) {
-    struct Nlist *np;
+struct PublisherNlist *lookup(char *s) {
+    struct PublisherNlist *np;
     //printf("lookup1\n");
     for (np = hashtab[hash(s)]; np != NULL; np = np->next) {
         //printf("searching linked list in cell[%d]\n", hash(s));
@@ -50,14 +50,14 @@ struct Nlist *lookup(char *s) {
 }
 
 // install - put(name defn) in hashtab
-struct Nlist *install(char *name, char *defn) {
+struct PublisherNlist *install(char *name, char *defn) {
     //printf("install1:name[%s] --- defn[%s]\n", name, defn);
-    struct Nlist *np;
+    struct PublisherNlist *np;
     unsigned hashval;
     //printf("install111\n");
     if ((np = lookup(name)) == NULL) { //not found
         //printf("install2\n");
-        np = (struct Nlist *) malloc(sizeof(*np));
+        np = (struct PublisherNlist *) malloc(sizeof(*np));
         if (np == NULL || (np->name = strdup(name)) == NULL)
             return NULL;
         hashval = hash(name);

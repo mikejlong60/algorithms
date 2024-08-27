@@ -3,6 +3,8 @@
 #include <string.h>
 #include "hashmap.h"
 
+
+//TODO use utash hashtable implementation instead of ou own: https://troydhanson.github.io/uthash/userguide.html
 //Question: You are given a pile of thousands of telephone bills and thousands of checks sent in to pay the bills. Find out who did not pay.
 //Answer:
 //    Steps:  Big O(n)  -- you iterate over each array once, first is to put cheques into map, second is to see if there is cheque for bill in hahmap.
@@ -50,7 +52,7 @@ int main() {
     //add unpaid bills to array
     for (int i = 0, j = 0; i < na; i++) {
         printf("bills[%d]:%s\n", i, bills[i]);
-        struct Nlist *np;
+        struct PublisherNlist *np;
         if ((np = lookup(bills[i])) == NULL) {
             unpaidbills[j] = bills[i];
             j++;
