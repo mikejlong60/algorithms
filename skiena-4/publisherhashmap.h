@@ -16,7 +16,7 @@ struct PublisherNlist { //table entry
 
 void PublisherNlistprint(const struct PublisherNlist *p) {
     if (p != NULL) {
-        printf("Next guy in linked list - %s : %d\n", p->name, p->defn->bookspublished);
+        printf("Number of book published for- %s : %d\n", p->name, p->defn->bookspublished);
         PublisherNlistprint(p->next);
     }
 }
