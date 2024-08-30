@@ -13,9 +13,7 @@ void PublisherNlistprint(struct PublisherNlist *);
 void PublisherNlistprint(struct PublisherNlist *p) {
     if (p != NULL) {
         PublisherNlistprint(p->next);
-        //printf("Next guy in linked list - %s:%s\n", p->name, p->defn);
     }
-    //printf("leaving Nlistprint\n");
 }
 
 #define HASHSIZE 3000
@@ -37,61 +35,30 @@ unsigned hash(char *s) {
 //lookup
 struct PublisherNlist *lookup(char *s) {
     struct PublisherNlist *np;
-    //printf("lookup1\n");
     for (np = hashtab[hash(s)]; np != NULL; np = np->next) {
-        //printf("searching linked list in cell[%d]\n", hash(s));
         if (strcmp(s, np->name) == 0) {
-            //printf("found in linked list\n");
             return np;  //found
         }
     }
-     //printf("lookup2\n");
     return NULL;  //not found
 }
 
 // install - put(name defn) in hashtab
 struct PublisherNlist *install(char *name, char *defn) {
-    //printf("install1:name[%s] --- defn[%s]\n", name, defn);
     struct PublisherNlist *np;
     unsigned hashval;
-    //printf("install111\n");
     if ((np = lookup(name)) == NULL) { //not found
-        //printf("install2\n");
         np = (struct PublisherNlist *) malloc(sizeof(*np));
         if (np == NULL || (np->name = strdup(name)) == NULL)
             return NULL;
         hashval = hash(name);
         np->next = hashtab[hashval];
-        //printf("hashval[%d]\n", hashval);
         hashtab[hashval] = np;
-    } else { //already there 
-        //printf("install3\n");
+    } else { //already there
         free((void *) np->defn); //free previous defn
-        //printf("install4\n");
     }
-    //printf("install5\n");
     if ((np->defn = strdup(defn)) == NULL) {
-        //printf("install6\n");
         return NULL;
     }
     return np;
 }
-    
-
-/*
-main() {
-    printf("1\n");
-    for (int i = 0; i < NUMELMTS; i++) {
-        char key[20];
-        sprintf(key, "MAX%d", i);    
-        char val[30];
-        sprintf(val, "fred%d", i);  
-    printf("2\n");
-        struct Nlist *x = install(key, val);
-        printf("3\n");
-    }
-    for (int i = 0; i < NUMELMTS; i++) {
-        printf("in loop\n");
-        Nlistprint(hashtab[i]);
-    }
-}*/
