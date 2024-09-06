@@ -45,7 +45,20 @@ int handle_egress(struct __sk_buff *skb) {
         return TC_ACT_SHOT; // Drop packet if parsing fails
     }
 
-    // Check if this is a UDP packet (for example)
+    // Check if this is a TCP packet
+    if (ip->protocol == IPPROTO_TCP) {
+        // Modify IP destination address
+        ip->daddr = bpf_htonl(0xC0A80102); // Example: New destination IP 192.168.1.2
+
+        // Recalculate IP checksum (simplified)
+        ip->check = 0;
+        ip->check = bpf_csum_diff(0, 0, (__be32 *)ip, ip->ihl * 4, 0);
+
+        // Redirect to another network interface (e.g., ifindex 3)
+        return bpf_redirect(3, 0);
+    }
+
+    // Check if this is a UDP packet
     if (ip->protocol == IPPROTO_UDP) {
         // Modify IP destination address
         ip->daddr = bpf_htonl(0xC0A80102); // Example: New destination IP 192.168.1.2
