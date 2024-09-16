@@ -1,4 +1,4 @@
-Question: Given a set S of n positive(simplifies fo now) integers and an integer T, give an O(n(k-1))
+Question: Given a set S of n positive(simplifies for now) integers and an integer T, give an O(n(k-1) log n)
 algorithm to test whether k of three distinct integers in S add up to T
 
 Answer:
