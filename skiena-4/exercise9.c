@@ -27,11 +27,11 @@ func f(int[] S, int T, int k, int workingIdx, int workingSum) bool {
 // Comparison function for integers
 int compare(const void *a, const void *b) {
     // Cast the pointers to int pointers and dereference them
-    int int_a = *(int *)a;
-    int int_b = *(int *)b;
+    const int int_a = *(int *)a;
+    const int int_b = *(int *)b;
 
     // Return the difference between the two integers
-    return (int_a - int_b);
+    return int_a - int_b;
 }
 
 //Binary search
@@ -47,7 +47,6 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
     const int a = (rightOffset - leftOffset)/2;
 
     const int relativeA = leftOffset + a;
-    printf("S[relativeA] = %d\n", S[relativeA]);
     if (S[relativeA] == lookingFor) {
         return 1;
     } else if (S[relativeA] < lookingFor) {
@@ -56,11 +55,10 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
         return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
-
-int main() { // Example array of integers
+testOddNumberOfElements() {
     int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
-    int n = sizeof(S) / sizeof(S[0]);
+    const int n = sizeof(S) / sizeof(S[0]);
 
     // Use qsort to sort the array
     qsort(S, n, sizeof(int), compare);
@@ -85,6 +83,39 @@ int main() { // Example array of integers
 
     r = find(S, 0, n-1, 5, n);
     assert(r == 1);
+}
 
-    return r;
+testEvenNumberOfElements() {
+    int S[] = {3,2,1,4,5,8};
+    // Calculate the number of elements in the array
+    int n = sizeof(S) / sizeof(S[0]);
+
+    // Use qsort to sort the array
+    qsort(S, n, sizeof(int), compare);
+
+    int r = find(S, 0, n-1, 3, n);
+    assert(r == 1);
+
+    r = find(S, 0, n-1, 2, n);
+    assert(r == 1);
+
+    r = find(S, 0, n-1, 0, n);
+    assert(r == 0);
+
+    r = find(S, 0, n-1, 1, n);
+    assert(r == 1);
+
+    r = find(S, 0, n-1, 50, n);
+    assert(r == 0);
+
+    r = find(S, 0, n-1, 4, n);
+    assert(r == 1);
+
+    r = find(S, 0, n-1, 8, n);
+    assert(r == 1);
+}
+
+int main() { // Example array of integers
+    testOddNumberOfElements();
+    testEvenNumberOfElements();
 }
