@@ -36,23 +36,23 @@ int compare(const void *a, const void *b) {
 
 //Binary search
 int find(int* S, const int leftOffset, const int rightOffset, const int lookingFor) {
-    const int a = (rightOffset - leftOffset)/2;
+    int a = (rightOffset - leftOffset)/2;
+
     const int relativeA = leftOffset + a;
     printf("S[relativeA] = %d\n", S[relativeA]);
     if (S[relativeA] == lookingFor) {
         return 1;  //true
-    //} else if (a == 0) {
-    //    return 0;
+    } else if (a == 0) {
+        return 0;
     } else if (S[relativeA] < lookingFor) {
         return find(S, leftOffset + a, rightOffset, lookingFor);
-    } else {
-        return find(S, leftOffset + a, rightOffset,  lookingFor);
-    }
+    } else
+        return find(S, leftOffset, leftOffset + a,  lookingFor);
 }
 
 
 int main() { // Example array of integers
-    int S[] = {1, 2,3,4,5};
+    int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]) - 1;
 
@@ -62,11 +62,23 @@ int main() { // Example array of integers
     int r = find(S, 0, n, 3);
     assert(r == 1);
 
-    r = find(S, 0, n, 5);
+    r = find(S, 0, n, 2);
+    assert(r == 1);
+
+    r = find(S, 0, n, 0);
     assert(r == 0);
+
+    r = find(S, 0, n, 1);
+    assert(r == 1);
 
     r = find(S, 0, n, 50);
     assert(r == 0);
+
+    r = find(S, 0, n, 4);
+    assert(r == 1);
+
+    r = find(S, 0, n, 5);
+    assert(r == 1);
 
     return r;
 }
