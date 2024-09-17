@@ -35,49 +35,55 @@ int compare(const void *a, const void *b) {
 }
 
 //Binary search
-int find(int* S, const int leftOffset, const int rightOffset, const int lookingFor) {
-    int a = (rightOffset - leftOffset)/2;
+int find(int* S, const int leftOffset, const int rightOffset, const int lookingFor, const int arraySize) {
+    //If lookingFor is completely outside array return false right away
+    if (S[0] > lookingFor || S[arraySize - 1] < lookingFor)
+        return 0;
+    //If lookingFor is first or last element return true right away
+    if (S[arraySize - 1] == lookingFor || S[0] == lookingFor)//case where looking for is left-most or right-most element.
+        return 1;
+
+    //Otherwise recursively split array with binary search
+    const int a = (rightOffset - leftOffset)/2;
 
     const int relativeA = leftOffset + a;
     printf("S[relativeA] = %d\n", S[relativeA]);
     if (S[relativeA] == lookingFor) {
-        return 1;  //true
-    } else if (a == 0) {
-        return 0;
+        return 1;
     } else if (S[relativeA] < lookingFor) {
-        return find(S, leftOffset + a, rightOffset, lookingFor);
+        return find(S, leftOffset + a, rightOffset, lookingFor, arraySize);
     } else
-        return find(S, leftOffset, leftOffset + a,  lookingFor);
+        return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
 
 int main() { // Example array of integers
     int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
-    int n = sizeof(S) / sizeof(S[0]) - 1;
+    int n = sizeof(S) / sizeof(S[0]);
 
     // Use qsort to sort the array
     qsort(S, n, sizeof(int), compare);
 
-    int r = find(S, 0, n, 3);
+    int r = find(S, 0, n-1, 3, n);
     assert(r == 1);
 
-    r = find(S, 0, n, 2);
+    r = find(S, 0, n-1, 2, n);
     assert(r == 1);
 
-    r = find(S, 0, n, 0);
+    r = find(S, 0, n-1, 0, n);
     assert(r == 0);
 
-    r = find(S, 0, n, 1);
+    r = find(S, 0, n-1, 1, n);
     assert(r == 1);
 
-    r = find(S, 0, n, 50);
+    r = find(S, 0, n-1, 50, n);
     assert(r == 0);
 
-    r = find(S, 0, n, 4);
+    r = find(S, 0, n-1, 4, n);
     assert(r == 1);
 
-    r = find(S, 0, n, 5);
+    r = find(S, 0, n-1, 5, n);
     assert(r == 1);
 
     return r;
