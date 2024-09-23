@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 /**
-Question: Given a set S of n positive(simplifies for now) integers and an integer T, give an O(n(k-1) log n)
-algorithm to test whether k of three distinct integers in S add up to T
+Question: Given a set S of n integers and an integer T, give an O(n(k-1) log n)
+algorithm to test whether k integers in S add up to T
 
 Answer:
     1. Sort the set of integers
@@ -55,7 +55,39 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
         return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
-testOddNumberOfElements() {
+int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make the algorithm work for k != 2
+    int sumSoFar = 0;
+    int desiredDifference = 0;
+    for (int j = 0; j < arraySize; j++) {
+        desiredDifference = T - S[j];
+        const int there = find(S, 0, arraySize-1, desiredDifference, arraySize);
+        if (there)
+            return 1;
+        if (S[j] > T)
+            return 0;//No need to look further since S[j] is too large to sum to T
+    }
+    return 0;
+}
+
+int testHasSum() {
+    int S[] = {3,2,1,4,5};
+    // Calculate the number of elements in the array
+    int n = sizeof(S) / sizeof(S[0]);
+
+    // Use qsort to sort the array
+    qsort(S, n, sizeof(int), compare);
+
+    int actual = hasSum(S, 2, 3, n);
+    assert(actual == 1);
+
+    actual = hasSum(S, 2, 1, n);
+    assert(actual == 0);
+
+    actual = hasSum(S, 2, 11, n);
+    assert(actual == 0);
+}
+
+int testOddNumberOfElements() {
     int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
     const int n = sizeof(S) / sizeof(S[0]);
@@ -85,7 +117,7 @@ testOddNumberOfElements() {
     assert(r == 1);
 }
 
-testEvenNumberOfElements() {
+int testEvenNumberOfElements() {
     int S[] = {3,2,1,4,5,8};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
@@ -118,4 +150,5 @@ testEvenNumberOfElements() {
 int main() { // Example array of integers
     testOddNumberOfElements();
     testEvenNumberOfElements();
+    testHasSum();
 }
