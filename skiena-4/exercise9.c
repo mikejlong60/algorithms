@@ -69,7 +69,28 @@ int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make t
     return 0;
 }
 
-int testHasSum() {
+int testHasSumEvenNumberOfElements() {
+    int S[] = {3,2,1,4,5,6};
+    // Calculate the number of elements in the array
+    int n = sizeof(S) / sizeof(S[0]);
+
+    // Use qsort to sort the array
+    qsort(S, n, sizeof(int), compare);
+
+    int actual = hasSum(S, 2, 3, n);
+    assert(actual == 1);
+
+    actual = hasSum(S, 2, 1, n);
+    assert(actual == 0);
+
+    actual = hasSum(S, 2, 11, n);
+    assert(actual == 1);
+
+    actual = hasSum(S, 2, 13, n);
+    assert(actual == 0);
+}
+
+int testHasSumOddNumberOfElements() {
     int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
@@ -150,5 +171,6 @@ int testEvenNumberOfElements() {
 int main() { // Example array of integers
     testOddNumberOfElements();
     testEvenNumberOfElements();
-    testHasSum();
+    testHasSumOddNumberOfElements();
+    testHasSumEvenNumberOfElements();
 }
