@@ -55,8 +55,11 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
         return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
-int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make the algorithm work for k != 2
-    int sumSoFar = 0;
+int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make the algorithm work for k > 2
+
+    if (k == 1)
+        return find(S, 0, arraySize-1, T, arraySize);
+
     int desiredDifference = 0;
     for (int j = 0; j < arraySize; j++) {
         desiredDifference = T - S[j];
@@ -67,6 +70,14 @@ int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make t
             return 0;//No need to look further since S[j] is too large to sum to T
     }
     return 0;
+}
+
+int hasSum23(int* S, const int k, const int T, const int arraySize) {
+    int yes = 0;
+    for (int i = 0; i < k; i++) {
+        yes = hasSum(S, i, T, arraySize);
+    }
+    return yes;
 }
 
 int testHasSumEvenNumberOfElements() {
@@ -88,6 +99,24 @@ int testHasSumEvenNumberOfElements() {
 
     actual = hasSum(S, 2, 13, n);
     assert(actual == 0);
+
+    actual = hasSum(S, 1, 1, n);
+    assert(actual == 1);
+
+    actual = hasSum(S, 1, 2, n);
+    assert(actual == 1);
+    actual = hasSum(S, 1, 3, n);
+    assert(actual == 1);
+    actual = hasSum(S, 1, 4, n);
+    assert(actual == 1);
+    actual = hasSum(S, 1, 5, n);
+    assert(actual == 1);
+    actual = hasSum(S, 1, 14, n);
+    assert(actual == 0);
+    actual = hasSum(S, 1, 0, n);
+    assert(actual == 0);
+
+
 }
 
 int testHasSumOddNumberOfElements() {
@@ -101,7 +130,7 @@ int testHasSumOddNumberOfElements() {
     int actual = hasSum(S, 2, 3, n);
     assert(actual == 1);
 
-    actual = hasSum(S, 2, 1, n);
+    actual = hasSum(S, 2, 0, n);
     assert(actual == 0);
 
     actual = hasSum(S, 2, 11, n);
