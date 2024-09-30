@@ -5,23 +5,6 @@
 Question: Given a set S of n integers and an integer T, give an O(n(k-1) log n)
 algorithm to test whether k integers in S add up to T
 
-Answer:
-    1. Sort the set of integers
-    2. Find the closest spot j in S using a binary search where s[j] < T. Example
-        Example data set: S = {1,2,3,4,5}. k = 3, T = 8
-        2.1 Find closest spot in array with binary search less than 8(T).  It's 5, position 4.
-        2.2 Work backwards 2 spots from 5 since you have three numbers you have to add and you cannot repeat usage
-        of the same number.
-        2.3 recursively function f-
-            2.3.1 start at position 3.  Add position 2 to working sum(ws). Does ws exceed T?
-                Yes - stop algorithm - no such set of k integers exits
-                No - call f with
-
-
-func f(int[] S, int T, int k, int workingIdx, int workingSum) bool {
-
-
-}
 */
 
 // Comparison function for integers
@@ -55,11 +38,7 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
         return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
-int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make the algorithm work for k > 2
-
-    if (k == 1)
-        return find(S, 0, arraySize-1, T, arraySize);
-
+int twoSum(int *S, const int k, const int T, const int arraySize) {//TODO make the algorithm work for k > 2
     int desiredDifference = 0;
     for (int j = 0; j < arraySize; j++) {
         desiredDifference = T - S[j];
@@ -72,72 +51,87 @@ int hasSum(int* S, const int k, const int T, const int arraySize) {//TODO make t
     return 0;
 }
 
-int hasSum23(int* S, const int k, const int T, const int arraySize) {
-    int yes = 0;
-    for (int i = 0; i < k; i++) {
-        yes = hasSum(S, i, T, arraySize);
+int hasSum(int *S, const int k, const int T, const int arraySize) {
+    if (k == 1)
+        return find(S, 0, arraySize-1, T, arraySize);
+    if (k ==2) {
+        return twoSum(S, k, T, arraySize);
     }
-    return yes;
+    for (int i = 0; i < arraySize; i++) {
+        if (i == 0) {// || S[i] != S[i-1]) {
+            //int pppp = i + 1;
+            //int* piss = S[pppp];
+            if (hasSum(&S[i + 1], k-1, T - S[i], arraySize)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
-int testHasSumEvenNumberOfElements() {
-    int S[] = {3,2,1,4,5,6};
+// Function to solve the 2-sum problem
+int two_sum(int *S, int left, int right, int target) {
+    while (left < right) {
+        int sum = S[left] + S[right];
+        if (sum == target)
+            return 1;  // Found the pair
+        else if (sum < target)
+            left++;
+        else
+            right--;
+    }
+    return 0;  // No pair found
+}
+
+// Function to solve the k-sum problem recursively
+int k_sum(int *S, int n, int k, int target) {
+    if (k == 2) {
+        // Base case: 2-sum problem
+        return two_sum(S, 0, n - 1, target);
+    }
+
+    // Recursive case: reduce k-sum to (k-1)-sum
+    for (int i = 0; i < n; i++) {
+        // Check if (k-1) integers sum up to target - S[i]
+        if (k_sum(S + i + 1, n - i - 1, k - 1, target - S[i])) {
+            return 1;  // Found k integers that sum up to the target
+        }
+    }
+
+    return 0;  // No solution found
+}
+
+
+int testKSum() {
+    int S[] = {3,2,1,4,5,6, 63, 12, 23, 34, -19, 19};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
 
     // Use qsort to sort the array
     qsort(S, n, sizeof(int), compare);
 
-    int actual = hasSum(S, 2, 3, n);
+    int actual = k_sum(S, n, 2, 5);
     assert(actual == 1);
 
-    actual = hasSum(S, 2, 1, n);
+    actual = k_sum(S, n, 2, 0);
+    assert(actual == 1);
+
+    // k > 2
+    actual = k_sum(S, n, 3, 200);
     assert(actual == 0);
 
-    actual = hasSum(S, 2, 11, n);
+    actual = k_sum(S, n, 3, 7);
     assert(actual == 1);
 
-    actual = hasSum(S, 2, 13, n);
+    actual = k_sum(S, n, 3, 0);
     assert(actual == 0);
 
-    actual = hasSum(S, 1, 1, n);
+    actual = k_sum(S, n, 3, 6);
     assert(actual == 1);
-
-    actual = hasSum(S, 1, 2, n);
-    assert(actual == 1);
-    actual = hasSum(S, 1, 3, n);
-    assert(actual == 1);
-    actual = hasSum(S, 1, 4, n);
-    assert(actual == 1);
-    actual = hasSum(S, 1, 5, n);
-    assert(actual == 1);
-    actual = hasSum(S, 1, 14, n);
-    assert(actual == 0);
-    actual = hasSum(S, 1, 0, n);
-    assert(actual == 0);
-
 
 }
 
-int testHasSumOddNumberOfElements() {
-    int S[] = {3,2,1,4,5};
-    // Calculate the number of elements in the array
-    int n = sizeof(S) / sizeof(S[0]);
-
-    // Use qsort to sort the array
-    qsort(S, n, sizeof(int), compare);
-
-    int actual = hasSum(S, 2, 3, n);
-    assert(actual == 1);
-
-    actual = hasSum(S, 2, 0, n);
-    assert(actual == 0);
-
-    actual = hasSum(S, 2, 11, n);
-    assert(actual == 0);
-}
-
-int testOddNumberOfElements() {
+int testBinarySearchOddNumberOfElements() {
     int S[] = {3,2,1,4,5};
     // Calculate the number of elements in the array
     const int n = sizeof(S) / sizeof(S[0]);
@@ -167,7 +161,7 @@ int testOddNumberOfElements() {
     assert(r == 1);
 }
 
-int testEvenNumberOfElements() {
+int testBinarySearchEvenNumberOfElements() {
     int S[] = {3,2,1,4,5,8};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
@@ -198,8 +192,7 @@ int testEvenNumberOfElements() {
 }
 
 int main() { // Example array of integers
-    testOddNumberOfElements();
-    testEvenNumberOfElements();
-    testHasSumOddNumberOfElements();
-    testHasSumEvenNumberOfElements();
+    testBinarySearchOddNumberOfElements();
+    testBinarySearchEvenNumberOfElements();
+    testKSum();
 }
