@@ -1,0 +1,3 @@
+/home/mjlong/go/src/github.com/mikejlong60/algorithms/cmake-build-debug/CMakeFiles/algorithms.dir
+/home/mjlong/go/src/github.com/mikejlong60/algorithms/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/mjlong/go/src/github.com/mikejlong60/algorithms/cmake-build-debug/CMakeFiles/rebuild_cache.dir

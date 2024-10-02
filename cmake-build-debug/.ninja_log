@@ -1,0 +1,9 @@
+# ninja log v6
+9	49	1727871742707959680	build.ninja	aef5327f3310e94f
+1	96	1727870679024764179	CMakeFiles/algorithms.dir/skiena-4/exercise9.c.o	558060b9cc9a5ae
+74	126	1727871114980121675	algorithms	bf2ef37b7e453524
+1	74	1727871114907121460	CMakeFiles/algorithms.dir/skiena-4/exercise10.c.o	80cf078956dacd8f
+0	51	1727871811989152855	CMakeFiles/algorithms.dir/skiena-4/unit_test.c.o	96f66bec5bd71cd7
+51	71	1727871812040152997	algorithms	4e847ccd61be8cd4
+1	47	1727871819646174204	CMakeFiles/algorithms.dir/skiena-4/unit_test.c.o	96f66bec5bd71cd7
+47	68	1727871819693174335	algorithms	4e847ccd61be8cd4
