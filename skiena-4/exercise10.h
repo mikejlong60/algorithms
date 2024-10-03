@@ -8,7 +8,8 @@ Question: Given a set S of n integers and an integer T give two different algori
 */
 
 //Binary search
-int find(int* S, const int leftOffset, const int rightOffset, const int lookingFor, const int arraySize) {
+int find(int* S, const int leftOffset, const int rightOffset, const int lookingFor, const int arraySize)
+{
     //If lookingFor is completely outside array return false right away
     if (S[0] > lookingFor || S[arraySize - 1] < lookingFor)
         return 0;
@@ -22,12 +23,15 @@ int find(int* S, const int leftOffset, const int rightOffset, const int lookingF
     const int relativeA = leftOffset + a;
     if (S[relativeA] == lookingFor) {
         return 1;
+    } else if (rightOffset - leftOffset == 1) {
+        return 0;
     } else if (S[relativeA] < lookingFor) {
         return find(S, leftOffset + a, rightOffset, lookingFor, arraySize);
     } else
         return find(S, leftOffset, leftOffset + a,  lookingFor, arraySize);
 }
 
+///Cost of O(n log n).  Might not be good enough. Book says you can do this in O(n). O(log n) is cost of binary search when array is sorted.
 int twoSum(int *S, const int T, const int arraySize) {
     int desiredDifference = 0;
     for (int j = 0; j < arraySize; j++) {
@@ -42,7 +46,7 @@ int twoSum(int *S, const int T, const int arraySize) {
 }
 
 int testTwoSum() {
-    int S[] = {3,2,1,4,5,6, 63, 12, 23, 34, -19, 19};
+    int S[] = {3,2,1,4,5,6, 63, 12, 23, 34, -19, 19, 23};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
 
@@ -52,26 +56,21 @@ int testTwoSum() {
     int actual = twoSum(S, 5, n);
     assert(actual == 1);
 
-//    actual = k_sum(S, n, 2, 0);
-//    assert(actual == 1);
-//
-//    // k > 2
-//    actual = k_sum(S, n, 3, 200);
-//    assert(actual == 0);
-//
-//    actual = k_sum(S, n, 3, 7);
-//    assert(actual == 1);
-//
-//    actual = k_sum(S, n, 3, 0);
-//    assert(actual == 0);
-//
-//    actual = k_sum(S, n, 3, 6);
-//    assert(actual == 1);
+    actual = twoSum(S, 2, n);
+    assert(actual == 1);
 
+    actual = twoSum(S, 75, n);
+    assert(actual == 1);
+
+    actual = twoSum(S, 112, n);
+    assert(actual == 0);
+
+    actual = twoSum(S, -112, n);
+    assert(actual == 0);
 }
 
 int testBinarySearchOddNumberOfElements() {
-    int S[] = {3,2,1,4,5};
+    int S[] = {3,2,1,4,5,12,32,-200, 37};
     // Calculate the number of elements in the array
     const int n = sizeof(S) / sizeof(S[0]);
 
@@ -101,7 +100,7 @@ int testBinarySearchOddNumberOfElements() {
 }
 
 int testBinarySearchEvenNumberOfElements() {
-    int S[] = {3,2,1,4,5,8};
+    int S[] = {3,2,1,4,5,8,-32,34,12,203};
     // Calculate the number of elements in the array
     int n = sizeof(S) / sizeof(S[0]);
 
