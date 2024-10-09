@@ -48,7 +48,7 @@ struct Nlist* lookup(const int s)
             return np; //found
         }
     }
-    printf("lookup2\n");
+    printf("did not find in lookup in cell[%d]\n", hash(s));
     return NULL; //not found
 }
 

@@ -3,7 +3,7 @@
 #include "inthashmap.h"
 
 /**
-Question: Give O(n) algorithm that, given a list of elements(xs), finds all the elements that appear more than n/k times in the list.
+Question: Give O(n) algorithm that, given a list of elements(xs), finds all the elements that appear more than n/2 times in the list.
   Then do the same for all the elements tha appear more than n/4 times in the list.
 
 Pseudocode:
@@ -20,24 +20,34 @@ return result array
 
 */
 
-int moreThanK(int* xs, const int T, const int arraySize)
-{
-    for (int j = 0; j < arraySize; j++)
-    {
-        install(xs[j], xs[j]);
+int* moreThanK(const int* xs, const int k, const int arraySize, int* result) {
+    const int moreThan = arraySize/k;
+    for (int j = 0; j < arraySize; j++) {
+        const struct Nlist* a = lookup(xs[j]);//lookup integer at position j in hashmap
+        if (a == NULL) {  //key not there so add a new entry to hashmap
+            install(xs[j], 1);
+        } else {  //found key
+            if (a->value > moreThan) {
+                result[j] = a->key;
+            }
+            //update hashmap to increment number of appearances of int in xs array
+            install(xs[j], a->value + 1);
+        }
     }
-    return 0;
+    return result;
 }
 
 
 int testMoreThanK()
 {
-    int xs[] = {3, 2, 1, 4, 5, 6, 63, 12, 23, 34, 19, 19, 23};
+    const int xs[] = {3, 3,3,3,1,1,1,1};
     // Calculate the number of elements in the array
-    int n = sizeof(xs) / sizeof(xs[0]);
+    int arraySize = sizeof(xs) / sizeof(xs[0]);
 
+    int *result = malloc(arraySize * sizeof(int));
     // Use qsort to sort the array
-    int actual = moreThanK(xs, 1, n);
+    const int *actual = moreThanK(xs, 2, arraySize, result);
 
     assert(actual == 0);
+    free(result);
 }
