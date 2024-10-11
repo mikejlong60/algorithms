@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
+
 #include "inthashmap.h"
 
 /**
@@ -20,15 +22,32 @@ return result array
 
 */
 
-int* moreThanK(const int* xs, const int k, const int arraySize, int* result) {
+bool makeArray(const int arraySize, int** result, int** value1)
+{
+    *result = malloc(arraySize * sizeof(int));
+    if (*result == NULL) {
+        // Handle allocation failure
+        *value1 = NULL;
+        return false;
+    }
+    return true;
+}
+
+int* moreThanK(const int* xs, const int k, const int arraySize) {
     const int moreThan = arraySize/k;
-    for (int j = 0; j < arraySize; j++) {
+
+    int* result;
+    int* value1;
+    if (!makeArray(arraySize, &result, &value1)) return value1;
+
+    for (int j = 0, i = 0; j < arraySize; j++) {
         const struct Nlist* a = lookup(xs[j]);//lookup integer at position j in hashmap
         if (a == NULL) {  //key not there so add a new entry to hashmap
             install(xs[j], 1);
         } else {  //found key
             if (a->value > moreThan) {
-                result[j] = a->key;
+                result[i] = a->key;
+                i++;
             }
             //update hashmap to increment number of appearances of int in xs array
             install(xs[j], a->value + 1);
@@ -44,10 +63,11 @@ int testMoreThanK()
     // Calculate the number of elements in the array
     int arraySize = sizeof(xs) / sizeof(xs[0]);
 
-    int *result = malloc(arraySize * sizeof(int));
-    // Use qsort to sort the array
-    const int *actual = moreThanK(xs, 2, arraySize, result);
+    int *result = moreThanK(xs, 3, arraySize);
+    printf("result[0]:%d\n", result[0]);
+    printf("result[1]:%d\n", result[1]);
+    assert(result[0] == 3);
+    assert(result[1] == 1);
 
-    assert(actual == 0);
     free(result);
 }
