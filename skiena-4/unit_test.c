@@ -1,6 +1,8 @@
 #include "exercise9.h"
 #include "exercise10.h"
 #include "exercise11.h"
+//#include "exercise12.h"
+#include "util.h"
 
 
 int main()
@@ -11,4 +13,5 @@ int main()
     testBinarySearchEvenNumberOfElements();
     testTwoSum();
     testMoreThanK();
+    //testSetUnion();
 }

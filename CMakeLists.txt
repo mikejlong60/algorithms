@@ -7,6 +7,4 @@ include_directories(skiena-4)
 
 add_executable(algorithms
   skiena-4/unit_test.c
-        skiena-4/unit_test.c
-
 )

@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <assert.h>
-#include <stdbool.h>
-
-#include "inthashmap.h"
+//#include "util.h"
 
 /**
 Question: Give an efficient algorithm to compute the union of two sets A and B, where n = max(|A|,|B|). The output
@@ -38,48 +36,62 @@ for (int i = 0, j = 0, k = 0; i < arrayASize, j < arrayBSize;) {
 }
 */
 
-bool makeArray(const int arraySize, int** result, int** value1)
-{
-    *result = malloc(arraySize * sizeof(int));
-    if (*result == NULL) {
-        // Handle allocation failure
-        *value1 = NULL;
-        return false;
-    }
-    return true;
-}
-
-int* moreThanK(const int* xs, const int k, const int arraySize) {
-    const int moreThan = arraySize/k;
-
+int* setUnion(const int* A, const int* B, const int arrayASize, const int arrayBSize) {
     int* result;
     int* value1;
-    if (!makeArray(arraySize, &result, &value1)) return value1;
+    if (!makeArray(arrayASize + arrayBSize, &result, &value1)) return value1;
 
-    for (int j = 0, i = 0; j < arraySize; j++) {
-        const struct Nlist* a = lookup(xs[j]);//lookup integer at position j in hashmap
-        if (a == NULL) {  //key not there so add a new entry to hashmap
-            install(xs[j], 1);
-        } else {  //found key
-            if (a->value > moreThan) {
-                result[i] = a->key;
-                i++;
+    int i = 0, j = 0, k = 0;
+    while (i < arrayASize, j < arrayBSize)
+    {
+        if (A[i] < B[j])
+        {
+            result[k] = A[i];
+            i++;
+            k++;
+
+            if (i == arrayASize -1)
+            {
+                for (; j < arrayBSize; j++) {
+                    result[k] = B[j];
+                    return result;
+                }
             }
-            //update hashmap to increment number of appearances of int in xs array
-            install(xs[j], a->value + 1);
+        }
+        else if (A[i] > B[j])
+        {
+            result[k] = B[j];
+            j++;
+            k++;
+            if (j == arrayBSize -1)
+            {
+                for (; i < arrayASize; i++) {
+                    result[k] = A[i];
+                    return result;
+                }
+            }
+        }
+        else
+        {//they are equal
+            j++;
+            k++;
+            i++;
         }
     }
-    return result;
+        return result;
 }
 
+int testSetUnion() {
+    const int A[] = {1,2,3,4};
+    const int B[] = {3, 6};
 
-int testMoreThanK()
-{
-    const int xs[] = {3, 3,3,3,1,1,1,1};
+    //Arrays re already sorted
+
     // Calculate the number of elements in the array
-    int arraySize = sizeof(xs) / sizeof(xs[0]);
+    int arrayASize = sizeof(A) / sizeof(A[0]);
+    int arrayBSize = sizeof(B) / sizeof(B[0]);
 
-    int *result = moreThanK(xs, 3, arraySize);
+    int *result = setUnion(A, B, arrayASize, arrayBSize);
     printf("result[0]:%d\n", result[0]);
     printf("result[1]:%d\n", result[1]);
     assert(result[0] == 3);
