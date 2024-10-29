@@ -1,6 +1,6 @@
-#include <stdlib.h>
 #include <assert.h>
-//#include "util.h"
+#include <stdlib.h>
+
 
 /**
 Question: A camera at the door tracks the entry time a, and the exit time b,
@@ -9,94 +9,45 @@ algorithm that analyzes this data to determine the time when the most people wer
 at the party. Assume that all party entry and exit times are distinct.
 
 
-Pseudocode for 1:
-for (int i = 0, j = 0, k = 0; i < arrayASize, j < arrayBSize;) {
-    if A[i] < B[j]
-        result[k] = A[i];
-        i++;
-        k++;
-        if i == arrayASize -1
-            for (; j < arrayBSize; j++ {
-                result[k] = B[j];
-                return result;
-            }
-    else if A[i] > B[j]
-        result[k] = B[j];
-        j++;
-        k++;
-        if j == arrayBSize -1
-            for (; i < arrayASize; i++ {
-                result[k] = A[i];
-                return result;
-            }
-    else //they are equal
-        result[k] = B[j];
-        j++;
-        k++;
-        i++;
-}
+Pseudocode:
+Loop over array of integers that consists of 1 and -1.  1 represents entering the party. -1 represents leaving the party.
+Keep a global variable that is the max and the current time(a go timestamp nano).
+Just add the number 1 or -1 to the current max inside the loop. Reset the current max every time it grows higher and record the timestamp.
+It's like your parent's thermometer tha trecords the max temperature for a given period.
+
+This algorithm is O(n).
 */
 
-int* setUnion(const int* A, const int* B, const int arrayASize, const int arrayBSize) {
-    int* result;
-    int* value1;
-    if (!makeArray(arrayASize + arrayBSize, &result, &value1)) return value1;
 
-    int i = 0, j = 0, k = 0;
-    while (i < arrayASize, j < arrayBSize)
+typedef struct {
+    int max;
+    int time;
+} MostPeople;
+
+MostPeople biggestCrowd(const int* people, const int peopleSize) {
+    MostPeople result;
+    result.max = 0;
+    result.time = 0;
+
+    int i = 0;
+    int currentMax = 0;
+    while (i < peopleSize)
     {
-        if (A[i] < B[j])
-        {
-            result[k] = A[i];
-            i++;
-            k++;
-
-            if (i == arrayASize -1)
-            {
-                for (; j < arrayBSize; j++) {
-                    result[k] = B[j];
-                    return result;
-                }
-            }
+        currentMax += people[i];
+        if (currentMax > result.max) {
+            result.max = currentMax;
+            result.time = i;
         }
-        else if (A[i] > B[j])
-        {
-            result[k] = B[j];
-            j++;
-            k++;
-            if (j == arrayBSize -1)
-            {
-                for (; i < arrayASize; i++) {
-                    result[k] = A[i];
-                    return result;
-                }
-            }
-        }
-        else
-        {//they are equal
-            j++;
-            k++;
-            i++;
-        }
+        i++;
     }
-        return result;
+    return result;
 }
 
-int testSetUnion() {
-    const int A[] = {1,2,3,4};
-    const int B[] = {3, 6};
+int testBiggestCrowd() {
+    const int people[] = {1,-1, 1,1,1,1,-1,-1,-1,1,1,1,1,-1};
+    int peopleSize = sizeof(people) / sizeof(people[0]);
 
-    //Arrays re already sorted
-
-    // Calculate the number of elements in the array
-    int arrayASize = sizeof(A) / sizeof(A[0]);
-    int arrayBSize = sizeof(B) / sizeof(B[0]);
-
-    int *result = setUnion(A, B, arrayASize, arrayBSize);
-    printf("result[0]:%d\n", result[0]);
-    printf("result[1]:%d\n", result[1]);
-    assert(result[0] == 3);
-    assert(result[1] == 1);
-
-    free(result);
+    MostPeople result = biggestCrowd(people, peopleSize);
+    assert(result.max == 5);
+    assert(result.time == 12);
 }
