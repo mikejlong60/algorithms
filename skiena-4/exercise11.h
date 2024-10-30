@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
-
 #include "inthashmap.h"
-//#include "util.h"
+
 
 /**
 Question: Give O(n) algorithm that, given a list of elements(xs), finds all the elements that appear more than n/2 times in the list.
@@ -22,6 +21,7 @@ end loop
 return result array
 
 */
+bool makeArray(const int arraySize, int** result, int** value1);
 
 int* moreThanK(const int* xs, const int k, const int arraySize) {
     const int moreThan = arraySize/k;

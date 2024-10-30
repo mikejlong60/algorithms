@@ -13,7 +13,7 @@ Pseudocode:
 Loop over array of integers that consists of 1 and -1.  1 represents entering the party. -1 represents leaving the party.
 Keep a global variable that is the max and the current time(a go timestamp nano).
 Just add the number 1 or -1 to the current max inside the loop. Reset the current max every time it grows higher and record the timestamp.
-It's like your parent's thermometer tha trecords the max temperature for a given period.
+It's like your parent's thermometer that records the max temperature for a given period.
 
 This algorithm is O(n).
 */

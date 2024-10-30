@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <assert.h>
-//#include "util.h"
 
 /**
 Question: Give an efficient algorithm to compute the union of two sets A and B, where n = max(|A|,|B|). The output
@@ -35,6 +34,7 @@ for (int i = 0, j = 0, k = 0; i < arrayASize, j < arrayBSize;) {
         i++;
 }
 */
+bool makeArray(const int arraySize, int** result, int** value1);
 
 int* setUnion(const int* A, const int* B, const int arrayASize, const int arrayBSize) {
     int* result;
