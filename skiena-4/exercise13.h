@@ -11,8 +11,9 @@ at the party. Assume that all party entry and exit times are distinct.
 
 Pseudocode:
 Loop over array of integers that consists of 1 and -1.  1 represents entering the party. -1 represents leaving the party.
-Keep a global variable that is the max and the current time(a go timestamp nano).
-Just add the number 1 or -1 to the current max inside the loop. Reset the current max every time it grows higher and record the timestamp.
+Keep a global variable that is the max and the current time(just an int).
+Just add the number 1 or -1 to the current max inside the loop. Reset the current max every time it grows higher and record the element number from n which is the point at
+which there are the most people in the party.
 It's like your parent's thermometer that records the max temperature for a given period.
 
 This algorithm is O(n).

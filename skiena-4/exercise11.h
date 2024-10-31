@@ -23,6 +23,7 @@ return result array
 */
 bool makeArray(const int arraySize, int** result, int** value1);
 
+//Using a hashmap this is O(n),
 int* moreThanK(const int* xs, const int k, const int arraySize) {
     const int moreThan = arraySize/k;
 
@@ -54,8 +55,6 @@ int testMoreThanK()
     int arraySize = sizeof(xs) / sizeof(xs[0]);
 
     int *result = moreThanK(xs, 3, arraySize);
-    printf("result[0]:%d\n", result[0]);
-    printf("result[1]:%d\n", result[1]);
     assert(result[0] == 3);
     assert(result[1] == 1);
 
