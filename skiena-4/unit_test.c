@@ -3,6 +3,7 @@
 #include "exercise11.h"
 #include "exercise12.h"
 #include "exercise13.h"
+#include "exercise14.h"
 #include "util.h"
 
 
@@ -16,4 +17,5 @@ int main()
     testMoreThanK();
     testSetUnion();
     testBiggestCrowd();
+    testMergeIntervals();
 }
