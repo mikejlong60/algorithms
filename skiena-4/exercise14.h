@@ -7,6 +7,8 @@ intervals are merged into a single pair. For I ={(1,3), (2,6),(8,10), (7,18)}, t
 {(1,6), (7,18)}.  Algorithm should be no worse than O(n log n).  Invariants are:
 1. Array has even number of elements
 2. Adjacent pairs of elements are merged into a single element.
+
+Algorithm Efficiency - O(n).
 */
 
 bool makeArray(const int arraySize, int** result, int** value1);
@@ -48,7 +50,6 @@ int testMergeIntervals() {
         {8, 10},
         {7, 18}
     };
-    //Arrays are already sorted
 
     // Calculate the number of elements in the array
     int arraySize = sizeof(pairs) / sizeof(pairs[0]);
