@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 /**
 Question: Given a list I of n intervals, specified as (xi, yi) pairs, return a list where the overlapping
@@ -8,10 +7,6 @@ intervals are merged into a single pair. For I ={(1,3), (2,6),(8,10), (7,18)}, t
 {(1,6), (7,18)}.  Algorithm should be no worse than O(n log n).  Invariants are:
 1. Array has even number of elements
 2. Adjacent pairs of elements are merged into a single element.
-
-Pseudocode:
-
-
 */
 
 bool makeArray(const int arraySize, int** result, int** value1);
@@ -32,7 +27,7 @@ struct Pair* mergeIntervals(struct Pair* pairs, const int arraySize) {
             result[k].b = pairs[j].b;
         } else if (pairs[i].a > pairs[j].a && pairs[i].b < pairs[j].b) {
         	result[k].a = pairs[j].a;
-            result[k].b = pairs[i].b;
+            result[k].b = pairs[j].b;
         } else if (pairs[i].a < pairs[j].a && pairs[i].b > pairs[j].b) {
         	result[k].a = pairs[i].a;
             result[k].b = pairs[i].b;
