@@ -2,65 +2,42 @@
 #include <stdlib.h>
 
 /**
-Question: Given a list I of n intervals, specified as (xi, yi) pairs, return a list where the overlapping
-intervals are merged into a single pair. For I ={(1,3), (2,6),(8,10), (7,18)}, the correct answer is:
-{(1,6), (7,18)}.  Algorithm should be no worse than O(n log n).  Invariants are:
-1. Array has even number of elements
-2. Adjacent pairs of elements are merged into a single element.
+Question: You are given a set S of n intervals on a line, with the ith interval described by its left and right endpoints(li, ri).
+Give a O(n log n) algorithm to identify a point p on the line which is in the largets number of intervals.
+As an example, for S = {(10,40), (20,60), (50,90), (15,70)}, no point exists in all 4 intervals.
+But 50 exists in 3 intervals. You can assume an endpoint counts as being in its own interval(inclusive).
 
-Algorithm Efficiency - O(n).
+Algorithm Efficiency - 
+
+S sorted by l: S = {(10,40), (15, 70), (20,60), (50, 90)}
+S sorted by r: S = {(10,40), (20,60), (15, 70), (50, 90)}
+S l sorted: Sl = {10, 15, 20, 50}
+S r sorted: Sl = {40, 60, 70, 90}
+
+
+Algorithm:
+struct currentMax {
+   l int
+   r int
+   numOverlaps int
+}
+1. sort S by l
+2. Set resultMax = currentMax{}
+3. resultMax.l = S[0].l;
+4. resultMax.r = s[0].r;
+5. resultMax.numOverlaps = 1;
+6. for int i := 1; i < len(s); i++ {
+   maybeMax = currentMax{};
+   if S[i].l <= currentMax.r && currentMax{
+      currentMax.numOverlaps++;
+   } else {
+      currentMax.l = S[i].l
+      currentMax.r = S[i].r
+      currentMax.numOverlaps = 1
+   }
+}
+
+
+
 */
-
-bool makeArray(const int arraySize, int** result, int** value1);
-
-struct Pair {
-    int a;
-    int b;
-};
-
-struct Pair* mergeIntervals(struct Pair* pairs, const int arraySize) {
-	struct Pair* result;
-	struct Pair* value1;
-    if (!makeArray(arraySize, &result, &value1)) return value1;
-
-    for (int i = 0, j = 1, k = 0; i < arraySize; k++) {
-    	if (pairs[i].a < pairs[j].a && pairs[i].b < pairs[j].b) {
-        	result[k].a = pairs[i].a;
-            result[k].b = pairs[j].b;
-        } else if (pairs[i].a > pairs[j].a && pairs[i].b < pairs[j].b) {
-        	result[k].a = pairs[j].a;
-            result[k].b = pairs[j].b;
-        } else if (pairs[i].a < pairs[j].a && pairs[i].b > pairs[j].b) {
-        	result[k].a = pairs[i].a;
-            result[k].b = pairs[i].b;
-		} else if (pairs[i].a > pairs[j].a && pairs[i].b < pairs[j].b) {
-        	result[k].a = pairs[j].a;
-            result[k].b = pairs[j].b;
-        }
-		j = j + 2;
-		i = i + 2;
-    }
-    return result;
-}
-
-int testMergeIntervals() {
-	struct Pair pairs[] = {
-        {1, 3},
-        {2, 6},
-        {8, 10},
-        {7, 18}
-    };
-
-    // Calculate the number of elements in the array
-    int arraySize = sizeof(pairs) / sizeof(pairs[0]);
-
-
-    struct Pair *result = mergeIntervals(pairs, arraySize);
-    assert(result[0].a == 1);
-    assert(result[0].b == 6);
-    assert(result[1].a == 7);
-    assert(result[1].b == 18);
-
-    free(result);
-}
 
