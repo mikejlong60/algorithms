@@ -4,6 +4,7 @@
 #include "exercise12.h"
 #include "exercise13.h"
 #include "exercise14.h"
+#include "exercise15.h"
 #include "util.h"
 
 
@@ -18,4 +19,5 @@ int main()
     testSetUnion();
     testBiggestCrowd();
     testMergeIntervals();
+    testMostFrequentPoint();
 }

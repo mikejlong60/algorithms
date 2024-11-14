@@ -36,8 +36,54 @@ struct currentMax {
       currentMax.numOverlaps = 1
    }
 }
-
-
-
 */
 
+struct CurrentMax {
+	int l;
+  	int r;
+  	int numOverlaps;
+};
+
+struct Interval {
+    int l;
+    int r;
+};
+
+struct CurrentMax mostFrequentPoint(const struct Interval* S, const int n) {
+    for (int i = 0; i < n; i++) {
+    }
+    //TODO ths ain't done
+    struct CurrentMax result;
+        result.l = 0;
+        result.r = 0;
+        result.numOverlaps = 0;
+
+    return  result;
+}
+  // Comparison function for intervals
+int compareIntervals(const void *a, const void *b) {
+    // Cast the pointers to Interval pointers and dereference them
+    const struct Interval *int_a = (struct Interval *)a;
+    const struct Interval *int_b = (struct Interval *)b;
+
+    // Return the difference between the two integers
+    return int_a->l - int_b->l;
+}
+
+int testMostFrequentPoint() {
+	struct Interval S[] = {
+        {10, 40},
+        {20, 60},
+        {50, 90},
+        {15, 70}
+    };
+         // Calculate the number of elements in the array
+    int n = sizeof(S) / sizeof(S[0]);
+
+    // Use qsort to sort the array
+    qsort(S, n, sizeof(struct Interval), compareIntervals);
+
+    struct CurrentMax result = mostFrequentPoint(S, n);
+    assert(result.l == 50);
+    assert(result.r == 90);
+}
