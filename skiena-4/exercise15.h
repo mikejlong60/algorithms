@@ -3,7 +3,7 @@
 
 /**
 Question: You are given a set S of n intervals on a line, with the ith interval described by its left and right endpoints(li, ri).
-Give a O(n log n) algorithm to identify a point p on the line which is in the largets number of intervals.
+Give a O(n log n) algorithm to identify a point p on the line which is in the largest number of intervals.
 As an example, for S = {(10,40), (20,60), (50,90), (15,70)}, no point exists in all 4 intervals.
 But 50 exists in 3 intervals. You can assume an endpoint counts as being in its own interval(inclusive).
 
@@ -38,7 +38,7 @@ struct currentMax {
 }
 */
 
-struct CurrentMax {
+struct Max {
 	int l;
   	int r;
   	int numOverlaps;
@@ -49,16 +49,40 @@ struct Interval {
     int r;
 };
 
-struct CurrentMax mostFrequentPoint(const struct Interval* S, const int n) {
+struct Max mostFrequentPoint(const struct Interval* S, const int n) {
+    struct Max currentOverlap; //the interval that has an overlap with subsequent intervals
+    currentOverlap.l = 0;
+    currentOverlap.r = 0;
+    currentOverlap.numOverlaps = 0;
+    struct Max maxOverlap;//the current maximum overlap
+    maxOverlap.l = 0;
+    maxOverlap.r = 0;
+    maxOverlap.numOverlaps = 0;
     for (int i = 0; i < n; i++) {
+        if (i == 0) {//First element
+            currentOverlap.l = S[i].l;
+            currentOverlap.r = S[i].r;
+            currentOverlap.numOverlaps = 1;
+            maxOverlap.l = S[i].l;
+            maxOverlap.r = S[i].r;
+            maxOverlap.numOverlaps = 1;
+        } else
+        {
+            //Not at first element
+            if (S[i].l <= currentOverlap.r) {//Is there an overlap with next element from currentOverlap
+                currentOverlap.numOverlaps += 1;
+            } else {// begin new overlap calculation
+                if (currentOverlap.numOverlaps > maxOverlap.numOverlaps) {//new max overlap
+                    maxOverlap = currentOverlap;
+                }
+                currentOverlap.l = S[i].l;
+                currentOverlap.r = S[i].r;
+                currentOverlap.numOverlaps = 1;
+            }
+        }
     }
-    //TODO ths ain't done
-    struct CurrentMax result;
-        result.l = 0;
-        result.r = 0;
-        result.numOverlaps = 0;
 
-    return  result;
+    return  maxOverlap;
 }
   // Comparison function for intervals
 int compareIntervals(const void *a, const void *b) {
@@ -71,7 +95,13 @@ int compareIntervals(const void *a, const void *b) {
 }
 
 int testMostFrequentPoint() {
-	struct Interval S[] = {
+    struct Interval suck[] = {
+        {10, 40},
+        {15, 70},
+        {20, 60},
+        {50, 90},
+    };
+    struct Interval S[] = {
         {10, 40},
         {20, 60},
         {50, 90},
@@ -83,7 +113,7 @@ int testMostFrequentPoint() {
     // Use qsort to sort the array
     qsort(S, n, sizeof(struct Interval), compareIntervals);
 
-    struct CurrentMax result = mostFrequentPoint(S, n);
+    struct Max result = mostFrequentPoint(S, n);
     assert(result.l == 50);
     assert(result.r == 90);
 }
