@@ -3,9 +3,9 @@
 #include "exercise11.h"
 #include "exercise12.h"
 #include "exercise13.h"
-#include "exercise14.h"
-#include "exercise15.h"
+//#include "exercise14.h"
 #include "util.h"
+#include "foldleftpoint.h"
 
 
 int main()
@@ -18,6 +18,6 @@ int main()
     testMoreThanK();
     testSetUnion();
     testBiggestCrowd();
-    testMergeIntervals();
-    testMostFrequentPoint();
+//  testMergeIntervals();
+    testFoldLeft();
 }

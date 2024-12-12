@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <stdlib.h>
 
 /**
 Question: You are given a set S of n intervals on a line, with the ith interval described by its left and right endpoints(li, ri).
@@ -10,29 +9,6 @@ But 50 exists in 3 intervals. You can assume an endpoint counts as being in its 
 Algorithm Efficiency -  O(n^2) -- it sucks I know.
 
 */
-typedef struct {
-    int p;
-    int c;
-} PointCount;
-
-bool makePointCountArray(const int arraySize, PointCount** result, PointCount** value1)
-{
-    *result = malloc(arraySize * sizeof(int));
-    if (*result == NULL) {
-        // Handle allocation failure
-        *value1 = NULL;
-        return false;
-    }
-    return true;
-}
-
-int FoldLeft(PointCount* array, int size, int accumulator, int (*func)(int, PointCount)) {
-    if (size == 0) {
-        return accumulator;
-    }
-    // Process the first element and recursively call for the rest
-    return FoldLeft(array + 1, size - 1, func(accumulator, array[0]), func);
-}
 
 // Example callback function: sum values in the array
 int sumValues(int accumulator, PointCount element) {
@@ -49,11 +25,6 @@ struct Interval {
 };
 
 struct PointCount* mostFrequentPoint(const struct Interval* S, const int n)  {
-    struct PointCount* result;
-    struct PointCount* value1;
-    if (!makePointCountArray(n * 2, &result, &value1)) return value1;
-
-
     for (int a = 0; a < n; a++) {
         for (int b = 0; b < n; b++)
         {

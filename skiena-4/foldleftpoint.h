@@ -15,85 +15,118 @@ typedef struct {
     int c;
 } PointCount;
 
-bool makePointCountArray(const int arraySize, PointCount** result, PointCount** value1)
-{
-    *result = malloc(arraySize * sizeof(int));
-    if (*result == NULL) {
-        // Handle allocation failure
-        *value1 = NULL;
+
+bool find20(PointCount s) {
+    if (s.p == 20) {
+        return true;
+    } else {
         return false;
     }
-    return true;
 }
 
-int FoldLeft(PointCount* array, int size, int accumulator, int (*func)(int, PointCount)) {
+// Function that returns a pointer to an array of Data structures
+PointCount* makePointCountArray(int size) {
+    // Allocate memory for the array
+    PointCount* array = (PointCount*)malloc(size * sizeof(PointCount));
+    if (!array) {
+        printf("Memory allocation failed!\n");
+        return NULL;  // Return NULL on allocation failure
+    }
+
+    // Initialize the array
+    for (int i = 0; i < size; i++) {
+        array[i].p = 0;
+        array[i].c = 0;
+    }
+    return array;
+}
+
+PointCount* FoldLeft(PointCount* array, int size, PointCount* accumulator, PointCount* (*f)(PointCount*, PointCount)) {
     if (size == 0) {
         return accumulator;
     }
     // Process the first element and recursively call for the rest
-    return FoldLeft(array + 1, size - 1, func(accumulator, array[0]), func);
+    return FoldLeft(array + 1, size - 1, f(accumulator, array[0]), f);
 }
 
-// Example callback function: sum values in the array
-int sumValues(int accumulator, PointCount element) {
-    return accumulator + element.c;
+// The efficiency of this algorithm is O(N)
+PointCount* Filter(PointCount* as, bool (*p)(PointCount)) {
+    // var g = func(accum []T, h T) []T {
+    //     if p(h) {
+    //         return append(accum, h)
+    //     } else {
+    //         return accum
+    //     }
+    // }
+    // return FoldLeft(as, []T{}, g)
 }
 
-// Example callback function: find max value in the array
-int maxValues(int accumulator, PointCount element) {
-    return accumulator > element.c ? accumulator : element.c;
-}
-struct Interval {
-    int l;
-    int r;
-};
-
-struct PointCount* mostFrequentPoint(const struct Interval* S, const int n)  {
-    struct PointCount* result;
-    struct PointCount* value1;
-    if (!makePointCountArray(n * 2, &result, &value1)) return value1;
 
 
-    for (int a = 0; a < n; a++) {
-        for (int b = 0; b < n; b++)
-        {
-            if (S[b].l >= S[a].l && S[b].r > S[a].r) {
-                //increment b.l point total
-                printf("\n1 - S[b].l point total:%d ",S[b].l);
-            } else if(S[b].l >= S[a].l && S[b].r <= S[a].r) {
-                //increment b.l point total
-                printf("\n2 - S[b].l point total:%d ",S[b].l);
-            } else if (S[b].l < S[a].l && S[b].r <= S[a].r) {
-                //increment b.r point total
-                printf("\n3 - S[b].r point total:%d ",S[b].r);
-            } else if (S[b].l > S[a].r) {
-                //can't increment anything, no overlap
-                printf("\n4 - no overlap");
 
-            } else if (S[b].l < S[a].l && S[b].r > S[a].r) {
-                //increment a.l point total
-                printf("\n5 - S[a].l point total:%d ",S[b].l);
-            }
-        }
+// func TestFilterIntArray(t *testing.T) {
+//     arr := []int{1, 2, 3, 3, 3, 3}
+//     var p = func(s int) bool {
+//         if s == 3 {
+//             return true
+//         } else {
+//             return false
+//         }
+//     }
+//
+//     bigarray := Filter(arr, p)
+//     if diff := deep.Equal(bigarray, []int{3, 3, 3, 3}); diff != nil {
+//         t.Error(diff)
+//     }
+// }
+
+// Define a function pointer type for the operation
+typedef int (*thefunc)(int acc, int element);
+
+// Recursive foldLeft function
+int foldLeft(int *arr, int size, int index, int acc, thefunc f) {
+    // Base case: when we've processed all elements
+    if (index >= size) {
+        return acc;
     }
 
-    return  FoldLeft(result, n, 0, maxValues);
+    // Recursive case: apply the function and recurse
+    return foldLeft(arr, size, index + 1, f(acc, arr[index]), f);
 }
 
-int testMostFrequentPoint() {
-    struct Interval S[] = {
-        {10, 40},
-        {20, 60},
-        {50, 90},
-        {15, 70}
+// Example operation: sum function
+int lsumOperation(int acc, int element) {
+    return acc + element;
+}
+
+int testFoldLeft() {
+    PointCount S[] = {
+        {10,0},
+        {20,0},
+        {50,0},
+        {15,0},
+        {40,0},
+        {60,0},
+        {90,0},
+        {70,0}
     };
-         // Calculate the number of elements in the array
-    int n = sizeof(S) / sizeof(S[0]);
 
-    // Use qsort to sort the array
-    //qsort(S, n, sizeof(struct Interval), compareIntervals);
+    PointCount *result = makePointCountArray(8);
+    if (!result) {
+        return 1;  // Exit if allocation failed
+    }
 
-    char result = mostFrequentPoint(S, n);
-    assert(result == 50);
+    // Print the result
+    for (int i = 0; i < 8; i++) {
+        printf("Pointcount p = %d, c = %d\n", result[i].p, result[i].c);
+    }
+
+    free(result);
+
+
+    //struct PointCount* result2 = FoldLeft(S, 8, value1);
+
+    //char result = mostFrequentPoint(S, n);
+    //assert(result == 50);
     //assert(result.r == 90);
 }
